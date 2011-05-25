@@ -1,0 +1,106 @@
+<style type="text/css">
+.icon-readwrite {
+	background-image:url({{ STATIC_URL }}ext/resources/themes/images/default/tree/leaf.gif) !important;
+}
+</style>
+<script type="text/javascript">	
+Ext.onReady(function() {
+
+	if (!Ext.ClassManager.isCreated('Account')) {
+		Ext.define('Account', {
+			extend: 'Ext.data.Model',
+			fields: [
+				{ name: 'name', type: 'string' },
+				{ name: 'number', type: 'string' },
+				{ name: 'description', type: 'string' },
+				{ name: 'type', type: 'string' },
+				{ name: 'balance', type: 'float' }
+			]
+		});
+	}
+	var data = {{ accounttree_json|safe }};
+
+	// create the Data Store
+	var store = Ext.create('Ext.data.TreeStore', {
+		model: 'Account',
+		proxy: {
+			type: 'memory',
+			reader: {
+				type: 'json',
+				root: 'children'
+			},
+		},
+		root: data,
+		folderSort: false,		
+	});
+
+	// create the grid and specify what field you want
+	// to use for the editor at each column.
+	var grid = Ext.create('Ext.tree.Panel', {
+		renderTo: 'editor-grid{{ uniquestring }}',
+		title: 'Accounts',
+		height: tabs.activeTab.getHeight(),
+		frame: true,
+        collapsible: false,
+        useArrows: true,
+        rootVisible: false,
+        store: store,
+        multiSelect: true,
+        singleExpand: false,
+		columns: [{
+			xtype: 'treecolumn',
+			text: 'Account name',
+			dataIndex: 'name',
+			width: 250,
+/*			editor: {
+				// defaults to textfield if no xtype is supplied
+				allowBlank: false
+			}*/
+		}, {
+			text: 'Account number',
+			dataIndex: 'number',
+			width: 100,
+			align: 'center',
+			sortable: true,
+		/*	editor: {
+				allowBlank: false,
+			}*/
+		}, {
+			text: 'Description',
+			dataIndex: 'description',
+			width: 250,
+			editor: {
+				allowBlank: false,
+			}
+		}, {
+			text: 'Account type',
+			dataIndex: 'type',
+			width: 120,
+			editor: {
+				allowBlank: false,
+			}
+		}, {
+			xtype: 'numbercolumn',
+			text: 'Balance',
+			dataIndex: 'balance',
+			format: '0.00',
+			width: 90,
+			align: 'right',
+		}],
+		listeners: {
+			itemdblclick: function(obj, record, el, index, e) {
+				addTab('Transactions', '{{ BASE_URL }}accounting/transactions', { account: record.get('id') });
+			},
+			render: function(panel) {
+				panel.el.on('keyup', function(e) {
+					if (e.keyCode == e.ENTER) {
+						selected = panel.getSelectionModel().getSelection()[0].get('id');
+						addTab('Transactions', '{{ BASE_URL }}accounting/transactions', { account: selected });
+					}
+				});
+			},
+		},
+	});
+});
+</script>
+<div id="editor-grid{{ uniquestring }}"></div>

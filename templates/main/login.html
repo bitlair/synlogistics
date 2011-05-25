@@ -1,0 +1,42 @@
+<!doctype html>
+<head>
+<title>SynLogistics</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="Robots" content="noindex,nofollow">
+<style type="text/css">
+body {
+	background-color: #999999;
+}
+#login {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -320px;
+	margin-top: -240px;
+	width: 640px;
+	height: 480px;
+	border: 1px solid #777777;
+	background-image: url({{ STATIC_URL }}images/titlescreen.jpg);
+}
+#loginform {
+	position: relative;
+	left: 200px;
+	top: 300px;
+}
+#error {
+	text-align: center;
+	color: red;
+}
+</style>
+<div id="login">
+	<div id="loginform">
+		<form method="post" action="{{ request.path }}">{% csrf_token %}
+			<table>
+			<tr><td colspan="2" id="error">{{ error }}</td></tr>
+			<tr><td>Username:</td><td><input type="text" name="username"></td></tr>
+			<tr><td>Password:</td><td><input type="password" name="password"></td></tr>
+			<tr><td colspan="2" style="text-align: center"><input type="submit" name="login" value="Login"></td></tr>
+			</table>
+		</form>
+	</div>
+</div>

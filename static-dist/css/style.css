@@ -1,0 +1,26 @@
+.menu-list {
+	padding: 0 3px 0 3px;
+}
+
+.menu-list-item {
+	margin-top: 3px;
+	padding-left: 20px;
+	font-size: 11px;
+	line-height: 20px;
+	cursor: pointer;
+	border: 1px solid #fff;
+}
+
+.menu-list .x-item-selected {
+	font-weight: bold; 
+	color: #15428B;
+	background-color: #DFE8F6;
+	border: 1px dotted #A3BAE9;
+}
+
+.menu-list-item-hover {
+	background-color: #eee;
+}
+.tabs {
+	background-image:url(ext/examples/tabs/images/tabs.gif) !important;
+}

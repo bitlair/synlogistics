@@ -1,0 +1,161 @@
+<script type="text/javascript">	
+Ext.onReady(function() {
+
+	if (!Ext.ClassManager.isCreated('Transaction')) {
+		Ext.define('Transaction', {
+			extend: 'Ext.data.Model',
+			fields: [
+				{ name: 'date', type: 'date', mapping: 0 },
+				{ name: 'transfer', type: 'string', mapping: 1 },
+				{ name: 'relation', type: 'string', mapping: 2 },
+				{ name: 'description', type: 'string', mapping: 3 },
+				{ name: 'amount', type: 'float', mapping: 4 },
+			]
+		});
+	}
+	var data = [
+{% for transaction in transactions %}
+	 [ '{{ transaction.date }}', '{{ transaction.transfer.number }} {{ transaction.transfer.name }}', '{{ transaction.relation }}', '{{ transaction.description }}', '{{ transaction.amount }}' ],
+{% endfor %}
+	];
+
+	// create the Data Store
+	var store = Ext.create('Ext.data.ArrayStore', {
+		model: 'Transaction',
+		proxy: {
+			type: 'memory',
+		},
+		data: data,
+		folderSort: false,		
+	});
+
+
+	var rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+		clicksToMoveEditor: 1,
+		autoCancel: false
+	});
+
+
+	// Ajax search
+	if (!Ext.ClassManager.isCreated('Search')) {
+		Ext.define("Search", {
+			extend: 'Ext.data.Model',
+			fields: [
+				{name: 'id', type: 'int' },
+				{name: 'name', type: 'string'},
+			]
+		});
+	}
+
+	var accounts = Ext.create('Ext.data.Store', {
+		model: 'Search',
+		pageSize: 10,
+		proxy: {
+			type: 'rest',
+			url : '{{ BASE_URL }}ajax/accountsearch.json',
+			reader: {
+				type: 'json',
+				root: 'accounts',
+			}
+		},
+	});
+	var relations = Ext.create('Ext.data.Store', {
+		model: 'Search',
+		pageSize: 10,
+		proxy: {
+			type: 'rest',
+			url : '{{ BASE_URL }}ajax/relationsearch.json',
+			reader: {
+				type: 'json',
+				root: 'relations',
+			}
+		},
+	});
+	// create the grid and specify what field you want
+	// to use for the editor at each column.
+	var grid = Ext.create('Ext.grid.Panel', {
+		renderTo: 'editor-grid{{ uniquestring }}',
+		title: 'Transactions',
+		height: tabs.activeTab.getHeight(),
+		frame: true,
+		store: store,
+		columns: [{
+			xtype: 'datecolumn',
+			format: 'Y-m-d',
+			text: 'Date',
+			dataIndex: 'date',
+			width: 110,
+			field: {
+				xtype: 'datefield',
+				allowBlank: false,
+				format: 'Y-m-d',
+				maxValue: Ext.Date.format(new Date(), 'Y-m-d')
+			}
+		}, {
+			text: 'Transfer',
+			dataIndex: 'transfer',
+			width: 225,
+			sortable: true,
+			field: {
+				xtype: 'combo',
+				store: accounts,
+				displayField: 'name',
+				hiddenField: 'id',
+				typeAhead: true,
+				hideLabel: true,
+				forceSelection: true,
+				listConfig: {
+					// Custom rendering template for each item
+					/*
+					getInnerTpl: function() {
+						return '<div class="search-item">{name}</div>';
+					}*/
+   				 }
+   			},
+		}, {
+			text: 'Relation',
+			dataIndex: 'relation',
+			width: 225,
+			sortable: true,
+			field: {
+				xtype: 'combo',
+				store: relations,
+				hiddenField: 'id',
+				displayField: 'name',
+				typeAhead: false,
+				hideLabel: true,
+				forceSelection: true,
+				maxHeight: 50,
+				listConfig: {
+					// Custom rendering template for each item
+					/*getInnerTpl: function() {
+						return '<div class="search-item">{name}</div>';
+					}*/
+   				}
+   			},
+		}, {
+			text: 'Description',
+			dataIndex: 'description',
+			width: 250,
+			editor: {
+				allowBlank: false,
+			}
+		}, {
+			xtype: 'numbercolumn',
+			format: '0.00',
+			align: 'right',
+			text: 'Amount',
+			dataIndex: 'amount',
+			width: 120,
+			field: {
+				xtype: 'numberfield',
+				allowBlank: false,
+				allowDecimals: true,
+				decimalPrecision: 2,
+			}
+		}],
+		plugins: [rowEditing],
+	});
+});
+</script>
+<div id="editor-grid{{ uniquestring }}"></div>

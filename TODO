@@ -1,0 +1,45 @@
+Wilco:
+* Transaction split/related support
+* Bank import <-> relation matching support
+* Service product support, including periodically invoicable product
+* Invoicing, including periodic invoicing
+
+
+Unassigned:
+* Relation management support
+* Location management support (location types: warehouse, warehouse, full location), main incoming goods location
+* User management support (including permissions and not showing things you're not allowed access to in the menu)
+* Settings dialog for configuring main settings like currency, locale, etc
+* Product management support (including subproducts: EAN/UPC)
+* Management of accounts (adding, renaming, moving, deleting)
+* Once transactions/invoicing are finished: Reports dialog (Use cool graphs!): 
+	outstanding payable, receivable, solvability, equity (debt, assets, etc), sales, annual report
+
+When accounting etc works:
+* Placing internal orders
+* Placing external orders
+* Accepting delivery
+* Selling products on invoice
+* Requesting stock information
+* Requesting item history
+* Reviewing internal orders
+* Reviewing external orders
+* Bill checker to check prices and ordered amounts
+	* Also input to accounts payable using this method
+	* Add .pdf bill to order (using sane compatible scanner on server, e.g. network scanner)
+		* Maybe hack some OCR to guess which order it belongs to based on order id 
+* Cash register
+* Add stock count module to inventory stock
+* Reserving items for customers (relations)
+* Create RMA tracker
+
+Future ideas (this is all speculation! Do it right or leave to others!!):
+* Create webshop links with configurable containertemplates (bill of materials)
+* Add project management, time registration, etc
+* Create sales order module to offer products and services, which can be accepted and converted linked to a project
+* Add issue tracker to track issues for relations/projects
+* Add work log book for relations
+* Add planning module using external CalDAV server, syncing relations <-> w/ CardDAV and adding X-Relation links
+* 
+
+

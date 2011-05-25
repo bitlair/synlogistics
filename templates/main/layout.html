@@ -1,0 +1,222 @@
+<html>
+<head>
+<title>SynLogistics</title>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}ext/resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/style.css" />
+<style type="text/css">
+p {
+	margin:5px;
+}
+.settings {
+	background-image:url({{ STATIC_URL }}ext/examples/shared/icons/fam/folder_wrench.png);
+}
+.nav {
+	background-image:url({{ STATIC_URL }}ext/examples/shared/icons/fam/folder_go.png);
+}
+.info {
+	background-image:url({{ STATIC_URL }}ext/examples/shared/icons/fam/information.png);
+}
+</style>
+<script type="text/javascript" src="{{ STATIC_URL }}ext/ext-all-debug.js"></script>
+<script type="text/javascript">
+Ext.Loader.setConfig({
+    enabled: true
+});
+
+Ext.require([
+    'Ext.grid.*',
+    'Ext.data.*',
+    'Ext.util.*',
+    'Ext.state.*',
+    'Ext.form.*',
+    'Ext.tab.*',
+	'Ext.state.CookieProvider',
+]);
+
+	Ext.onReady(function() {
+
+		Ext.QuickTips.init();
+
+		// NOTE: This is an example showing simple state management. During development,
+		// it is generally best to disable state management as dynamically-generated ids
+		// can change across page loads, leading to unpredictable results.  The developer
+		// should ensure that stable state ids are set for stateful components in real apps.
+		Ext.state.Manager.setProvider(Ext.create('Ext.state.CookieProvider'));
+
+		Ext.define('MenuItem', {
+			extend: 'Ext.data.Model',
+			fields: [
+				{ name: 'title', type: 'string' },
+				{ name: 'action', type: 'string' }
+			]
+		});
+		function createMenu(data) {
+			return Ext.create('widget.dataview', {
+						store: Ext.data.Store({
+							model: 'MenuItem',
+							data: data 
+						}),
+						listeners: {
+							beforeitemclick: function(context, record, el, index, e) {
+
+								addTab(record.get('title'), record.get('page'), record.get('params'));
+							},
+							beforeitemkeydown: function(context, record, el, index, e) {
+								if (e.keyCode == 13) { /* Return key */
+									addTab(record.get('title'), record.get('page'), record.get('params'));
+									return false;
+								}
+								/* Make sure active item is always in view */
+								if (e.keyCode == 40) { /* Down key */
+									obj = el.offsetParent;
+									if (obj.scrollHeight > obj.clientHeight && el.offsetTop > obj.clientHeight) {
+										obj.scrollTop = el.offsetTop;
+									}
+								}
+								if (e.keyCode == 38) { /* Up key */
+									obj = el.offsetParent;
+									if (obj.scrollTop > el.offsetTop) {
+										obj.scrollTop = el.offsetTop;
+									}
+								}
+							}
+						},
+						cls: 'menu-list',
+						itemSelector: '.menu-list-item',
+						trackOver: true, 
+						overItemCls: 'menu-list-item-hover',
+						tpl: '<tpl for="."><div class="menu-list-item">{title}</div></tpl>',
+
+					});
+		}	
+
+		var viewport = Ext.create('Ext.Viewport', {
+			layout: 'border',
+			items: [
+			// create instance immediately
+			Ext.create('Ext.Component', {
+				region: 'north',
+				height: 40, // give north and south regions a height
+				autoEl: {
+					tag: 'div',
+					style: 'margin-top: 0px; margin-bottom: 0px; margin-left: 5px; background-image: url({{ STATIC_URL }}images/header.jpg); background-repeat: no-repeat;',
+					html:''
+				}
+			}), {
+				region: 'west',
+				id: 'west-panel',
+				title: 'Menu',
+				split: true,
+				width: 200,
+				minWidth: 175,
+				maxWidth: 200,
+				collapsible: true,
+				animCollapse: false,
+				margins: '0 0 0 5',
+				layout: 'accordion',
+				items: [{
+					title: 'Accounting',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Accounting overview', page: '{{ BASE_URL }}accounting/overview', params: {} },
+						{ title: 'Reporting', page: '{{ BASE_URL }}accounting/reports', params: {} },
+						{ title: 'Manage accounts', page: '{{ BASE_URL }}accounting/manage', params: {} }
+					])
+ 				}, {
+					title: 'Sales',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Stock query', page: '{{ BASE_URL }}sales/stockquery', params: {} },
+						{ title: 'Cash register', page: '{{ BASE_URL }}sales/cashregister', params: {} },
+						{ title: 'Internal order', page: '{{ BASE_URL }}sales/internalorder', params: {} },
+						{ title: 'Invoicing', page: '{{ BASE_URL }}sales/invoicing', params: {} },
+						{ title: 'Item information', page: '{{ BASE_URL }}sales/iteminfo', params: {} },
+						{ title: 'Relations', page: '{{ BASE_URL }}sales/relations', params: {} },
+						{ title: 'RMA', page: '{{ BASE_URL }}sales/rma', params: {} },
+						{ title: 'Periodic invoices', page: '{{ BASE_URL }}sales/peridioc', params: {} },
+						{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },
+					]),
+				}, {
+					title: 'Purchasing',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Purchasing overview', page: '{{ BASE_URL }}purchasing/overview', params: {} },
+						{ title: 'Orders', page: '{{ BASE_URL }}purchasing/orders', params: {} },
+						{ title: 'Products', page: '{{ BASE_URL }}purchasing/products', params: {} },
+					])
+				}, {
+					title: 'Logistics',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Delivery acceptance', page: '{{ BASE_URL }}logistics/delivery', params: {} },
+						{ title: 'Inter-location acceptance', page: '{{ BASE_URL }}logistics/locationaccept', params: {} },
+						{ title: 'Destination changing', page: '{{ BASE_URL }}logistics/destination', params: {} },
+						{ title: 'All Items in transit', page: '{{ BASE_URL }}logistics/intransit', params: {} },
+					])
+				}, {
+					title: 'Manufacturing',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Containers', page: '{{ BASE_URL }}manufacturing/containers', params: {} }
+					])
+				}, {
+					title: 'Inventory',
+					iconCls: 'nav',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Stock count', page: '{{ BASE_URL }}inventory/stockcount', params: {} },
+						{ title: 'Input item without order', page: '{{ BASE_URL }}inventory/itemwithoutorder', params: {} }
+					])
+				}, {
+					title: 'Settings',
+					iconCls: 'settings',
+					autoScroll: true,
+					items: createMenu([
+						{ title: 'Users and permissions', page: '{{ BASE_URL }}settings/users', params: {} },
+						{ title: 'Locations', page: '{{ BASE_URL }}settings/locations', params: {} },
+						{ title: 'Settings', page: '{{ BASE_URL }}settings/settings', params: {} }
+					])
+				}]
+			},
+			Ext.create('Ext.tab.Panel', {
+				id: 'tabs',
+				region: 'center', // a center region is ALWAYS required for border layout
+				deferredRender: false,
+				activeTab: 0,	 // first tab initially active
+				items: []
+			})]
+		});
+	});
+
+	function addTab (title, page, params) {
+		params['csrfmiddlewaretoken']=Ext.util.Cookies.get('csrftoken')
+		tabs = Ext.getCmp('tabs');
+		tabs.add({
+			title: title,
+			iconCls: 'tabs',
+			loader: {
+					url: page,
+					contentType: 'html',
+					autoLoad: true,
+					scripts: true,
+					loadScripts: true,
+					params: params
+				},
+			closable: true
+		}).show();
+	}
+
+
+	</script>
+</head>
+<body>
+<noscript>
+	Sorry, you need a javascript browser for this to work.
+</noscript>
+</body>
+</html>
