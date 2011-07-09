@@ -39,7 +39,8 @@ Ext.onReady(function() {
 	var grid = Ext.create('Ext.tree.Panel', {
 		renderTo: 'editor-grid{{ uniquestring }}',
 		title: 'Accounts',
-		height: tabs.activeTab.getHeight(),
+		height: '100%',
+		anchor: '100%',
 		frame: true,
         collapsible: false,
         useArrows: true,

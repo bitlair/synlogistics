@@ -77,12 +77,48 @@ def transactions(request):
 	account = 6
 	if 'account' in request.POST:
 		account = request.POST['account']
-
+	
 	transactions = Transaction.objects.filter(account=account)
+
+	# Preseed arrays
+	accounts = {}
+	relations = {}
+	for transaction in transactions:
+		accounts[transaction.transfer.id] = str(transaction.transfer.number) + " " + transaction.transfer.name
+		# Relation is not mandatory
+		try:
+			relations[transaction.relation.id] = str(transaction.relation.name)
+		except:
+			pass
+
 	c = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
+		'account_id': account,
 		'transactions': transactions,
+		'accounts': accounts,
+		'relations': relations,
 	})
 	c.update(csrf(request))
 	return render_to_response('accounting/transactions.html', c)
+
+def transaction_reader(request):
+	transactions = Transaction.objects.filter(account=request.GET['account'])
+	response = '{success:true,data:['
+	for transaction in transactions:
+		response += '{id:%d,' % transaction.id
+		response += 'date:"%s",' % transaction.date
+		response += 'transfer:%d,' % transaction.transfer.id
+		response += 'description:"%s",' % transaction.description
+		try:
+			response += 'relation:%d,' % transaction.relation
+		except:
+			response += 'relation:null,'
+		response += 'amount:%d},' % transaction.amount
+	response += ']}'
+	return HttpResponse(response)		
+	
+def transaction_writer(request):
+	if request.META['REQUEST_METHOD'] == "PUT":
+		# FIXME Actually do something with the request
+		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)

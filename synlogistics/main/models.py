@@ -139,6 +139,11 @@ class ProductGroup(models.Model):
 		db_table = u'product_groups'
 
 class Product(models.Model):
+	TYPE_CHOICES = (
+		(00, 'Hardware'),
+		(01, 'Service'),
+		(02, 'Periodic'))
+	product_type = models.IntegerField(null=False, choices=TYPE_CHOICES)
 	product_group = models.ForeignKey(ProductGroup)
 	code = models.CharField(unique=True, max_length=120, blank=False)
 	name = models.CharField(max_length=300, blank=True)

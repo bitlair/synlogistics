@@ -8,9 +8,12 @@ import synlogistics.settings as settings
 
 urlpatterns = patterns('',
 	url(r'^$', 'main.views.login'),
-	url(r'^main\/layout$', 'main.views.layout'),
+	url(r'^main/layout$', 'main.views.layout'),
 	url(r'^accounting/overview$', 'accounting.views.overview'),
 	url(r'^accounting/transactions$', 'accounting.views.transactions'),
+	url(r'^accounting/transactiondata$', 'accounting.views.transaction_reader'),
+	url(r'^accounting/transactiondata/', 'accounting.views.transaction_writer'),
+	url(r'^sales/invoicing', 'invoicing.views.create'),
 	
 	# Main Ajax fields, used in more than one app:
 	url(r'^ajax/accountsearch.json$', 'ajax.views.accounts'),
