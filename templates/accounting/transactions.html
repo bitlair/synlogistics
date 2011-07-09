@@ -5,28 +5,34 @@ Ext.onReady(function() {
 		Ext.define('Transaction', {
 			extend: 'Ext.data.Model',
 			fields: [
-				{ name: 'date', type: 'date', mapping: 0 },
-				{ name: 'transfer', type: 'string', mapping: 1 },
-				{ name: 'relation', type: 'string', mapping: 2 },
-				{ name: 'description', type: 'string', mapping: 3 },
-				{ name: 'amount', type: 'float', mapping: 4 },
+				{ name: 'id', type: 'int' },
+				{ name: 'date', type: 'date' },
+				{ name: 'transfer', type: 'string' },
+				{ name: 'relation', type: 'string' },
+				{ name: 'description', type: 'string' },
+				{ name: 'amount', type: 'double' },
 			]
 		});
 	}
-	var data = [
-{% for transaction in transactions %}
-	 [ '{{ transaction.date }}', '{{ transaction.transfer.number }} {{ transaction.transfer.name }}', '{{ transaction.relation }}', '{{ transaction.description }}', '{{ transaction.amount }}' ],
-{% endfor %}
-	];
 
 	// create the Data Store
-	var store = Ext.create('Ext.data.ArrayStore', {
+	var store = Ext.create('Ext.data.Store', {
 		model: 'Transaction',
 		proxy: {
-			type: 'memory',
+			type: 'rest',
+			url: '{{ BASE_URL }}accounting/transactiondata',
+			extraParams: { account: '{{ account_id }}' },
+			reader: {
+				type: 'json',
+				root: 'data',
+			},
+			writer: {
+				type: 'json',
+				root: 'data',
+			},
 		},
-		data: data,
-		folderSort: false,		
+		autoLoad: true,
+		autoSync: true,
 	});
 
 
