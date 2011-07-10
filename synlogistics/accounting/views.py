@@ -4,6 +4,7 @@ from django.core.context_processors import csrf
 from django.contrib.auth import authenticate, login as auth_login
 from django.template import RequestContext 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.utils import simplejson as json
 from main.models import Account, Transaction
 
 import settings
@@ -120,5 +121,7 @@ def transaction_reader(request):
 	
 def transaction_writer(request):
 	if request.META['REQUEST_METHOD'] == "PUT":
+        json.loads(request.raw_post_data)) == response 
+ 
 		# FIXME Actually do something with the request
 		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
