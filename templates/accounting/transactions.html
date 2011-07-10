@@ -105,8 +105,8 @@ Ext.onReady(function() {
 			field: {
 				xtype: 'combo',
 				store: accounts,
+				valueField: 'id',
 				displayField: 'name',
-				hiddenField: 'id',
 				typeAhead: true,
 				hideLabel: true,
 				forceSelection: true,
@@ -126,7 +126,7 @@ Ext.onReady(function() {
 			field: {
 				xtype: 'combo',
 				store: relations,
-				hiddenField: 'id',
+				valueField: 'id',
 				displayField: 'name',
 				typeAhead: false,
 				hideLabel: true,

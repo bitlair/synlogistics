@@ -5,10 +5,11 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.template import RequestContext 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson as json
-from main.models import Account, Transaction
+from main.models import Account, Transaction, Relation
 
 import settings
 import pprint
+from datetime import datetime
 
 def show_children(children, account_id):
 	accounttree_json = "expanded: true, children: ["
@@ -110,10 +111,10 @@ def transaction_reader(request):
 	for transaction in transactions:
 		response += '{id:%d,' % transaction.id
 		response += 'date:"%s",' % transaction.date
-		response += 'transfer:%d,' % transaction.transfer.id
+		response += 'transfer:"%s %s",' % (transaction.transfer.number,transaction.transfer.name)
 		response += 'description:"%s",' % transaction.description
 		try:
-			response += 'relation:%d,' % transaction.relation
+			response += 'relation:"%s",' % transaction.relation.displayname
 		except:
 			response += 'relation:null,'
 		response += 'amount:%d},' % transaction.amount
@@ -123,9 +124,13 @@ def transaction_reader(request):
 def transaction_writer(request):
 	if request.META['REQUEST_METHOD'] == "PUT":
 		response = json.loads(request.raw_post_data)
-		transaction = Transaction.objects.filter(id=response['id']) 
-		#transaction.update(response)
-		#transaction.save()
+		transaction = Transaction.objects.get(pk=response['id'])
+		transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+		transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+		transaction.description = response['description']
+		transaction.relation = Relation.objects.get(pk=int(response['relation']))
+		transaction.amount = response['amount']
+		transaction.save()
 		# FIXME Actually do something with the request
 		#return HttpResponse(response)
 		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
