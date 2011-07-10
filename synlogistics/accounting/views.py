@@ -8,6 +8,7 @@ from django.utils import simplejson as json
 from main.models import Account, Transaction
 
 import settings
+import pprint
 
 def show_children(children, account_id):
 	accounttree_json = "expanded: true, children: ["
@@ -121,7 +122,10 @@ def transaction_reader(request):
 	
 def transaction_writer(request):
 	if request.META['REQUEST_METHOD'] == "PUT":
-        json.loads(request.raw_post_data)) == response 
- 
+		response = json.loads(request.raw_post_data)
+		transaction = Transaction.objects.filter(id=response['id']) 
+		#transaction.update(response)
+		#transaction.save()
 		# FIXME Actually do something with the request
+		#return HttpResponse(response)
 		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
