@@ -81,7 +81,7 @@ Ext.onReady(function() {
 	var grid = Ext.create('Ext.grid.Panel', {
 		renderTo: 'editor-grid{{ uniquestring }}',
 		title: 'Transactions',
-		height: '100%',
+		height: tabs.activeTab.getHeight(),
 		anchor: '100%',
 		frame: true,
 		store: store,
