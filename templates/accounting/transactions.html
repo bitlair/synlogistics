@@ -161,6 +161,17 @@ Ext.onReady(function() {
 			}
 		}],
 		plugins: [rowEditing],
+		dockedItems: [{
+			xtype: 'toolbar',
+			items: [{
+				text: 'Add',
+				iconCls: 'icon-add',
+				handler: function() {
+					store.insert(store.count(false), new Transaction());
+					rowEditing.startEdit(store.count(false)-1,0);
+				},
+			}],
+		}],
 	});
 });
 </script>

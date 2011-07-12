@@ -22,5 +22,15 @@
 	background-color: #eee;
 }
 .tabs {
-	background-image:url(ext/examples/tabs/images/tabs.gif) !important;
+	background-image:url(../images/tabs.gif) !important;
+}
+
+.icon-user {
+	background-image: url(../images/user.png) !important;
+}
+.icon-add {
+    background-image: url(../images/add.png) !important;
+}
+.icon-delete {
+    background-image: url(../images/delete.png) !important;
 }
