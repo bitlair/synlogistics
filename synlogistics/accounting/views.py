@@ -111,10 +111,10 @@ def transaction_reader(request):
 	for transaction in transactions:
 		response += '{id:%d,' % transaction.id
 		response += 'date:"%s",' % transaction.date
-		response += 'transfer:"%s %s",' % (transaction.transfer.number,transaction.transfer.name)
+		response += 'transfer:%d,' % transaction.transfer.id
 		response += 'description:"%s",' % transaction.description
 		try:
-			response += 'relation:"%s",' % transaction.relation.displayname
+			response += 'relation:%d,' % transaction.relation.id
 		except:
 			response += 'relation:null,'
 		response += 'amount:%d},' % transaction.amount
