@@ -130,7 +130,15 @@ def transaction_writer(request):
 		transaction.description = response['description']
 		transaction.relation = Relation.objects.get(pk=int(response['relation']))
 		transaction.amount = response['amount']
+		for related in transaction.related.all():
+			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+			related.account = Account.objects.get(pk=int(response['transfer']))
+			related.description = response['description']
+			related.relation = Relation.objects.get(pk=int(response['relation']))
+			related.amount = response['amount']
+			related.save()
 		transaction.save()
+		
 		# FIXME Actually do something with the request
 		#return HttpResponse(response)
 		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
