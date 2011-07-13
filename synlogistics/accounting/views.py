@@ -106,20 +106,51 @@ def transactions(request):
 	return render_to_response('accounting/transactions.html', c)
 
 def transaction_reader(request):
-	transactions = Transaction.objects.filter(account=request.GET['account'])
-	response = '{success:true,data:['
-	for transaction in transactions:
-		response += '{id:%d,' % transaction.id
-		response += 'date:"%s",' % transaction.date
-		response += 'transfer:%d,' % transaction.transfer.id
-		response += 'description:"%s",' % transaction.description
-		try:
-			response += 'relation:%d,' % transaction.relation.id
-		except:
-			response += 'relation:null,'
-		response += 'amount:%d},' % transaction.amount
-	response += ']}'
-	return HttpResponse(response)		
+	if request.method == "POST": 
+		response = json.loads(request.raw_post_data)
+		if response['date'] != "":
+			# insert the main transaction
+			transaction = Transaction()
+			transaction.account = Account.objects.get(pk=int(request.GET['account']))
+			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+			transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+			transaction.description = response['description']
+			transaction.relation = Relation.objects.get(pk=int(response['relation']))
+			transaction.amount = response['amount']
+			transaction.save()
+		
+			related = Transaction()
+			related.account = Account.objects.get(pk=int(response['transfer']))
+			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+			related.transfer = Account.objects.get(pk=int(request.GET['account'])) 
+			related.description = response['description']
+			related.relation = Relation.objects.get(pk=int(response['relation']))
+			related.amount = response['amount']
+			related.save()
+
+			transaction.related.add(related)
+			transaction.save()
+
+			related.related.add(transaction)
+			related.save()
+			return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
+		else:	
+			return HttpResponse('')
+	else:
+		transactions = Transaction.objects.filter(account=request.GET['account'])
+		response = '{success:true,data:['
+		for transaction in transactions:
+			response += '{id:%d,' % transaction.id
+			response += 'date:"%s",' % transaction.date
+			response += 'transfer:%d,' % transaction.transfer.id
+			response += 'description:"%s",' % transaction.description
+			try:
+				response += 'relation:%d,' % transaction.relation.id
+			except:
+				response += 'relation:null,'
+			response += 'amount:%d},' % transaction.amount
+		response += ']}'
+		return HttpResponse(response)		
 	
 def transaction_writer(request):
 	if request.META['REQUEST_METHOD'] == "PUT":

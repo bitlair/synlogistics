@@ -22,7 +22,7 @@ Ext.onReady(function() {
 			type: 'rest',
 			url: '{{ BASE_URL }}accounting/transactiondata',
 			extraParams: { account: '{{ account_id }}' },
-			headers: { 'X-CSRF-Token': Ext.util.Cookies.get('csrftoken') },
+			headers: { 'X-CSRFToken': Ext.util.Cookies.get('csrftoken') },
 			reader: {
 				type: 'json',
 				root: 'data',
