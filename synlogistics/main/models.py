@@ -99,15 +99,15 @@ class Account(models.Model):
 		db_table = u'accounts'
 
 class Transaction(models.Model):
-	date = models.DateField(null=True, blank=True)
+	date = models.DateField(null=False, blank=False)
 	account = models.ForeignKey(Account, related_name='transaction')
 	transfer = models.ForeignKey(Account, related_name='transaction_transfer')
 	related = models.ManyToManyField('self', blank=False)
 	relation = models.ForeignKey(Relation)
 	description = models.CharField(max_length=765, blank=True)
 	amount = models.FloatField(null=True, blank=True)
-	invoice_number = models.CharField(max_length=45, blank=True)
-	purchase_order = models.ForeignKey(PurchaseOrder)
+	invoice_number = models.CharField(max_length=45, null=True, blank=True)
+	purchase_order = models.ForeignKey(PurchaseOrder, null=True)
 	#sale = models.ForeignKey('SaleItem')
 	document = models.TextField(blank=True)
 	class Meta:
