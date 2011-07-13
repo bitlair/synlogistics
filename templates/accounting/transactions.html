@@ -21,7 +21,8 @@ Ext.onReady(function() {
 		proxy: {
 			type: 'rest',
 			url: '{{ BASE_URL }}accounting/transactiondata',
-			extraParams: { account: '{{ account_id }}', csrfmiddlewaretoken: Ext.util.Cookies.get('csrftoken') },
+			extraParams: { account: '{{ account_id }}' },
+			headers: { 'X-CSRF-Token': Ext.util.Cookies.get('csrftoken') },
 			reader: {
 				type: 'json',
 				root: 'data',
