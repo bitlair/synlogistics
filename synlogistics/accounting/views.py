@@ -6,6 +6,7 @@ from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson as json
 from main.models import Account, Transaction, Relation
+from django.db import transaction as db_trans
 
 import settings
 import pprint
@@ -92,6 +93,7 @@ def transactions(request):
 #
 # This is the AJAX handler for the transaction data in the transaction view.
 #
+@db_trans.commit_manually
 def transaction_data(request):
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data)
@@ -102,10 +104,8 @@ def transaction_data(request):
 			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			transaction.transfer = Account.objects.get(pk=int(response['transfer']))
 			transaction.description = response['description']
-			try:
+			if response['relation'] != 0:
 				transaction.relation = Relation.objects.get(pk=int(response['relation']))
-			except:
-				pass
 			transaction.amount = response['amount']
 			transaction.save()
 		
@@ -114,10 +114,8 @@ def transaction_data(request):
 			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			related.transfer = Account.objects.get(pk=int(request.GET['account'])) 
 			related.description = response['description']
-			try:
+			if response['relation'] != 0:
 				related.relation = Relation.objects.get(pk=int(response['relation']))
-			except:
-				pass
 			related.amount = -response['amount']
 			related.save()
 
@@ -126,7 +124,13 @@ def transaction_data(request):
 
 			related.related.add(transaction)
 			related.save()
-			return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
+
+			response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+			if transaction.relation != None:
+				response['relation_display'] = transaction.relation.displayname
+
+			db_trans.commit()
+			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 		else:
 			# FIXME Show error message on client
 			return HttpResponse('')
@@ -137,37 +141,34 @@ def transaction_data(request):
 		transaction.transfer = Account.objects.get(pk=int(response['transfer']))
 		transaction.description = response['description']
 
-		# Relations are not mandatory
-		try:
+		if response['relation']:
 			transaction.relation = Relation.objects.get(pk=int(response['relation']))
-		except:
-			pass
 
 		transaction.amount = response['amount']
 		for related in transaction.related.all():
 			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			related.account = Account.objects.get(pk=int(response['transfer']))
 			related.description = response['description']
-			# Relations are not mandatory
-			try:
+
+			if response['relation']:
 				related.relation = Relation.objects.get(pk=int(response['relation']))
-			except:
-				pass
+
 			related.amount = -response['amount']
 			related.save()
 		transaction.save()
 		
 
 		response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
-		try:
+		if transaction.relation != None:
 			response['relation_display'] = transaction.relation.displayname
-		except:
+		else:
 			response['relation_display'] = ''
-			pass
 
+		db_trans.commit()
 		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 	else:
 		transactions = Transaction.objects.filter(account=request.GET['account'])
+		# XXX May want to change this to use simplejson
 		response = '{success:true,data:['
 		for transaction in transactions:
 			response += '{id:%d,' % transaction.id
@@ -175,7 +176,7 @@ def transaction_data(request):
 			response += 'transfer:%d,' % transaction.transfer.id
 			response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
 			response += 'description:"%s",' % transaction.description
-			if transaction.relation:
+			if transaction.relation != None:
 				response += 'relation:%d,' % transaction.relation.id
 				response += 'relation_display:"%s",' % transaction.relation.displayname
 			else:
@@ -183,5 +184,7 @@ def transaction_data(request):
 				response += 'relation_display:"",'
 			response += 'amount:%d},' % transaction.amount
 		response += ']}'
+
+		db_trans.commit()
 		return HttpResponse(response)		
 	

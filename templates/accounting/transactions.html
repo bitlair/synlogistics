@@ -40,7 +40,14 @@ Ext.onReady(function() {
 
 	var rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
 		clicksToMoveEditor: 1,
-		autoCancel: false
+		autoCancel: false,
+		listeners: {
+			/* This ensures that the comboboxes get seeded properly. NOTE: extjs documentation has this backwards for some reason. */
+			beforeedit: function(e, editor) {
+				accounts.loadData([{ id: e.record.get('transfer'), name: e.record.get('transfer_display') }]);
+				relations.loadData([{ id: e.record.get('relation'), name: e.record.get('relation_display') }]);
+			},
+		},
 	});
 
 
@@ -57,28 +64,28 @@ Ext.onReady(function() {
 
 	var accounts = Ext.create('Ext.data.Store', {
 		model: 'Search',
-		pageSize: 10,
 		proxy: {
 			type: 'rest',
-			url : '{{ BASE_URL }}ajax/accountsearch.json',
+			url: '{{ BASE_URL }}ajax/accountsearch.json',
 			reader: {
 				type: 'json',
 				root: 'accounts',
-			}
+			},
 		},
 	});
+
 	var relations = Ext.create('Ext.data.Store', {
 		model: 'Search',
-		pageSize: 10,
 		proxy: {
 			type: 'rest',
-			url : '{{ BASE_URL }}ajax/relationsearch.json',
+			url: '{{ BASE_URL }}ajax/relationsearch.json',
 			reader: {
 				type: 'json',
 				root: 'relations',
-			}
+			},
 		},
 	});
+
 	// create the grid and specify what field you want
 	// to use for the editor at each column.
 	var grid = Ext.create('Ext.grid.Panel', {
@@ -130,7 +137,7 @@ Ext.onReady(function() {
 				displayField: 'name',
 				typeAhead: false,
 				hideLabel: true,
-				forceSelection: true,
+				forceSelection: false,
    			},
 		}, {
 			text: 'Description',

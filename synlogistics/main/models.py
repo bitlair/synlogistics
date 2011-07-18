@@ -103,7 +103,7 @@ class Transaction(models.Model):
 	account = models.ForeignKey(Account, related_name='transaction')
 	transfer = models.ForeignKey(Account, related_name='transaction_transfer')
 	related = models.ManyToManyField('self', blank=False)
-	relation = models.ForeignKey(Relation)
+	relation = models.ForeignKey(Relation, null=True)
 	description = models.CharField(max_length=765, blank=True)
 	amount = models.FloatField(null=True, blank=True)
 	invoice_number = models.CharField(max_length=45, null=True, blank=True)
