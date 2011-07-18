@@ -11,6 +11,8 @@ import settings
 import pprint
 from datetime import datetime
 
+
+# XXX may want to replace this with simplejson
 def show_children(children, account_id):
 	accounttree_json = "expanded: true, children: ["
 	for account in children[account_id]:
@@ -31,6 +33,9 @@ def show_children(children, account_id):
 	accounttree_json += "],"
 	return accounttree_json
 
+#
+# This is the account tree accounting overview
+#
 def overview(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect(settings.LOGIN_URL)
@@ -53,6 +58,7 @@ def overview(request):
 			children[0].append(account)
 
 	# Create a recursive json tree of accounts
+	# XXX may want to replace this with simplejson
 	accounttree_json = '{'
 	if 0 in children:
 		accounttree_json += show_children(children, 0)
@@ -65,47 +71,28 @@ def overview(request):
 	})
 	c.update(csrf(request))
 
-	#accounttree_json = 'Dude<br>'
-	#for account in Account.objects.all():
-	#	accounttree_json += str(account.balance)+"<br>"
-	#return HttpResponse(accounttree_json)
-
 	return render_to_response('accounting/overview.html', c)
 
+#
+# This is the transaction view, basically just serve the template.
+#
 def transactions(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect(settings.LOGIN_URL)
 
-	# FIXME Remove Hack to make debugging easier
-	account = 6
-	if 'account' in request.POST:
-		account = request.POST['account']
-	
-	transactions = Transaction.objects.filter(account=account)
-
-	# Preseed arrays
-	accounts = {}
-	relations = {}
-	for transaction in transactions:
-		accounts[transaction.transfer.id] = str(transaction.transfer.number) + " " + transaction.transfer.name
-		# Relation is not mandatory
-		try:
-			relations[transaction.relation.id] = str(transaction.relation.name)
-		except:
-			pass
-
 	c = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
-		'account_id': account,
-		'transactions': transactions,
-		'accounts': accounts,
-		'relations': relations,
+		'account_id': request.POST['account'],
 	})
 	c.update(csrf(request))
 	return render_to_response('accounting/transactions.html', c)
 
-def transaction_reader(request):
+
+#
+# This is the AJAX handler for the transaction data in the transaction view.
+#
+def transaction_data(request):
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data)
 		if response['date'] != "":
@@ -115,7 +102,10 @@ def transaction_reader(request):
 			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			transaction.transfer = Account.objects.get(pk=int(response['transfer']))
 			transaction.description = response['description']
-			transaction.relation = Relation.objects.get(pk=int(response['relation']))
+			try:
+				transaction.relation = Relation.objects.get(pk=int(response['relation']))
+			except:
+				pass
 			transaction.amount = response['amount']
 			transaction.save()
 		
@@ -124,7 +114,10 @@ def transaction_reader(request):
 			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			related.transfer = Account.objects.get(pk=int(request.GET['account'])) 
 			related.description = response['description']
-			related.relation = Relation.objects.get(pk=int(response['relation']))
+			try:
+				related.relation = Relation.objects.get(pk=int(response['relation']))
+			except:
+				pass
 			related.amount = response['amount']
 			related.save()
 
@@ -134,8 +127,45 @@ def transaction_reader(request):
 			related.related.add(transaction)
 			related.save()
 			return HttpResponse('{success: true, data: %s }' % request.raw_post_data)
-		else:	
+		else:
+			# FIXME Show error message on client
 			return HttpResponse('')
+	elif request.method == "PUT":
+		response = json.loads(request.raw_post_data)
+		transaction = Transaction.objects.get(pk=response['id'])
+		transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+		transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+		transaction.description = response['description']
+
+		# Relations are not mandatory
+		try:
+			transaction.relation = Relation.objects.get(pk=int(response['relation']))
+		except:
+			pass
+
+		transaction.amount = response['amount']
+		for related in transaction.related.all():
+			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+			related.account = Account.objects.get(pk=int(response['transfer']))
+			related.description = response['description']
+			# Relations are not mandatory
+			try:
+				related.relation = Relation.objects.get(pk=int(response['relation']))
+			except:
+				pass
+			related.amount = response['amount']
+			related.save()
+		transaction.save()
+		
+
+		response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+		try:
+			response['relation_display'] = transaction.relation.displayname
+		except:
+			response['relation_display'] = ''
+			pass
+
+		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 	else:
 		transactions = Transaction.objects.filter(account=request.GET['account'])
 		response = '{success:true,data:['
@@ -143,33 +173,15 @@ def transaction_reader(request):
 			response += '{id:%d,' % transaction.id
 			response += 'date:"%s",' % transaction.date
 			response += 'transfer:%d,' % transaction.transfer.id
+			response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
 			response += 'description:"%s",' % transaction.description
-			try:
+			if transaction.relation:
 				response += 'relation:%d,' % transaction.relation.id
-			except:
+				response += 'relation_display:"%s",' % transaction.relation.displayname
+			else:
 				response += 'relation:null,'
+				response += 'relation_display:"",'
 			response += 'amount:%d},' % transaction.amount
 		response += ']}'
 		return HttpResponse(response)		
 	
-def transaction_writer(request):
-	if request.META['REQUEST_METHOD'] == "PUT":
-		response = json.loads(request.raw_post_data)
-		transaction = Transaction.objects.get(pk=response['id'])
-		transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-		transaction.transfer = Account.objects.get(pk=int(response['transfer']))
-		transaction.description = response['description']
-		transaction.relation = Relation.objects.get(pk=int(response['relation']))
-		transaction.amount = response['amount']
-		for related in transaction.related.all():
-			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-			related.account = Account.objects.get(pk=int(response['transfer']))
-			related.description = response['description']
-			related.relation = Relation.objects.get(pk=int(response['relation']))
-			related.amount = response['amount']
-			related.save()
-		transaction.save()
-		
-		# FIXME Actually do something with the request
-		#return HttpResponse(response)
-		return HttpResponse('{success: true, data: %s }' % request.raw_post_data)

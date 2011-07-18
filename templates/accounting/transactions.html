@@ -7,8 +7,10 @@ Ext.onReady(function() {
 			fields: [
 				{ name: 'id', type: 'int' },
 				{ name: 'date', type: 'date' },
-				{ name: 'transfer', type: 'string' },
-				{ name: 'relation', type: 'string' },
+				{ name: 'transfer', type: 'int' },
+				{ name: 'transfer_display', type: 'string' },
+				{ name: 'relation', type: 'int' },
+				{ name: 'relation_display', type: 'string' },
 				{ name: 'description', type: 'string' },
 				{ name: 'amount', type: 'double' },
 			]
@@ -99,10 +101,12 @@ Ext.onReady(function() {
 				maxValue: Ext.Date.format(new Date(), 'Y-m-d')
 			}
 		}, {
+			xtype: 'templatecolumn',
 			text: 'Transfer',
 			dataIndex: 'transfer',
 			width: 225,
 			sortable: true,
+			tpl: '{transfer_display}',
 			field: {
 				xtype: 'combo',
 				store: accounts,
@@ -111,19 +115,14 @@ Ext.onReady(function() {
 				typeAhead: true,
 				hideLabel: true,
 				forceSelection: true,
-				listConfig: {
-					// Custom rendering template for each item
-					/*
-					getInnerTpl: function() {
-						return '<div class="search-item">{name}</div>';
-					}*/
-   				 }
    			},
 		}, {
+			xtype: 'templatecolumn',
 			text: 'Relation',
 			dataIndex: 'relation',
 			width: 225,
 			sortable: true,
+			tpl: '{relation_display}',
 			field: {
 				xtype: 'combo',
 				store: relations,
@@ -132,13 +131,6 @@ Ext.onReady(function() {
 				typeAhead: false,
 				hideLabel: true,
 				forceSelection: true,
-				maxHeight: 50,
-				listConfig: {
-					// Custom rendering template for each item
-					/*getInnerTpl: function() {
-						return '<div class="search-item">{name}</div>';
-					}*/
-   				}
    			},
 		}, {
 			text: 'Description',
