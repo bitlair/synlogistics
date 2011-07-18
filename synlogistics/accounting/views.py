@@ -118,7 +118,7 @@ def transaction_data(request):
 				related.relation = Relation.objects.get(pk=int(response['relation']))
 			except:
 				pass
-			related.amount = response['amount']
+			related.amount = -response['amount']
 			related.save()
 
 			transaction.related.add(related)
@@ -153,7 +153,7 @@ def transaction_data(request):
 				related.relation = Relation.objects.get(pk=int(response['relation']))
 			except:
 				pass
-			related.amount = response['amount']
+			related.amount = -response['amount']
 			related.save()
 		transaction.save()
 		
