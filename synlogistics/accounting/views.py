@@ -117,21 +117,17 @@ def transaction_data(request):
 			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 			related.transfer = Account.objects.get(pk=int(request.GET['account'])) 
 			related.description = response['description']
+
 			if response['relation'] != 0:
 				related.relation = Relation.objects.get(pk=int(response['relation']))
 			
+			related.amount = Decimal(response['amount'])
+
 			# Some accounts, like liabilities and expenses are inverted.
 			# Determine if we need to invert the amount on the related transaction
-			if transaction.account.account_type < 10 or transaction.account.account_type == 80:
-				if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
-					related.amount = -Decimal(response['amount'])
-				else:
-					related.amount = Decimal(response['amount'])
-			else:
-				if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
-					related.amount = Decimal(response['amount'])
-				else:
-					related.amount = -Decimal(response['amount'])
+			if (transaction.account.account_type < 10 or transaction.account.account_type == 80) ==
+					(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
+				related.amount = -Decimal(response['amount'])
 			related.save()
 
 			transaction.related.add(related)
@@ -172,18 +168,13 @@ def transaction_data(request):
 				if response['relation']:
 					related.relation = Relation.objects.get(pk=int(response['relation']))
 
+				related.amount = Decimal(response['amount'])
+
 				# Some accounts, like liabilities and expenses are inverted.
 				# Determine if we need to invert the amount on the related transaction
-				if transaction.account.account_type < 10 or transaction.account.account_type == 80:
-					if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
-						related.amount = -Decimal(response['amount'])
-					else:
-						related.amount = Decimal(response['amount'])
-				else:
-					if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
-						related.amount = Decimal(response['amount'])
-					else:
-						related.amount = -Decimal(response['amount'])
+				if (transaction.account.account_type < 10 or transaction.account.account_type == 80) ==
+						(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
+					related.amount = -Decimal(response['amount'])
 				related.save()
 
 			transaction.save()
