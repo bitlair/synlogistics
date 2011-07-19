@@ -125,8 +125,8 @@ def transaction_data(request):
 
 			# Some accounts, like liabilities and expenses are inverted.
 			# Determine if we need to invert the amount on the related transaction
-			if (transaction.account.account_type < 10 or transaction.account.account_type == 80) ==
-					(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
+			if (transaction.account.account_type < 10 or transaction.account.account_type == 80) \
+ 				==	(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
 				related.amount = -Decimal(response['amount'])
 			related.save()
 
@@ -172,8 +172,8 @@ def transaction_data(request):
 
 				# Some accounts, like liabilities and expenses are inverted.
 				# Determine if we need to invert the amount on the related transaction
-				if (transaction.account.account_type < 10 or transaction.account.account_type == 80) ==
-						(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
+				if (transaction.account.account_type < 10 or transaction.account.account_type == 80) \
+						== (transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80):
 					related.amount = -Decimal(response['amount'])
 				related.save()
 
