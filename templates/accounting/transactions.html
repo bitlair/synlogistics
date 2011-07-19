@@ -44,8 +44,12 @@ Ext.onReady(function() {
 		listeners: {
 			/* This ensures that the comboboxes get seeded properly. NOTE: extjs documentation has this backwards for some reason. */
 			beforeedit: function(e, editor) {
-				accounts.loadData([{ id: e.record.get('transfer'), name: e.record.get('transfer_display') }]);
-				relations.loadData([{ id: e.record.get('relation'), name: e.record.get('relation_display') }]);
+				if (e.record.get('transfer_display') != "") {
+					accounts.loadData([{ id: e.record.get('transfer'), name: e.record.get('transfer_display') }]);
+				}
+				if (e.record.get('relation_display') != "") {
+					relations.loadData([{ id: e.record.get('relation'), name: e.record.get('relation_display') }]);
+				}
 			},
 		},
 	});

@@ -1,12 +1,13 @@
 from random import getrandbits
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.decorators import login_required
 from django.template import RequestContext 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson as json
 from main.models import Account, Transaction, Relation
 from django.db import transaction as db_trans
+from decimal import *
 
 import settings
 import pprint
@@ -37,10 +38,8 @@ def show_children(children, account_id):
 #
 # This is the account tree accounting overview
 #
+@login_required
 def overview(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.LOGIN_URL)
-	
 	accounts = Account.objects.all()
 
 	# Build a dictionary with parent_id as key with lists of records as data
@@ -77,10 +76,8 @@ def overview(request):
 #
 # This is the transaction view, basically just serve the template.
 #
+@login_required
 def transactions(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.LOGIN_URL)
-
 	c = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
@@ -93,11 +90,17 @@ def transactions(request):
 #
 # This is the AJAX handler for the transaction data in the transaction view.
 #
+@login_required
 @db_trans.commit_manually
 def transaction_data(request):
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data)
-		if response['date'] != "":
+
+		# Catch phony record creation request.
+		if response['date'] == None:
+			return HttpResponse('')
+
+		try:
 			# insert the main transaction
 			transaction = Transaction()
 			transaction.account = Account.objects.get(pk=int(request.GET['account']))
@@ -106,7 +109,7 @@ def transaction_data(request):
 			transaction.description = response['description']
 			if response['relation'] != 0:
 				transaction.relation = Relation.objects.get(pk=int(response['relation']))
-			transaction.amount = response['amount']
+			transaction.amount = Decimal(response['amount'])
 			transaction.save()
 		
 			related = Transaction()
@@ -116,7 +119,7 @@ def transaction_data(request):
 			related.description = response['description']
 			if response['relation'] != 0:
 				related.relation = Relation.objects.get(pk=int(response['relation']))
-			related.amount = -response['amount']
+			related.amount = -Decimal(response['amount'])
 			related.save()
 
 			transaction.related.add(related)
@@ -129,42 +132,62 @@ def transaction_data(request):
 			if transaction.relation != None:
 				response['relation_display'] = transaction.relation.displayname
 
-			db_trans.commit()
-			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+		except:
+			db_trans.rollback()
+			raise
 		else:
-			# FIXME Show error message on client
-			return HttpResponse('')
+			db_trans.commit()
+
+			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 	elif request.method == "PUT":
 		response = json.loads(request.raw_post_data)
-		transaction = Transaction.objects.get(pk=response['id'])
-		transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-		transaction.transfer = Account.objects.get(pk=int(response['transfer']))
-		transaction.description = response['description']
-
-		if response['relation']:
-			transaction.relation = Relation.objects.get(pk=int(response['relation']))
-
-		transaction.amount = response['amount']
-		for related in transaction.related.all():
-			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-			related.account = Account.objects.get(pk=int(response['transfer']))
-			related.description = response['description']
+		try:
+			transaction = Transaction.objects.get(pk=response['id'])
+			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+			transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+			transaction.description = response['description']
+			transaction.amount = Decimal(response['amount'])
 
 			if response['relation']:
-				related.relation = Relation.objects.get(pk=int(response['relation']))
+				transaction.relation = Relation.objects.get(pk=int(response['relation']))
 
-			related.amount = -response['amount']
-			related.save()
-		transaction.save()
+
+			for related in transaction.related.all():
+				related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+				related.account = Account.objects.get(pk=int(response['transfer']))
+				related.description = response['description']
+
+				if response['relation']:
+					related.relation = Relation.objects.get(pk=int(response['relation']))
+
+				# Some accounts, like liabilities and expenses are inverted.
+				# Determine if we need to invert the amount on the related transaction
+				if transaction.account.account_type < 10 or transaction.account.account_type == 80:
+					if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
+						related.amount = -Decimal(response['amount'])
+					else:
+						related.amount = Decimal(response['amount'])
+				else:
+					if transaction.transfer.account_type < 10 or transaction.transfer.account_type == 80:
+						related.amount = Decimal(response['amount'])
+					else:
+						related.amount = -Decimal(response['amount'])
+				related.save()
+
+			transaction.save()
 		
 
-		response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
-		if transaction.relation != None:
-			response['relation_display'] = transaction.relation.displayname
+			response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+			if transaction.relation != None:
+				response['relation_display'] = transaction.relation.displayname
+			else:
+				response['relation_display'] = ''
+		except:
+			db_trans.rollback()
+			raise
 		else:
-			response['relation_display'] = ''
+			db_trans.commit()
 
-		db_trans.commit()
 		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 	else:
 		transactions = Transaction.objects.filter(account=request.GET['account'])
@@ -182,7 +205,7 @@ def transaction_data(request):
 			else:
 				response += 'relation:null,'
 				response += 'relation_display:"",'
-			response += 'amount:%d},' % transaction.amount
+			response += 'amount:%s},' % transaction.amount
 		response += ']}'
 
 		db_trans.commit()
