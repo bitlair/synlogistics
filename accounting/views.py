@@ -225,6 +225,24 @@ def transaction_data(request):
 
 		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 
+	# A delete  is done via DELETE /transactiondata/id
+	elif request.method == "DELETE":
+		response = json.loads(request.raw_post_data)
+		try:
+			transaction = Transaction.objects.get(pk=response['id'])
+
+			# Delete the related transaction first (There can be only one!)
+			for related in transaction.related.all():
+				related.delete()
+			transaction.delete()
+
+		except:
+			db_trans.rollback()
+			raise
+		else:
+			db_trans.commit()
+		return HttpResponse(json.dumps({ 'success': True }))
+
 	# Requesting transactions is done via GET /transactiondata?account=..
 	else:
 		transactions = Transaction.objects.filter(account=request.GET['account'])
