@@ -144,6 +144,12 @@ class Product(models.Model):
 		(00, 'Hardware'),
 		(01, 'Service'),
 		(02, 'Periodic'))
+	INTERVAL_CHOICES = (
+		(00, 'Daily'),
+		(01, 'Weekly'),
+		(02, 'Monthly'),
+		(03, 'Quarterly'),
+		(04, 'Annually'))
 	product_type = models.IntegerField(null=False, choices=TYPE_CHOICES)
 	product_group = models.ForeignKey(ProductGroup)
 	code = models.CharField(unique=True, max_length=120, blank=False)
@@ -153,6 +159,9 @@ class Product(models.Model):
 	maximum_stock = models.IntegerField(null=True, blank=True)
 	active = models.BooleanField(default=True)
 	vat = models.ForeignKey(Vat)
+	has_own_serials = models.BooleanField(default=True)
+	invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
+	invoice_interval_count = models.IntegerField(null=True, default=1)
 	class Meta:
 		db_table = u'products'
 
@@ -162,6 +171,17 @@ class Subproduct(models.Model):
 	name = models.CharField(max_length=300, blank=False)
 	class Meta:
 		db_table = u'subproducts'
+
+class Subscription(models.Model):
+	product = models.ForeignKey(Product)
+	customer = models.ForeignKey(Relation)
+	start_date = models.DateTimeField(null=False, blank=False)
+	end_date = models.DateTimeField(null=True)
+	last_invoice_date = models.DateTimeField(null=True)
+	subscription_extra_info = models.TextField(null=False, blank=False)
+	active = models.BooleanField(null=False, default=1)
+	class Meta:
+		db_table = u'subscriptions'
 
 class InternalOrder(models.Model):
 	state = models.IntegerField(null=True, blank=True)
