@@ -106,13 +106,14 @@ Ext.onReady(function() {
 		}],
 		listeners: {
 			itemdblclick: function(obj, record, el, index, e) {
-				addTab('Transactions', '{{ BASE_URL }}accounting/transactions', { account: record.get('id') });
+				addTab('Transactions: ' + record.get('name'), '{{ BASE_URL }}accounting/transactions', { account: record.get('id') });
 			},
 			render: function(panel) {
 				panel.el.on('keyup', function(e) {
 					if (e.keyCode == e.ENTER) {
 						selected = panel.getSelectionModel().getSelection()[0].get('id');
-						addTab('Transactions', '{{ BASE_URL }}accounting/transactions', { account: selected });
+						label = panel.getSelectionModel().getSelection()[0].get('name');
+						addTab('Transactions: ' + label, '{{ BASE_URL }}accounting/transactions', { account: selected });
 					}
 				});
 			},
