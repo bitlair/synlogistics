@@ -18,13 +18,12 @@
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 from main.models import Account, Relation
 
+@login_required
 def relations(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.LOGIN_URL)
-
 	# Obscure errors ftw \o/
 	if not 'query' in request.GET:
 		return HttpResponse("")
@@ -38,10 +37,9 @@ def relations(request):
 
 	return HttpResponse(response, mimetype='application/json')
 
-def accounts(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.LOGIN_URL)
 
+@login_required
+def accounts(request):
 	# Obscure errors ftw \o/
 	if not 'query' in request.GET:
 		return HttpResponse("")

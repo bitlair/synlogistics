@@ -21,6 +21,7 @@ from django.core.context_processors import csrf
 from django.contrib.auth import authenticate, login as auth_login
 from django.template import RequestContext 
 from django.http import HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 import settings
 
@@ -47,10 +48,8 @@ def login(request):
 
 	return render_to_response('main/login.html', c)
 
+@login_required
 def layout(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect(settings.LOGIN_URL)
-	
 	c = RequestContext(request, {
 		'request': request,
 		'BASE_URL': settings.BASE_URL

@@ -22,8 +22,10 @@ from django.core.context_processors import csrf
 from django.contrib.auth import authenticate, login as auth_login
 from django.template import RequestContext 
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 import settings
 
+@login_required
 def create(request):
 	c = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
