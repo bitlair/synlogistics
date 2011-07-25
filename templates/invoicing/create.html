@@ -43,10 +43,9 @@ var relations = Ext.create('Ext.data.Store', {
 var store = Ext.create('Ext.data.Store', {model: 'Search',});
 Ext.create('Ext.form.Panel', {
 		frame:true,
-		title: 'Multi Column, Nested Layouts and Anchoring',
-		bodyStyle:'padding:5px 5px 0',
+		title: 'Invoicing',
 		renderTo: 'editor-grid{{ uniquestring }}',
-		height: '100%',
+		height: tabs.activeTab.getHeight(),
 		fieldDefaults: {
 			labelAlign: 'left',
 			msgTarget: 'side'
@@ -111,6 +110,56 @@ Ext.create('Ext.form.Panel', {
 			anchor: '100%',
 			height: '100%',
 			store: store,
+			columns: [{
+				text: 'Serial number',
+				dataIndex: 'serial',
+				width: 150,
+				editor: {
+					allowBlank: true,
+				},
+			},{
+				text: 'Product',
+				dataIndex: 'product',
+				width: 150,
+				editor: {
+					allowBlank: false,
+				},
+			},{
+				text: 'Description',
+				dataIndex: 'description',
+				width: 250,
+				editor: {
+					allowBlank: false,
+				},
+			},{
+				text: 'Count',
+				dataIndex: 'count',
+				width: 50,
+				editor: {
+					allowBlank: false,
+				},
+			},{
+				text: 'Price',
+				dataIndex: 'price',
+				width: 100,
+				editor: {
+					allowBlank: false,
+				},
+			},{
+				text: 'VAT',
+				dataIndex: 'vat',
+				width: 100,
+				editor: {
+					allowBlank: false,
+				},
+			},{
+				text: 'Discount',
+				dataIndex: 'discount',
+				width: 50,
+				editor: {
+					allowBlank: false,
+				},
+			}],
 		}],
 		
 		buttons: [{
