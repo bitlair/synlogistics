@@ -104,6 +104,16 @@ Ext.onReady(function() {
 			width: 90,
 			align: 'right',
 		}],
+		dockedItems: [{
+			xtype: 'toolbar',
+			items: [{
+				text: 'Refresh',
+				iconCls: 'icon-refresh',
+				handler: function() {
+					tabs.activeTab.loader.load();
+				},
+			}],
+		}],
 		listeners: {
 			itemdblclick: function(obj, record, el, index, e) {
 				addTab('Transactions: ' + record.get('name'), '{{ BASE_URL }}accounting/transactions', { account: record.get('id') });
