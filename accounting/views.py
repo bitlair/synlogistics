@@ -112,6 +112,7 @@ def transactions(request):
 @login_required
 @db_trans.commit_manually
 def transaction_data(request):
+	# New transactions come in through a POST request
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data)
 
@@ -164,6 +165,7 @@ def transaction_data(request):
 			related.save()
 
 			response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+			response['id'] = transaction.id
 			if transaction.relation != None:
 				response['relation_display'] = transaction.relation.displayname
 
@@ -174,6 +176,8 @@ def transaction_data(request):
 			db_trans.commit()
 
 			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+	
+	# Existing transactions come in through a PUT request on /transactiondata/id
 	elif request.method == "PUT":
 		response = json.loads(request.raw_post_data)
 		try:
@@ -220,6 +224,8 @@ def transaction_data(request):
 			db_trans.commit()
 
 		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+
+	# Requesting transactions is done via GET /transactiondata?account=..
 	else:
 		transactions = Transaction.objects.filter(account=request.GET['account'])
 		# XXX May want to change this to use simplejson
