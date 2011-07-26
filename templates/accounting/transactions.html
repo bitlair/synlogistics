@@ -58,6 +58,7 @@ Ext.onReady(function() {
 	var rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
 		clicksToMoveEditor: 1,
 		autoCancel: false,
+		errorSummary: false,
 		listeners: {
 			/* This ensures that the comboboxes get seeded properly. NOTE: extjs documentation has this backwards for some reason. */
 			beforeedit: function(e, editor) {
