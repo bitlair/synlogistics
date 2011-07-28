@@ -1,5 +1,4 @@
 Wilco:
-* Transaction split/related support
 * Bank import <-> relation matching support
 * Service product support, including periodically invoicable product
 * Invoicing, including periodic invoicing
