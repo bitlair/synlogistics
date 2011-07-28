@@ -98,6 +98,7 @@ def subscription_data(request):
 			response = []
 			for subscription in subscriptions:
 				response.append({
+						'id': subscription.id,
 						'product': subscription.product.id,
 						'product_display': subscription.product.name,
 						'customer': subscription.customer.id,
