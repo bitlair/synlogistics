@@ -1,8 +1,8 @@
 LOCK TABLES `transactions` WRITE;
-INSERT INTO `transactions` VALUES (1,NULL,6,28,0,'Membership',25,'',0,'');
-INSERT INTO `transactions` VALUES (2,NULL,28,6,0,'Membership',25,'',0,'');
-INSERT INTO `transactions` VALUES (3,NULL,6,21,0,'Taxes',-50,'',0,'');
-INSERT INTO `transactions` VALUES (4,NULL,21,6,0,'Taxes',-50,'',0,'');
+INSERT INTO `transactions` VALUES (1,'2011-07-18',6,28,0,'Membership',25,'',0,'');
+INSERT INTO `transactions` VALUES (2,'2011-07-18',28,6,0,'Membership',25,'',0,'');
+INSERT INTO `transactions` VALUES (3,'2011-07-18',6,21,0,'Taxes',-50,'',0,'');
+INSERT INTO `transactions` VALUES (4,'2011-07-18',21,6,0,'Taxes',-50,'',0,'');
 UNLOCK TABLES;
 LOCK TABLES `transactions_related` WRITE;
 INSERT INTO `transactions_related` VALUES (1,1,2);
