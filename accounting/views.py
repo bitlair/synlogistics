@@ -114,7 +114,7 @@ def transactions(request):
 def transaction_data(request):
 	# New transactions come in through a POST request
 	if request.method == "POST": 
-		response = json.loads(request.raw_post_data)
+		response = json.loads(request.raw_post_data, parse_float=Decimal)
 
 		# Catch phony record creation request.
 		if response['date'] == None:
@@ -179,7 +179,7 @@ def transaction_data(request):
 	
 	# Existing transactions come in through a PUT request on /transactiondata/id
 	elif request.method == "PUT":
-		response = json.loads(request.raw_post_data)
+		response = json.loads(request.raw_post_data, parse_float=Decimal)
 		try:
 			transaction = Transaction.objects.get(pk=response['id'])
 			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
@@ -227,7 +227,7 @@ def transaction_data(request):
 
 	# A delete  is done via DELETE /transactiondata/id
 	elif request.method == "DELETE":
-		response = json.loads(request.raw_post_data)
+		response = json.loads(request.raw_post_data, parse_float=Decimal)
 		try:
 			transaction = Transaction.objects.get(pk=response['id'])
 

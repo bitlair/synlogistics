@@ -185,8 +185,10 @@ class Subscription(models.Model):
 	customer = models.ForeignKey(Relation)
 	start_date = models.DateTimeField(null=False, blank=False)
 	end_date = models.DateTimeField(null=True)
-	last_invoice_date = models.DateTimeField(null=True)
-	subscription_extra_info = models.TextField(null=False, blank=False)
+	discount = models.DecimalField(decimal_places=5,max_digits=9, null=False, default=0.0)
+	invoiced_until_date = models.DateTimeField(null=True)
+	intervals_per_invoice = models.IntegerField(null=False, default=0)
+	extra_info = models.TextField(null=False, blank=False)
 	active = models.BooleanField(null=False, default=1)
 	class Meta:
 		db_table = u'subscriptions'

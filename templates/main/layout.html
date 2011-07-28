@@ -134,28 +134,29 @@ Ext.require([
 				margins: '0 0 0 5',
 				layout: 'accordion',
 				items: [{
-					title: 'Accounting',
+					title: 'Administration',
 					iconCls: 'nav',
 					autoScroll: true,
 					items: createMenu([
-						{ title: 'Accounting overview', page: '{{ BASE_URL }}accounting/overview', params: {} },
-						{ title: 'Reporting', page: '{{ BASE_URL }}accounting/reports', params: {} },
-						{ title: 'Manage accounts', page: '{{ BASE_URL }}accounting/manage', params: {} }
+						{ title: 'Accounting', page: '{{ BASE_URL }}accounting/overview', params: {} },
+						{ title: 'Reports', page: '{{ BASE_URL }}accounting/reports', params: {} },
+						{ title: 'Invoices/reminders to send', page: '{{ BASE_URL }}accounting/send', params: {} },
+						{ title: 'Manage accounts', page: '{{ BASE_URL }}accounting/manage', params: {} },
 					])
  				}, {
 					title: 'Sales',
 					iconCls: 'nav',
 					autoScroll: true,
 					items: createMenu([
-						{ title: 'Stock query', page: '{{ BASE_URL }}sales/stockquery', params: {} },
+						{ title: 'Invoicing', page: '{{ BASE_URL }}sales/invoicing', params: {} },
+						{ title: 'Subscriptions', page: '{{ BASE_URL }}sales/subscriptions', params: {} },
+						{ title: 'Relations', page: '{{ BASE_URL }}sales/relations', params: {} },
+						/*{ title: 'Stock query', page: '{{ BASE_URL }}sales/stockquery', params: {} },
 						{ title: 'Cash register', page: '{{ BASE_URL }}sales/cashregister', params: {} },
 						{ title: 'Internal order', page: '{{ BASE_URL }}sales/internalorder', params: {} },
-						{ title: 'Invoicing', page: '{{ BASE_URL }}sales/invoicing', params: {} },
 						{ title: 'Item information', page: '{{ BASE_URL }}sales/iteminfo', params: {} },
-						{ title: 'Relations', page: '{{ BASE_URL }}sales/relations', params: {} },
 						{ title: 'RMA', page: '{{ BASE_URL }}sales/rma', params: {} },
-						{ title: 'Periodic invoices', page: '{{ BASE_URL }}sales/peridioc', params: {} },
-						{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },
+						{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },*/
 					]),
 				}, {
 					title: 'Purchasing',
@@ -181,7 +182,8 @@ Ext.require([
 					iconCls: 'nav',
 					autoScroll: true,
 					items: createMenu([
-						{ title: 'Containers', page: '{{ BASE_URL }}manufacturing/containers', params: {} }
+						{ title: 'Containers', page: '{{ BASE_URL }}manufacturing/containers', params: {} },
+						/*{ title: 'Bill of Materials', page: '{{ BASE_URL }}manufacturing/containers', params: {} }, */
 					])
 				}, {
 					title: 'Inventory',

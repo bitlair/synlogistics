@@ -1,0 +1,262 @@
+{% comment %}
+    SynLogistics: Account transactions template
+    Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+{% endcomment %}<script type="text/javascript">	
+Ext.onReady(function() {
+
+	if (!Ext.ClassManager.isCreated('Transaction')) {
+		Ext.define('Transaction', {
+			extend: 'Ext.data.Model',
+			fields: [
+				{ name: 'id', type: 'int' },
+				{ name: 'product', type: 'int' },
+				{ name: 'product_display', type: 'string' },
+				{ name: 'customer', type: 'int' },
+				{ name: 'customer_display', type: 'string' },
+				{ name: 'discount', type: 'float' },
+				{ name: 'intervals_per_invoice', type: 'int', defaultValue: 1 },
+				{ name: 'extra_info', type: 'string' },
+				{ name: 'startdate', type: 'date', format: 'Y-m-d' },
+				{ name: 'enddate', type: 'date', format: 'Y-m-d' },
+				{ name: 'active', type: 'bool', defaultValue: true },
+			]
+		});
+	}
+
+	// create the Data Store
+	var store = Ext.create('Ext.data.Store', {
+		model: 'Transaction',
+		proxy: {
+			type: 'rest',
+			url: '{{ BASE_URL }}sales/subscriptiondata',
+			extraParams: { account: '{{ account_id }}' },
+			headers: { 'X-CSRFToken': Ext.util.Cookies.get('csrftoken') },
+			reader: {
+				type: 'json',
+				root: 'data',
+			},
+			writer: {
+				type: 'json',
+			},
+		},
+		autoLoad: true,
+		autoSync: true,
+	});
+
+
+	var rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+		clicksToMoveEditor: 1,
+		autoCancel: false,
+		errorSummary: false,
+		listeners: {
+			/* This ensures that the comboboxes get seeded properly. NOTE: extjs documentation has this backwards for some reason. */
+			beforeedit: function(e, editor) {
+				if (e.record.get('product_display') != "") {
+					products.loadData([{ id: e.record.get('product'), name: e.record.get('product_display') }]);
+				}
+				if (e.record.get('customer_display') != "") {
+					relations.loadData([{ id: e.record.get('customer'), name: e.record.get('customer_display') }]);
+				}
+			},
+		},
+	});
+
+
+	// Ajax search
+	if (!Ext.ClassManager.isCreated('Search')) {
+		Ext.define("Search", {
+			extend: 'Ext.data.Model',
+			fields: [
+				{name: 'id', type: 'int' },
+				{name: 'name', type: 'string'},
+			]
+		});
+	}
+
+	var products = Ext.create('Ext.data.Store', {
+		model: 'Search',
+		proxy: {
+			type: 'rest',
+			url: '{{ BASE_URL }}ajax/productsearch.json',
+			reader: {
+				type: 'json',
+				root: 'products',
+			},
+		},
+	});
+
+	var relations = Ext.create('Ext.data.Store', {
+		model: 'Search',
+		proxy: {
+			type: 'rest',
+			url: '{{ BASE_URL }}ajax/relationsearch.json',
+			reader: {
+				type: 'json',
+				root: 'relations',
+			},
+		},
+	});
+
+	// create the grid and specify what field you want
+	// to use for the editor at each column.
+	var grid = Ext.create('Ext.grid.Panel', {
+		renderTo: 'editor-grid{{ uniquestring }}',
+		title: 'Subscriptions',
+		height: tabs.activeTab.getHeight(),
+		anchor: '100%',
+		frame: true,
+		store: store,
+		columns: [{
+			xtype: 'templatecolumn',
+			text: 'Product',
+			dataIndex: 'product',
+			width: 225,
+			sortable: true,
+			tpl: '{product_display}',
+			field: {
+				xtype: 'combo',
+				store: products,
+				valueField: 'id',
+				displayField: 'name',
+				typeAhead: true,
+				hideLabel: true,
+				forceSelection: true,
+				allowBlank: false,
+   			},
+		}, {
+			xtype: 'templatecolumn',
+			text: 'Customer',
+			dataIndex: 'customer',
+			width: 225,
+			sortable: true,
+			tpl: '{customer_display}',
+			field: {
+				xtype: 'combo',
+				store: relations,
+				valueField: 'id',
+				displayField: 'name',
+				typeAhead: false,
+				hideLabel: true,
+				forceSelection: true,
+				allowBlank: false,
+   			},
+		}, {
+			xtype: 'datecolumn',
+			format: 'Y-m-d',
+			text: 'Start date',
+			dataIndex: 'startdate',
+			width: 110,
+			field: {
+				xtype: 'datefield',
+				allowBlank: false,
+				format: 'Y-m-d',
+				maxValue: Ext.Date.format(new Date(), 'Y-m-d')
+			}
+		}, {
+			xtype: 'datecolumn',
+			format: 'Y-m-d',
+			text: 'End date',
+			dataIndex: 'enddate',
+			width: 110,
+			field: {
+				xtype: 'datefield',
+				allowBlank: true,
+				format: 'Y-m-d',
+				maxValue: Ext.Date.format(new Date(), 'Y-m-d')
+			}
+		}, {
+			text: 'Extra info',
+			dataIndex: 'extra_info',
+			width: 250,
+			editor: {
+				allowBlank: true,
+			}
+		}, {
+			xtype: 'numbercolumn',
+			format: '0.0%',
+			align: 'right',
+			text: 'Discount',
+			dataIndex: 'discount',
+			width: 120,
+			field: {
+				xtype: 'numberfield',
+				allowBlank: false,
+				allowDecimals: true,
+				decimalPrecision: 5,
+			}
+		}, {
+			xtype: 'numbercolumn',
+			format: '0',
+			align: 'right',
+			text: 'Intervals',
+			dataIndex: 'intervals_per_invoice',
+			width: 120,
+			field: {
+				xtype: 'numberfield',
+				allowBlank: false,
+				allowDecimals: false,
+			}
+		}, {
+			xtype: 'booleancolumn',
+			align: 'right',
+			text: 'Active',
+			dataIndex: 'active',
+			width: 120,
+			trueText: 'Yes',
+			falseText: 'No',
+			field: {
+				xtype: 'checkboxfield',
+				allowBlank: false,
+				allowDecimals: true,
+				decimalPrecision: 5,
+			}
+		}],
+		plugins: [rowEditing],
+		dockedItems: [{
+			xtype: 'toolbar',
+			items: [{
+				text: 'Add',
+				iconCls: 'icon-add',
+				handler: function() {
+					grid.addRow();
+				},
+			},{
+				text: 'Delete',
+				iconCls: 'icon-delete',
+				handler: function() {
+					grid.deleteSelection();
+				},
+			}],
+		}],
+		deleteSelection: function() {
+			var selection = this.getView().getSelectionModel().getSelection()[0];
+			if (!selection) {
+				return false;
+			}
+			if (!confirm("Are you sure you wish to delete the selected transaction?")) {
+				return false;
+			}
+			return this.store.remove(selection);
+		},
+		addRow: function() {
+			store.insert(store.count(false), new Transaction());
+			rowEditing.startEdit(store.count(false)-1,0);
+		}
+	});
+});
+</script>
+<div id="editor-grid{{ uniquestring }}"></div>

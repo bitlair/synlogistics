@@ -12,11 +12,14 @@ urlpatterns = patterns('',
 	url(r'^accounting/overview$', 'accounting.views.overview'),
 	url(r'^accounting/transactions$', 'accounting.views.transactions'),
 	url(r'^accounting/transactiondata', 'accounting.views.transaction_data'),
-	url(r'^sales/invoicing', 'invoicing.views.create'),
+	url(r'^sales/invoicing$', 'invoicing.views.create'),
+	url(r'^sales/subscriptions$', 'invoicing.views.subscriptions'),
+	url(r'^sales/subscriptiondata', 'invoicing.views.subscription_data'),
 	
 	# Main Ajax fields, used in more than one app:
 	url(r'^ajax/accountsearch.json$', 'ajax.views.accounts'),
 	url(r'^ajax/relationsearch.json$', 'ajax.views.relations'),
+	url(r'^ajax/productsearch.json$', 'ajax.views.products'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
