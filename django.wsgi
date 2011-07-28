@@ -1,8 +1,7 @@
 import os
 import sys
 
-sys.path.append('/home/http/wilco/')
-sys.path.append('/home/http/wilco/synlogistics')
+sys.path.append('/usr/share/synlogistics')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'synlogistics.settings'
 
