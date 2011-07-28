@@ -23,7 +23,7 @@ Ext.onReady(function() {
 			extend: 'Ext.data.Model',
 			fields: [
 				{ name: 'id', type: 'int' },
-				{ name: 'date', type: 'date' },
+				{ name: 'date', type: 'date', format: 'Y-m-d' },
 				{ name: 'transfer', type: 'int' },
 				{ name: 'transfer_display', type: 'string' },
 				{ name: 'relation', type: 'int' },
@@ -179,7 +179,7 @@ Ext.onReady(function() {
 				xtype: 'numberfield',
 				allowBlank: false,
 				allowDecimals: true,
-				decimalPrecision: 2,
+				decimalPrecision: 5,
 			}
 		}],
 		plugins: [rowEditing],
