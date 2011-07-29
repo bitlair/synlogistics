@@ -245,24 +245,28 @@ def transaction_data(request):
 
 	# Requesting transactions is done via GET /transactiondata?account=..
 	else:
-		transactions = Transaction.objects.filter(account=request.GET['account'])
-		# XXX May want to change this to use simplejson
-		response = '{success:true,data:['
-		for transaction in transactions:
-			response += '{id:%d,' % transaction.id
-			response += 'date:"%s",' % transaction.date
-			response += 'transfer:%d,' % transaction.transfer.id
-			response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
-			response += 'description:"%s",' % transaction.description
-			if transaction.relation != None:
-				response += 'relation:%d,' % transaction.relation.id
-				response += 'relation_display:"%s",' % transaction.relation.displayname
-			else:
-				response += 'relation:null,'
-				response += 'relation_display:"",'
-			response += 'amount:%s},' % transaction.amount
-		response += ']}'
-
-		db_trans.commit()
-		return HttpResponse(response)		
+		try:
+			transactions = Transaction.objects.filter(account=request.GET['account'])
+			# XXX May want to change this to use simplejson
+			response = '{success:true,data:['
+			for transaction in transactions:
+				response += '{id:%d,' % transaction.id
+				response += 'date:"%s",' % transaction.date
+				response += 'transfer:%d,' % transaction.transfer.id
+				response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
+				response += 'description:"%s",' % transaction.description
+				if transaction.relation != None:
+					response += 'relation:%d,' % transaction.relation.id
+					response += 'relation_display:"%s",' % transaction.relation.displayname
+				else:
+					response += 'relation:null,'
+					response += 'relation_display:"",'
+				response += 'amount:%s},' % transaction.amount
+			response += ']}'
+		except:
+			db_trans.rollback()
+			raise
+		else:
+			db_trans.commit()
+			return HttpResponse(response)		
 	
