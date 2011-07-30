@@ -18,8 +18,8 @@
 {% endcomment %}<script type="text/javascript">	
 Ext.onReady(function() {
 
-	if (!Ext.ClassManager.isCreated('Transaction')) {
-		Ext.define('Transaction', {
+	if (!Ext.ClassManager.isCreated('Subscription')) {
+		Ext.define('Subscription', {
 			extend: 'Ext.data.Model',
 			fields: [
 				{ name: 'id', type: 'int' },
@@ -39,7 +39,7 @@ Ext.onReady(function() {
 
 	// create the Data Store
 	var store = Ext.create('Ext.data.Store', {
-		model: 'Transaction',
+		model: 'Subscription',
 		proxy: {
 			type: 'rest',
 			url: '{{ BASE_URL }}sales/subscriptiondata',
@@ -253,7 +253,7 @@ Ext.onReady(function() {
 			return this.store.remove(selection);
 		},
 		addRow: function() {
-			store.insert(store.count(false), new Transaction());
+			store.insert(store.count(false), new Subscription());
 			rowEditing.startEdit(store.count(false)-1,0);
 		}
 	});
