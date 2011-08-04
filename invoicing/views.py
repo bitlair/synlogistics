@@ -79,6 +79,13 @@ def subscription_data(request):
 			subscription.active = response['active']
 			subscription.save()
 
+			# Make output pretty
+			response['customer_display'] = subscription.customer.displayname
+			response['product_display'] = subscription.product.name
+			
+			# The decimal can't be serialized by json
+			response['discount'] = str(response['discount'])
+
 
 		except:
 			db_trans.rollback()
@@ -86,9 +93,6 @@ def subscription_data(request):
 		else:
 			db_trans.commit()
 		
-			# The decimal can't be serialized by json
-			response['discount'] = str(response['discount'])
-
 			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 
 	# Updates come in as PUT subscriptiondata/id
@@ -106,12 +110,18 @@ def subscription_data(request):
 			subscription.extra_info = response['extra_info']
 			subscription.active = response['active']
 			subscription.save()
+
+			# Make output pretty
+			response['customer_display'] = subscription.customer.displayname
+			response['product_display'] = subscription.product.name
+			
+			# The decimal can't be serialized by json
+			response['discount'] = str(response['discount'])
 		except:
 			db_trans.rollback()
 			raise
 		else:
 			db_trans.commit()
-			response['discount'] = str(response['discount'])
 
 			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 		
