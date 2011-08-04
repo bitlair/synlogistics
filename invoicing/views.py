@@ -90,6 +90,43 @@ def subscription_data(request):
 			response['discount'] = str(response['discount'])
 
 			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+
+	# Updates come in as PUT subscriptiondata/id
+	elif request.method == "PUT":
+		response = json.loads(request.raw_post_data, parse_float=Decimal)
+		try:
+			subscription = Subscription.objects.get(pk=response['id'])
+			subscription.product = Product.objects.get(pk=int(response['product']))
+			subscription.customer = Relation.objects.get(pk=int(response['customer']))
+			subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
+			if response['enddate']:
+				subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
+			subscription.discount = Decimal(response['discount'])
+			subscription.intervals_per_invoice = response['intervals_per_invoice']
+			subscription.extra_info = response['extra_info']
+			subscription.active = response['active']
+			subscription.save()
+		except:
+			db_trans.rollback()
+			raise
+		else:
+			db_trans.commit()
+			response['discount'] = str(response['discount'])
+
+			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+		
+	# A delete is done via DELETE subscriptiondata/id
+	elif request.method == "DELETE":
+		response = json.loads(request.raw_post_data, parse_float=Decimal)
+		try:
+			subscription = Subscription.objects.get(pk=response['id'])
+			subscription.delete()
+		except:
+			db_trans.rollback()
+			raise
+		else:
+			db_trans.commit()
+			return HttpResponse(json.dumps({ 'success': True }))
 	else:
 		try:
 			# TODO: Allow for filtering here!

@@ -1,5 +1,5 @@
 {% comment %}
-    SynLogistics: Account transactions template
+    SynLogistics: Subscription management
     Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 
     This program is free software: you can redistribute it and/or modify
@@ -218,11 +218,10 @@ Ext.onReady(function() {
 			width: 120,
 			trueText: 'Yes',
 			falseText: 'No',
-			field: {
+			editor: {
 				xtype: 'checkboxfield',
-				allowBlank: false,
-				allowDecimals: true,
-				decimalPrecision: 5,
+				inputValue: 'true',
+				uncheckedValue: 'false',
 			}
 		}],
 		plugins: [rowEditing],
@@ -247,7 +246,7 @@ Ext.onReady(function() {
 			if (!selection) {
 				return false;
 			}
-			if (!confirm("Are you sure you wish to delete the selected transaction?")) {
+			if (!confirm("Are you sure you wish to delete the selected subscription?")) {
 				return false;
 			}
 			return this.store.remove(selection);
