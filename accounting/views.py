@@ -223,7 +223,7 @@ def transaction_data(request):
 		else:
 			db_trans.commit()
 
-		return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+			return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 
 	# A delete  is done via DELETE /transactiondata/id
 	elif request.method == "DELETE":
@@ -241,7 +241,7 @@ def transaction_data(request):
 			raise
 		else:
 			db_trans.commit()
-		return HttpResponse(json.dumps({ 'success': True }))
+			return HttpResponse(json.dumps({ 'success': True }))
 
 	# Requesting transactions is done via GET /transactiondata?account=..
 	else:
