@@ -56,11 +56,10 @@ def show_children(children, account_id):
 	accounttree_json += "],"
 	return accounttree_json
 
-#
-# This is the account tree accounting overview
-#
 @login_required
 def overview(request):
+	""" Account tree overview view function. """
+
 	accounts = Account.objects.all()
 
 	# Build a dictionary with parent_id as key with lists of records as data
@@ -94,11 +93,10 @@ def overview(request):
 
 	return render_to_response('accounting/overview.html', ctx)
 
-#
-# This is the transaction view, basically just serve the template.
-#
 @login_required
 def transactions(request):
+	""" Transaction view, basically just serves the template """
+
 	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
@@ -108,12 +106,11 @@ def transactions(request):
 	return render_to_response('accounting/transactions.html', ctx)
 
 
-#
-# This is the AJAX handler for the transaction data in the transaction view.
-#
 @login_required
 @db_trans.commit_manually
 def transaction_data(request):
+	""" AJAX handler for transaction data in the transaction view """
+
 	# New transactions come in through a POST request
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data, parse_float=Decimal)
