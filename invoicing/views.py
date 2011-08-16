@@ -33,23 +33,23 @@ import settings
 
 @login_required
 def create(request):
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
 	})
-	c.update(csrf(request))
+	ctx.update(csrf(request))
 
-	return render_to_response('invoicing/create.html', c)
+	return render_to_response('invoicing/create.html', ctx)
 
 @login_required
 def subscriptions(request):
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring': str(getrandbits(32)),
 	})
-	c.update(csrf(request))
+	ctx.update(csrf(request))
 
-	return render_to_response('invoicing/subscriptions.html', c)
+	return render_to_response('invoicing/subscriptions.html', ctx)
 
 #
 # This is the AJAX handler for the subscription data in the sales->subscriptions view.

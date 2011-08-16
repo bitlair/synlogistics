@@ -1,4 +1,4 @@
-#
+
 # SynLogistics accounting overview and transaction management
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) by Rudy Hardeman <zarya@bitlair.nl> 2011
@@ -83,27 +83,27 @@ def overview(request):
 		accounttree_json += show_children(children, 0)
 	accounttree_json += '}'
 
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
 		'accounttree_json': accounttree_json,
 	})
-	c.update(csrf(request))
+	ctx.update(csrf(request))
 
-	return render_to_response('accounting/overview.html', c)
+	return render_to_response('accounting/overview.html', ctx)
 
 #
 # This is the transaction view, basically just serve the template.
 #
 @login_required
 def transactions(request):
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
 		'account_id': request.POST['account'],
 	})
-	c.update(csrf(request))
-	return render_to_response('accounting/transactions.html', c)
+	ctx.update(csrf(request))
+	return render_to_response('accounting/transactions.html', ctx)
 
 
 #

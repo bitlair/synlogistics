@@ -40,20 +40,20 @@ def login(request):
 				error = "Your account is disabled."
 		else:
 			error = "Invalid username or password"
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'error': error,
 		'request': request
 	})
-	c.update(csrf(request))
+	ctx.update(csrf(request))
 
-	return render_to_response('main/login.html', c)
+	return render_to_response('main/login.html', ctx)
 
 @login_required
 def layout(request):
-	c = RequestContext(request, {
+	ctx = RequestContext(request, {
 		'request': request,
 		'BASE_URL': settings.BASE_URL
 	})
-	c.update(csrf(request))
+	ctx.update(csrf(request))
 
-	return render_to_response('main/layout.html', c)
+	return render_to_response('main/layout.html', ctx)
