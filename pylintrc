@@ -18,6 +18,7 @@ profile=no
 # path. You may set this option multiple times.
 ignore=.git
 ignore=static/ext
+ignore=manage.py
 
 # Pickle collected data for later comparisons.
 persistent=yes
