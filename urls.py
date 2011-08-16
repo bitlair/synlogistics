@@ -17,13 +17,13 @@ urlpatterns = patterns('',
 	url(r'^sales/subscriptiondata', 'invoicing.views.subscription_data'),
 	
 	# Main Ajax fields, used in more than one app:
-	url(r'^ajax/accountsearch.json$', 'ajax.views.accounts'),
-	url(r'^ajax/relationsearch.json$', 'ajax.views.relations'),
-	url(r'^ajax/productsearch.json$', 'ajax.views.products'),
+	url(r'^ajax/accountsearch.json$', 'ajax.views.get_accounts'),
+	url(r'^ajax/relationsearch.json$', 'ajax.views.get_relations'),
+	url(r'^ajax/productsearch.json$', 'ajax.views.get_products'),
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+	# Uncomment the admin/doc line below to enable admin documentation:
+	# url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+	# Uncomment the next line to enable the admin:
+	# url(r'^admin/', include(admin.site.urls)),
 )
