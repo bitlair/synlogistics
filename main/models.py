@@ -78,7 +78,7 @@ class Account(models.Model):
 	description = models.CharField(max_length=765, blank=True)
 	account_type = models.IntegerField(null=False, blank=False, choices=TYPE_CHOICES)
 	is_readonly = models.BooleanField(null=False, default=False)
-	_balance = models.DecimalField(decimal_places=5,max_digits=25, null=False, blank=False, default=0.0)
+	_balance = models.DecimalField(decimal_places=5, max_digits=25, null=False, blank=False, default=0.0)
 	parent = models.ForeignKey('self', null=True, related_name='children')
 
 	def get_balance(self):
@@ -114,7 +114,7 @@ class Transaction(models.Model):
 	related = models.ManyToManyField('self', blank=False)
 	relation = models.ForeignKey(Relation, null=True)
 	description = models.CharField(max_length=765, blank=True)
-	amount = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	amount = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	invoice_number = models.CharField(max_length=45, null=True, blank=True)
 	purchase_order = models.ForeignKey(PurchaseOrder, null=True)
 	#sale = models.ForeignKey('SaleItem')
@@ -136,7 +136,7 @@ class Location(models.Model):
 
 class Vat(models.Model):
 	name = models.CharField(max_length=30, blank=True)
-	percent = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	percent = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	class Meta:
 		db_table = u'vat'
 
@@ -185,7 +185,7 @@ class Subscription(models.Model):
 	customer = models.ForeignKey(Relation)
 	start_date = models.DateTimeField(null=False, blank=False)
 	end_date = models.DateTimeField(null=True)
-	discount = models.DecimalField(decimal_places=5,max_digits=9, null=False, default=0.0)
+	discount = models.DecimalField(decimal_places=5, max_digits=9, null=False, default=0.0)
 	invoiced_until_date = models.DateTimeField(null=True)
 	intervals_per_invoice = models.IntegerField(null=False, default=0)
 	extra_info = models.TextField(null=False, blank=False)
@@ -201,8 +201,8 @@ class InternalOrder(models.Model):
 	product = models.ForeignKey(Product)
 	product_group = models.ForeignKey(ProductGroup)
 	product_description = models.CharField(max_length=300, blank=True)
-	purchase_price_indication = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
-	selling_price = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	purchase_price_indication = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+	selling_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	supplier_suggestion = models.ForeignKey(Relation, related_name='+')
 	for_customer = models.BooleanField(default=False)
 	customer = models.ForeignKey(Relation)
@@ -214,7 +214,7 @@ class PurchaseOrderItem(models.Model):
 	purchase_order = models.ForeignKey(PurchaseOrder)
 	internal_order = models.ForeignKey(InternalOrder)
 	state = models.IntegerField(null=True, blank=True)
-	purchase_price = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	purchase_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	order_amount = models.IntegerField(null=True, blank=True)
 	units_per_pack = models.IntegerField(null=True, blank=True)
 	subproduct = models.ForeignKey(Subproduct)
@@ -276,7 +276,7 @@ class InventoryItem(models.Model):
 	inventory = models.ForeignKey('Inventory')
 	item = models.ForeignKey(Item)
 	location = models.ForeignKey(Location)
-	value = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	value = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	class Meta:
 		db_table = u'inventory_data'
 
@@ -285,7 +285,7 @@ class ProductSellingprice(models.Model):
 	product = models.ForeignKey(Product)
 	commencing_date = models.DateField(null=True, blank=True)
 	set_date = models.DateField(null=True, blank=True)
-	price = models.DecimalField(decimal_places=5,max_digits=25, null=True, blank=True)
+	price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	class Meta:
 		db_table = u'product_sellingprices'
 
