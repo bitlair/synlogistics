@@ -1,5 +1,8 @@
+"""
+SynLogistics AJAX JSON server interaction for common search boxes and
+generic interactive components.
+"""
 #
-# SynLogistics AJAX JSON server interaction for common search boxes, etc.
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 #   
 # This program is free software; you can redistribute it and/or modify

@@ -1,5 +1,7 @@
+"""
+SynLogistics base login system and layout manager views
+"""
 #
-# SynLogistics base login system and layout manager
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 #   
 # This program is free software; you can redistribute it and/or modify

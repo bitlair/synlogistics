@@ -1,5 +1,7 @@
+"""
+SynLogistics: Invoicing and subscription views.
+"""
 #
-# SynLogistics: Invoicing module
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 #   
 # This program is free software; you can redistribute it and/or modify

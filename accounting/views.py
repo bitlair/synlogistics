@@ -1,5 +1,7 @@
-
-# SynLogistics accounting overview and transaction management
+"""
+SynLogistics accounting overview and transaction management views.
+"""
+#
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) by Rudy Hardeman <zarya@bitlair.nl> 2011
 #   
