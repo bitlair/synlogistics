@@ -37,7 +37,7 @@ def relations(request):
 
 	response = "{relations:["
 	for relation in relations:
-		 response += "{ id:'"+str(relation.id)+"',name:'"+relation.displayname+"'},"
+		response += "{ id:'"+str(relation.id)+"',name:'"+relation.displayname+"'},"
 	response += "]}"
 
 	return HttpResponse(response, mimetype='application/json')
@@ -49,11 +49,13 @@ def accounts(request):
 	if not 'query' in request.GET:
 		return HttpResponse("")
 
-	accounts = Account.objects.filter(Q(number__icontains=request.GET['query'])|Q(name__icontains=request.GET['query'])).order_by('number')
+	accounts = Account.objects.filter(Q(number__icontains=request.GET['query']) \
+			| Q(name__icontains=request.GET['query']))
+	accounts.order_by('number')
 
 	response = "{accounts:["
 	for account in accounts:
-		 response += "{ id:'"+str(account.id)+"',name:'"+account.number+" "+account.name+"'},"
+		response += "{ id:'"+str(account.id)+"',name:'"+account.number+" "+account.name+"'},"
 	response += "]}"
 
 	return HttpResponse(response, mimetype='application/json' )
