@@ -29,10 +29,10 @@ urlpatterns = patterns('',
 	url(r'^$', 'main.views.login'),
 	url(r'^main/layout$', 'main.views.layout'),
 	url(r'^accounting/overview$', 'accounting.views.overview'),
-	url(r'^accounting/transactions$', 'accounting.views.transactions'),
+	url(r'^accounting/transactions$', 'accounting.views.transactions_view'),
 	url(r'^accounting/transactiondata', 'accounting.views.transaction_data'),
 	url(r'^sales/invoicing$', 'invoicing.views.create'),
-	url(r'^sales/subscriptions$', 'invoicing.views.subscriptions'),
+	url(r'^sales/subscriptions$', 'invoicing.views.subscriptions_view'),
 	url(r'^sales/subscriptiondata', 'invoicing.views.subscription_data'),
 	
 	# Main Ajax fields, used in more than one app:

@@ -35,6 +35,8 @@ import settings
 
 @login_required
 def create(request):
+	""" Displays the create invoice template """
+
 	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring':	str(getrandbits(32)),
@@ -44,7 +46,9 @@ def create(request):
 	return render_to_response('invoicing/create.html', ctx)
 
 @login_required
-def subscriptions(request):
+def subscriptions_view(request):
+	""" Displays the invoicing/subscriptions template """
+
 	ctx = RequestContext(request, {
 		'BASE_URL': settings.BASE_URL,
 		'uniquestring': str(getrandbits(32)),
@@ -53,12 +57,11 @@ def subscriptions(request):
 
 	return render_to_response('invoicing/subscriptions.html', ctx)
 
-#
-# This is the AJAX handler for the subscription data in the sales->subscriptions view.
-#
 @login_required
 @db_trans.commit_manually
 def subscription_data(request):
+	""" AJAX handler for the subscription data in the sales->subscription view. """
+
 	# New subscriptions come in through a POST request
 	if request.method == "POST": 
 		response = json.loads(request.raw_post_data, parse_float=Decimal)

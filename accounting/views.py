@@ -24,14 +24,13 @@ from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.utils import simplejson as json
 from main.models import Account, Transaction, Relation
 from django.db import transaction as db_trans
 from decimal import Decimal
 
 import settings
-import pprint
 from datetime import datetime
 
 
@@ -94,7 +93,7 @@ def overview(request):
 	return render_to_response('accounting/overview.html', ctx)
 
 @login_required
-def transactions(request):
+def transactions_view(request):
 	""" Transaction view, basically just serves the template """
 
 	ctx = RequestContext(request, {
