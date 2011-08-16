@@ -27,7 +27,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson as json
 from django.db import transaction as db_trans
-from decimal import *
+from decimal import Decimal
 from datetime import datetime
 
 from main.models import Subscription, Relation, Product
