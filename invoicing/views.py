@@ -21,9 +21,8 @@ SynLogistics: Invoicing and subscription views.
 from random import getrandbits
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
-from django.contrib.auth import authenticate, login as auth_login
 from django.template import RequestContext 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson as json
 from django.db import transaction as db_trans
