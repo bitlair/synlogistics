@@ -26,7 +26,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson as json
 from main.models import Account, Transaction, Relation
 from django.db import transaction as db_trans
-from decimal import *
+from decimal import Decimal
 
 import settings
 import pprint
