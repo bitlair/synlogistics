@@ -16,14 +16,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
 from main.models import Account, Relation, Product
 
 @login_required
-def relations(request):
+def get_relations(request):
 	# Obscure errors ftw \o/
 	if not 'query' in request.GET:
 		return HttpResponse("")
@@ -44,7 +44,7 @@ def relations(request):
 
 
 @login_required
-def accounts(request):
+def get_accounts(request):
 	# Obscure errors ftw \o/
 	if not 'query' in request.GET:
 		return HttpResponse("")
@@ -61,7 +61,7 @@ def accounts(request):
 	return HttpResponse(response, mimetype='application/json' )
 
 @login_required
-def products(request):
+def get_products(request):
 	# Obscure errors ftw \o/
 	if not 'query' in request.GET:
 		return HttpResponse("")
@@ -73,7 +73,7 @@ def products(request):
 
 	response = "{products:["
 	for product in products:
-		 response += "{ id:'"+str(product.id)+"',name:'"+product.name+"'},"
+		response += "{ id:'"+str(product.id)+"',name:'"+product.name+"'},"
 	response += "]}"
 
 	return HttpResponse(response, mimetype='application/json' )
