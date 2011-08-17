@@ -83,9 +83,11 @@ def subscription_data(request):
 			subscription.active = response['active']
 			subscription.save()
 
-			# Make output pretty
+			# Make output parseable
 			response['customer_display'] = subscription.customer.displayname
 			response['product_display'] = subscription.product.name
+			response['startdate'] = str(subscription.start_date)
+			response['enddate'] = str(subscription.end_date)
 			
 			# The decimal can't be serialized by json
 			response['discount'] = str(response['discount'])
@@ -107,17 +109,23 @@ def subscription_data(request):
 			subscription.product = Product.objects.get(pk=int(response['product']))
 			subscription.customer = Relation.objects.get(pk=int(response['customer']))
 			subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
+
 			if response['enddate']:
 				subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
+			else:
+				subscription.end_date = None
+
 			subscription.discount = Decimal(response['discount'])
 			subscription.intervals_per_invoice = response['intervals_per_invoice']
 			subscription.extra_info = response['extra_info']
 			subscription.active = response['active']
 			subscription.save()
 
-			# Make output pretty
+			# Make output parseable
 			response['customer_display'] = subscription.customer.displayname
 			response['product_display'] = subscription.product.name
+			response['startdate'] = str(subscription.start_date)
+			response['enddate'] = str(subscription.end_date)
 			
 			# The decimal can't be serialized by json
 			response['discount'] = str(response['discount'])
