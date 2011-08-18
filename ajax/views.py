@@ -34,9 +34,9 @@ def get_relations(request):
 	relations = Relation.objects.filter(displayname__icontains=request.GET['query'])
 	
 	# TODO Need filter here what type is needed: supplier, customer or both
-	relations.filter(Q(active_customer=1)|Q(active_supplier=1))
+	relations = relations.filter(Q(active_customer=1)|Q(active_supplier=1))
 	
-	relations.order_by('displayname')
+	relations = relations.order_by('displayname')
 
 	response = "{relations:["
 	for relation in relations:
@@ -70,9 +70,9 @@ def get_products(request):
 		return HttpResponse("")
 
 	products = Product.objects.filter(active=1)
-	products.filter(name__icontains=request.GET['query'])
-	products.filter(product_type=03)
-	products.order_by('name')
+	products = products.filter(name__icontains=request.GET['query'])
+	products = products.filter(product_type=03)
+	products = products.order_by('name')
 
 	response = "{products:["
 	for product in products:
