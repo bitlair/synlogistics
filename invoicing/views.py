@@ -86,8 +86,9 @@ def subscription_data(request):
 			# Make output parseable
 			response['customer_display'] = subscription.customer.displayname
 			response['product_display'] = subscription.product.name
-			response['startdate'] = str(subscription.start_date)
-			response['enddate'] = str(subscription.end_date)
+			response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
+			if response['enddate']:
+				response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
 			
 			# The decimal can't be serialized by json
 			response['discount'] = str(response['discount'])
@@ -124,8 +125,9 @@ def subscription_data(request):
 			# Make output parseable
 			response['customer_display'] = subscription.customer.displayname
 			response['product_display'] = subscription.product.name
-			response['startdate'] = str(subscription.start_date)
-			response['enddate'] = str(subscription.end_date)
+			response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
+			if response['enddate']:
+				response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
 			
 			# The decimal can't be serialized by json
 			response['discount'] = str(response['discount'])
@@ -162,8 +164,9 @@ def subscription_data(request):
 						'product_display': subscription.product.name,
 						'customer': subscription.customer.id,
 						'customer_display': subscription.customer.displayname,
-						'startdate': str(subscription.start_date),
-						'enddate': str(subscription.end_date),
+						'startdate': subscription.start_date.strftime("%Y-%m-%d"),
+						'enddate': subscription.end_date.strftime("%Y-%m-%d") 
+						           if subscription.end_date else None,
 						'discount': int(subscription.discount*10000)/10000,
 						'intervals_per_invoice': subscription.intervals_per_invoice,
 						'extra_info': subscription.extra_info,
