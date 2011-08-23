@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.grid.feature.Grouping
  * @extends Ext.grid.feature.Feature
@@ -50,8 +64,7 @@ Ext.define('Ext.grid.feature.Grouping', {
      * @event groupclick
      * @param {Ext.view.Table} view
      * @param {HTMLElement} node
-     * @param {Number} unused
-     * @param {Number} unused
+     * @param {String} group The name of the group
      * @param {Ext.EventObject} e
      */
 
@@ -59,8 +72,7 @@ Ext.define('Ext.grid.feature.Grouping', {
      * @event groupdblclick
      * @param {Ext.view.Table} view
      * @param {HTMLElement} node
-     * @param {Number} unused
-     * @param {Number} unused
+     * @param {String} group The name of the group
      * @param {Ext.EventObject} e
      */
 
@@ -68,8 +80,7 @@ Ext.define('Ext.grid.feature.Grouping', {
      * @event groupcontextmenu
      * @param {Ext.view.Table} view
      * @param {HTMLElement} node
-     * @param {Number} unused
-     * @param {Number} unused
+     * @param {String} group The name of the group
      * @param {Ext.EventObject} e
      */
 
@@ -77,8 +88,7 @@ Ext.define('Ext.grid.feature.Grouping', {
      * @event groupcollapse
      * @param {Ext.view.Table} view
      * @param {HTMLElement} node
-     * @param {Number} unused
-     * @param {Number} unused
+     * @param {String} group The name of the group
      * @param {Ext.EventObject} e
      */
 
@@ -86,8 +96,7 @@ Ext.define('Ext.grid.feature.Grouping', {
      * @event groupexpand
      * @param {Ext.view.Table} view
      * @param {HTMLElement} node
-     * @param {Number} unused
-     * @param {Number} unused
+     * @param {String} group The name of the group
      * @param {Ext.EventObject} e
      */
 
@@ -261,7 +270,7 @@ Ext.define('Ext.grid.feature.Grouping', {
             showGroupsText     = me.showGroupsText,
             enableNoGroups     = me.enableNoGroups,
             groupMenuItemClick = Ext.Function.bind(me.onGroupMenuItemClick, me),
-            groupToggleMenuItemClick = Ext.Function.bind(me.onGroupToggleMenuItemClick, me)
+            groupToggleMenuItemClick = Ext.Function.bind(me.onGroupToggleMenuItemClick, me);
         
         // runs in the scope of headerCt
         return function() {
@@ -504,15 +513,16 @@ Ext.define('Ext.grid.feature.Grouping', {
     // events that are fired on the view. Chose not to return the actual
     // group itself because of its expense and because developers can simply
     // grab the group via store.getGroups(groupName)
-    getFireEventArgs: function(type, view, featureTarget) {
+    getFireEventArgs: function(type, view, featureTarget, e) {
         var returnArray = [type, view, featureTarget],
             groupBd     = Ext.fly(featureTarget.nextSibling, '_grouping'),
             groupBdId   = Ext.getDom(groupBd).id,
             prefix      = view.id + '-gp-',
             groupName   = groupBdId.substr(prefix.length);
         
-        returnArray.push(groupName);
+        returnArray.push(groupName, e);
         
         return returnArray;
     }
 });
+

@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.env.OS
  * Provide useful information about the current operating system environment. Access the global instance stored in Ext.os. Example:
@@ -36,7 +50,7 @@ Ext.define('Ext.env.OS', {
         }
     },
 
-    /*
+    /**
      * A "hybrid" property, can be either accessed as a method call, i.e:
      * <pre><code>
      * if (Ext.os.is('Android')) { ... }
@@ -61,17 +75,18 @@ Ext.define('Ext.env.OS', {
      *
      * @param {String} value The OS name to check
      * @return {Boolean}
+     * @method
      */
     is: Ext.emptyFn,
 
-    /*
+    /**
      * Read-only - the full name of the current operating system
      * Possible values are: iOS, Android, WebOS, BlackBerry, MacOSX, Windows, Linux and Other
      * @type String
      */
     name: null,
 
-    /*
+    /**
      * Read-only, refer to {@link Ext.Version}
      * @type Ext.Version
      */
@@ -130,3 +145,4 @@ Ext.define('Ext.env.OS', {
 Ext.os = new Ext.env.OS();
 
 });
+

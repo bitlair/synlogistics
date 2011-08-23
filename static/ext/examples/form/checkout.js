@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 Ext.require([
     'Ext.form.*',
     'Ext.data.*',
@@ -194,14 +208,18 @@ Ext.onReady(function() {
                             // Animate the opacity on each field. Would be more efficient to wrap them in a container
                             // and animate the opacity on just the single container element, but IE has a bug where
                             // the alpha filter does not get applied on position:relative children.
-                            field.el.animate({opacity: checked ? .3 : 1});
+                            // This must only be applied when it is not IE6, as it has issues with opacity when cleartype
+                            // is enabled
+                            if (!Ext.isIE6) {
+                                field.el.animate({opacity: checked ? .3 : 1});
+                            }
                         });
                     }
                 }, {
                     xtype: 'textfield',
                     fieldLabel: 'Street Address',
                     name: 'billingStreet',
-                    style: 'opacity:.3',
+                    //style: 'opacity:.3',
                     disabled: true,
                     allowBlank: false
                 }, {
@@ -211,14 +229,14 @@ Ext.onReady(function() {
                         xtype: 'textfield',
                         fieldLabel: 'City',
                         name: 'billingCity',
-                        style: 'opacity:.3',
+                        style: (!Ext.isIE6) ? 'opacity:.3' : '',
                         flex: 1,
                         disabled: true,
                         allowBlank: false
                     }, {
                         xtype: 'combobox',
                         name: 'billingState',
-                        style: 'opacity:.3',
+                        style: (!Ext.isIE6) ? 'opacity:.3' : '',
                         fieldLabel: 'State',
                         labelWidth: 50,
                         width: 100,
@@ -235,7 +253,7 @@ Ext.onReady(function() {
                         fieldLabel: 'Postal Code',
                         labelWidth: 80,
                         name: 'billingPostalCode',
-                        style: 'opacity:.3',
+                        style: (!Ext.isIE6) ? 'opacity:.3' : '',
                         width: 160,
                         disabled: true,
                         allowBlank: false,
@@ -347,3 +365,4 @@ Ext.onReady(function() {
     });
 
 });
+

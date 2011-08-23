@@ -1,4 +1,18 @@
 /*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
+/*
  * This is code is also distributed under MIT license for use
  * with jQuery and prototype JavaScript libraries.
  */
@@ -523,7 +537,10 @@ Ext.core.DomQuery = Ext.DomQuery = function(){
         },
 
         /**
-         * Selects a group of elements.
+         * Selects an array of DOM nodes using JavaScript-only implementation.
+         *
+         * Use {@link #select} to take advantage of browsers built-in support for CSS selectors.
+         *
          * @param {String} selector The selector/xpath query (can be a comma separated list of selectors)
          * @param {Node/String} root (optional) The start of the query (defaults to document).
          * @return {Array} An Array of DOM elements which match the selector. If there are
@@ -573,7 +590,23 @@ Ext.core.DomQuery = Ext.DomQuery = function(){
             var docEl = (el ? el.ownerDocument || el : 0).documentElement;
             return docEl ? docEl.nodeName !== "HTML" : false;
         },
-        
+
+        /**
+         * Selects an array of DOM nodes by CSS/XPath selector.
+         *
+         * Uses [document.querySelectorAll][0] if browser supports that, otherwise falls back to
+         * {@link #jsSelect} to do the work.
+         * 
+         * Aliased as {@link Ext#query}.
+         * 
+         * [0]: https://developer.mozilla.org/en/DOM/document.querySelectorAll
+         *
+         * @param {String} path The selector/xpath query
+         * @param {Node} root (optional) The start of the query (defaults to document).
+         * @return {Array} An array of DOM elements (not a NodeList as returned by `querySelectorAll`).
+         * Empty array when no matches.
+         * @method
+         */
         select : document.querySelectorAll ? function(path, root, type) {
             root = root || document;
             if (!Ext.DomQuery.isXml(root)) {
@@ -948,3 +981,4 @@ Then external links could be gathered with the following statement:
  * @method query
  */
 Ext.query = Ext.DomQuery.select;
+

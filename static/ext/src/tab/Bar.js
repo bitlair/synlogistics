@@ -1,10 +1,22 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @author Ed Spencer
  * @class Ext.tab.Bar
  * @extends Ext.panel.Header
  * <p>TabBar is used internally by a {@link Ext.tab.Panel TabPanel} and wouldn't usually need to be created manually.</p>
- *
- * @xtype tabbar
  */
 Ext.define('Ext.tab.Bar', {
     extend: 'Ext.panel.Header',
@@ -63,9 +75,9 @@ Ext.define('Ext.tab.Bar', {
             'change'
         );
 
-        Ext.applyIf(this.renderSelectors, {
-            body : '.' + this.baseCls + '-body',
-            strip: '.' + this.baseCls + '-strip'
+        Ext.applyIf(me.renderSelectors, {
+            body : '.' + me.baseCls + '-body',
+            strip: '.' + me.baseCls + '-strip'
         });
         me.callParent(arguments);
 
@@ -123,7 +135,8 @@ Ext.define('Ext.tab.Bar', {
     onClick: function(e, target) {
         // The target might not be a valid tab el.
         var tab = Ext.getCmp(target.id),
-            tabPanel = this.tabPanel;
+            tabPanel = this.tabPanel,
+            allowActive = true;
 
         target = e.getTarget();
 
@@ -131,9 +144,11 @@ Ext.define('Ext.tab.Bar', {
             if (tab.closable && target === tab.closeEl.dom) {
                 tab.onCloseClick();
             } else {
-                this.setActiveTab(tab);
                 if (tabPanel) {
+                    // TabPanel will card setActiveTab of the TabBar
                     tabPanel.setActiveTab(tab.card);
+                } else {
+                    this.setActiveTab(tab);
                 }
                 tab.focus();
             }
@@ -146,20 +161,32 @@ Ext.define('Ext.tab.Bar', {
      * @param {Ext.Tab} tab The tab to close
      */
     closeTab: function(tab) {
-        var card    = tab.card,
-            tabPanel = this.tabPanel,
+        var me = this,
+            card = tab.card,
+            tabPanel = me.tabPanel,
             nextTab;
+            
+        if (card && card.fireEvent('beforeclose', card) === false) {
+            return false;
+        }
 
-        if (tab.active && this.items.getCount() > 1) {
-            nextTab = tab.next('tab') || this.items.items[0];
-            this.setActiveTab(nextTab);
+        if (tab.active && me.items.getCount() > 1) {
+            nextTab = tab.next('tab') || me.items.items[0];
+            me.setActiveTab(nextTab);
             if (tabPanel) {
                 tabPanel.setActiveTab(nextTab.card);
             }
         }
-        this.remove(tab);
+        /*
+         * force the close event to fire. By the time this function returns,
+         * the tab is already destroyed and all listeners have been purged
+         * so the tab can't fire itself.
+         */
+        tab.fireClose();
+        me.remove(tab);
 
         if (tabPanel && card) {
+            card.fireEvent('close', card);
             tabPanel.remove(card);
         }
         

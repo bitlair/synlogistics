@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.form.field.Number
  * @extends Ext.form.field.Spinner
@@ -85,11 +99,7 @@ and mouse wheel handlers set `{@link #keyNavEnabled keyNavEnabled}:false` and
     });
 
 
- * @constructor
- * Creates a new Number field
- * @param {Object} config Configuration options
  *
- * @xtype numberfield
  * @markdown
  * @docauthor Jason Johnston <jason@sencha.com>
  */
@@ -178,23 +188,25 @@ Ext.define('Ext.form.field.Number', {
         var me = this,
             allowed;
 
-        this.callParent();
+        me.callParent();
 
         me.setMinValue(me.minValue);
         me.setMaxValue(me.maxValue);
 
         // Build regexes for masking and stripping based on the configured options
-        allowed = me.baseChars + '';
-        if (me.allowDecimals) {
-            allowed += me.decimalSeparator;
-        }
-        if (me.minValue < 0) {
-            allowed += '-';
-        }
-        allowed = Ext.String.escapeRegex(allowed);
-        me.maskRe = new RegExp('[' + allowed + ']');
-        if (me.autoStripChars) {
-            me.stripCharsRe = new RegExp('[^' + allowed + ']', 'gi');
+        if (me.disableKeyFilter !== true) {
+            allowed = me.baseChars + '';
+            if (me.allowDecimals) {
+                allowed += me.decimalSeparator;
+            }
+            if (me.minValue < 0) {
+                allowed += '-';
+            }
+            allowed = Ext.String.escapeRegex(allowed);
+            me.maskRe = new RegExp('[' + allowed + ']');
+            if (me.autoStripChars) {
+                me.stripCharsRe = new RegExp('[^' + allowed + ']', 'gi');
+            }
         }
     },
 
@@ -242,7 +254,11 @@ Ext.define('Ext.form.field.Number', {
     },
 
     rawToValue: function(rawValue) {
-        return this.fixPrecision(this.parseValue(rawValue)) || rawValue || null;
+        var value = this.fixPrecision(this.parseValue(rawValue));
+        if (value === null) {
+            value = rawValue || null;
+        }
+        return  value;
     },
 
     valueToRaw: function(value) {
@@ -330,3 +346,4 @@ Ext.define('Ext.form.field.Number', {
         }
     }
 });
+

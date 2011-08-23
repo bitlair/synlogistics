@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @author Ed Spencer
  * @class Ext.data.Errors
@@ -16,8 +30,8 @@ var errors = myModel.validate();
 errors.isValid(); //false
 
 errors.length; //2
-errors.getByField('name');  // [{field: 'name',  error: 'must be present'}]
-errors.getByField('title'); // [{field: 'title', error: 'is too short'}]
+errors.getByField('name');  // [{field: 'name',  message: 'must be present'}]
+errors.getByField('title'); // [{field: 'title', message: 'is too short'}]
 </code></pre>
  */
 Ext.define('Ext.data.Errors', {
@@ -51,3 +65,4 @@ Ext.define('Ext.data.Errors', {
         return errors;
     }
 });
+

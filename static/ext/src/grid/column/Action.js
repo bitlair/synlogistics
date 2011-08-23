@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.grid.column.Action
  * @extends Ext.grid.column.Column
@@ -50,7 +64,6 @@
  *     });
  * <p>The action column can be at any index in the columns array, and a grid can have any number of
  * action columns. </p>
- * @xtype actioncolumn
  */
 Ext.define('Ext.grid.column.Action', {
     extend: 'Ext.grid.column.Column',
@@ -152,7 +165,7 @@ Ext.define('Ext.grid.column.Action', {
 
         // This is a Container. Delete the items config to be reinstated after construction.
         delete cfg.items;
-        this.callParent([cfg]);
+        me.callParent([cfg]);
 
         // Items is an array property of ActionColumns
         me.items = items;
@@ -166,7 +179,7 @@ Ext.define('Ext.grid.column.Action', {
             meta.tdCls += ' ' + Ext.baseCSSPrefix + 'action-col-cell';
             for (i = 0; i < l; i++) {
                 item = items[i];
-                v += '<img alt="' + me.altText + '" src="' + (item.icon || Ext.BLANK_IMAGE_URL) +
+                v += '<img alt="' + (item.altText || me.altText) + '" src="' + (item.icon || Ext.BLANK_IMAGE_URL) +
                     '" class="' + Ext.baseCSSPrefix + 'action-col-icon ' + Ext.baseCSSPrefix + 'action-col-' + String(i) + ' ' +  (item.iconCls || '') + 
                     ' ' + (Ext.isFunction(item.getClass) ? item.getClass.apply(item.scope||me.scope||me, arguments) : (me.iconCls || '')) + '"' +
                     ((item.tooltip) ? ' data-qtip="' + item.tooltip + '"' : '') + ' />';
@@ -188,19 +201,23 @@ Ext.define('Ext.grid.column.Action', {
      * Returns the event handler's status to allow canceling of GridView's bubbling process.
      */
     processEvent : function(type, view, cell, recordIndex, cellIndex, e){
-        var m = e.getTarget().className.match(this.actionIdRe),
+        var me = this,
+            match = e.getTarget().className.match(me.actionIdRe),
             item, fn;
-        if (m && (item = this.items[parseInt(m[1], 10)])) {
-            if (type == 'click') {
-                fn = item.handler;
-                if (fn || this.handler) {
-                    fn.call(item.scope||this.scope||this, view, recordIndex, cellIndex, item, e);
+        if (match) {
+            item = me.items[parseInt(match[1], 10)];
+            if (item) {
+                if (type == 'click') {
+                    fn = item.handler || me.handler;
+                    if (fn) {
+                        fn.call(item.scope || me.scope || me, view, recordIndex, cellIndex, item, e);
+                    }
+                } else if (type == 'mousedown' && item.stopSelection !== false) {
+                    return false;
                 }
-            } else if ((type == 'mousedown') && (item.stopSelection !== false)) {
-                return false;
             }
         }
-        return this.callParent(arguments);
+        return me.callParent(arguments);
     },
 
     cascade: function(fn, scope) {

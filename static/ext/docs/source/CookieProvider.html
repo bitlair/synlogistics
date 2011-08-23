@@ -1,5 +1,22 @@
-<!DOCTYPE html><html><head><title>Sencha Documentation Project</title><link rel="stylesheet" href="../reset.css" type="text/css"><link rel="stylesheet" href="../prettify.css" type="text/css"><link rel="stylesheet" href="../prettify_sa.css" type="text/css"><script type="text/javascript" src="../prettify.js"></script></head><body onload="prettyPrint()"><pre class="prettyprint"><pre><span id='Ext-state.CookieProvider-method-constructor'><span id='Ext-state.CookieProvider-cfg-secure'><span id='Ext-state.CookieProvider-cfg-domain'><span id='Ext-state.CookieProvider-cfg-expires'><span id='Ext-state.CookieProvider-cfg-path'><span id='Ext-state.CookieProvider'>/**
-</span></span></span></span></span></span> * @class Ext.state.CookieProvider
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Ext-state-CookieProvider-cfg-secure'><span id='Ext-state-CookieProvider-cfg-domain'><span id='Ext-state-CookieProvider-cfg-expires'><span id='Ext-state-CookieProvider-cfg-path'><span id='Ext-state-CookieProvider'>/**
+</span></span></span></span></span> * @class Ext.state.CookieProvider
  * @extends Ext.state.Provider
  * A Provider implementation which saves and retrieves state via cookies.
  * The CookieProvider supports the usual cookie options, such as:
@@ -26,13 +43,14 @@
  * all sub-domains if you need to access cookies across different sub-domains (defaults to null which uses the same
  * domain the page is running on including the 'www' like 'www.sencha.com')
  * @cfg {Boolean} secure True if the site is using SSL (defaults to false)
- * @constructor
- * Create a new CookieProvider
- * @param {Object} config The configuration object
  */
 Ext.define('Ext.state.CookieProvider', {
     extend: 'Ext.state.Provider',
 
+<span id='Ext-state-CookieProvider-method-constructor'>    /**
+</span>     * Creates a new CookieProvider.
+     * @param {Object} config (optional) Config object.
+     */
     constructor : function(config){
         var me = this;
         me.path = &quot;/&quot;;
@@ -103,4 +121,6 @@ Ext.define('Ext.state.CookieProvider', {
            ((me.secure == true) ? &quot;; secure&quot; : &quot;&quot;);
     }
 });
-</pre></pre></body></html>
+</pre>
+</body>
+</html>

@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 Ext.Loader.setConfig({enabled: true});
 
 Ext.Loader.setPath('Ext.ux', '../ux/');
@@ -244,13 +258,12 @@ Ext.onReady(function() {
         renderTo: 'grid-example',
         listeners: {
             scope: this,
-            //here we tell the toolbar's droppable plugin that it can accept items from the columns' dragdrop group
-            afterrender: function(grid) {
-                var headerCt = grid.child("headercontainer"),
-                    //the plugin position depends on browser see Ext.grid.header.Container sources
-                    dragProxy = headerCt.plugins[0].dragZone || headerCt.plugins[1].dragZone;
-
-                droppable.addDDGroup(dragProxy.ddGroup);
+            // wait for the first layout to access the headerCt (we only want this once):
+            single: true,
+            // tell the toolbar's droppable plugin that it accepts items from the columns' dragdrop group
+            afterlayout: function(grid) {
+                var headerCt = grid.child("headercontainer");
+                droppable.addDDGroup(headerCt.reorderer.dragZone.ddGroup);
                 doSort();
             }
         }

@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.grid.plugin.CellEditing
  * @extends Ext.grid.plugin.Editing
@@ -16,53 +30,53 @@
  * {@img Ext.grid.plugin.CellEditing/Ext.grid.plugin.CellEditing.png Ext.grid.plugin.CellEditing plugin}
  *
  * ## Example Usage
- *    Ext.create('Ext.data.Store', {
- *        storeId:'simpsonsStore',
- *        fields:['name', 'email', 'phone'],
- *        data:{'items':[
- *            {"name":"Lisa", "email":"lisa@simpsons.com", "phone":"555-111-1224"},
- *            {"name":"Bart", "email":"bart@simpsons.com", "phone":"555--222-1234"},
- *            {"name":"Homer", "email":"home@simpsons.com", "phone":"555-222-1244"},
- *            {"name":"Marge", "email":"marge@simpsons.com", "phone":"555-222-1254"}
- *        ]},
- *        proxy: {
- *            type: 'memory',
- *            reader: {
- *                type: 'json',
- *                root: 'items'
- *            }
- *        }
- *    });
  *
- *    Ext.create('Ext.grid.Panel', {
- *        title: 'Simpsons',
- *        store: Ext.data.StoreManager.lookup('simpsonsStore'),
- *        columns: [
- *            {header: 'Name',  dataIndex: 'name', field: 'textfield'},
- *            {header: 'Email', dataIndex: 'email', flex:1,
- *                editor: {
- *                    xtype:'textfield',
- *                    allowBlank:false
- *                }
- *            },
- *            {header: 'Phone', dataIndex: 'phone'}
- *        ],
- *        selType: 'cellmodel',
- *        plugins: [
- *            Ext.create('Ext.grid.plugin.CellEditing', {
- *                clicksToEdit: 1
- *            })
- *        ],
- *        height: 200,
- *        width: 400,
- *        renderTo: Ext.getBody()
- *    });
- *
+ *     Ext.create('Ext.data.Store', {
+ *         storeId:'simpsonsStore',
+ *         fields:['name', 'email', 'phone'],
+ *         data:{'items':[
+ *             {"name":"Lisa", "email":"lisa@simpsons.com", "phone":"555-111-1224"},
+ *             {"name":"Bart", "email":"bart@simpsons.com", "phone":"555--222-1234"},
+ *             {"name":"Homer", "email":"home@simpsons.com", "phone":"555-222-1244"},
+ *             {"name":"Marge", "email":"marge@simpsons.com", "phone":"555-222-1254"}
+ *         ]},
+ *         proxy: {
+ *             type: 'memory',
+ *             reader: {
+ *                 type: 'json',
+ *                 root: 'items'
+ *             }
+ *         }
+ *     });
+ *     
+ *     Ext.create('Ext.grid.Panel', {
+ *         title: 'Simpsons',
+ *         store: Ext.data.StoreManager.lookup('simpsonsStore'),
+ *         columns: [
+ *             {header: 'Name',  dataIndex: 'name', field: 'textfield'},
+ *             {header: 'Email', dataIndex: 'email', flex:1,
+ *                 editor: {
+ *                     xtype:'textfield',
+ *                     allowBlank:false
+ *                 }
+ *             },
+ *             {header: 'Phone', dataIndex: 'phone'}
+ *         ],
+ *         selType: 'cellmodel',
+ *         plugins: [
+ *             Ext.create('Ext.grid.plugin.CellEditing', {
+ *                 clicksToEdit: 1
+ *             })
+ *         ],
+ *         height: 200,
+ *         width: 400,
+ *         renderTo: Ext.getBody()
+ *     });
  */
 Ext.define('Ext.grid.plugin.CellEditing', {
     alias: 'plugin.cellediting',
     extend: 'Ext.grid.plugin.Editing',
-    requires: ['Ext.grid.CellEditor'],
+    requires: ['Ext.grid.CellEditor', 'Ext.util.DelayedTask'],
 
     constructor: function() {
         /**
@@ -145,6 +159,12 @@ grid.on('validateedit', function(e) {
         this.editors = Ext.create('Ext.util.MixedCollection', false, function(editor) {
             return editor.editorId;
         });
+        this.editTask = Ext.create('Ext.util.DelayedTask');
+    },
+    
+    onReconfigure: function(){
+        this.editors.clear();
+        this.callParent();    
     },
 
     /**
@@ -153,25 +173,32 @@ grid.on('validateedit', function(e) {
      */
     destroy: function() {
         var me = this;
+        me.editTask.cancel();
         me.editors.each(Ext.destroy, Ext);
         me.editors.clear();
         me.callParent(arguments);
+    },
+    
+    onBodyScroll: function() {
+        var ed = this.getActiveEditor();
+        if (ed && ed.field) {
+            if (ed.field.triggerBlur) {
+                ed.field.triggerBlur();
+            } else {
+                ed.field.blur();
+            }
+        }
     },
 
     // private
     // Template method called from base class's initEvents
     initCancelTriggers: function() {
-        var me   = this;
+        var me   = this,
             grid = me.grid,
-            view   = grid.view;
-
-        me.mon(view, {
-            mousewheel: {
-                element: 'el',
-                fn: me.cancelEdit,
-                scope: me
-            }
-        });
+            view = grid.view;
+            
+        view.addElListener('mousewheel', me.cancelEdit, me);
+        me.mon(view, 'bodyscroll', me.onBodyScroll, me);
         me.mon(grid, {
             columnresize: me.cancelEdit,
             columnmove: me.cancelEdit,
@@ -215,13 +242,13 @@ grid.on('validateedit', function(e) {
             me.setActiveColumn(columnHeader);
 
             // Defer, so we have some time between view scroll to sync up the editor
-            Ext.defer(ed.startEdit, 15, ed, [me.getCell(record, columnHeader), value]);
+            me.editTask.delay(15, ed.startEdit, ed, [me.getCell(record, columnHeader), value]);
         } else {
             // BrowserBug: WebKit & IE refuse to focus the element, rather
             // it will focus it and then immediately focus the body. This
             // temporary hack works for Webkit and IE6. IE7 and 8 are still
             // broken
-            me.grid.getView().el.focus((Ext.isWebKit || Ext.isIE) ? 10 : false);
+            me.grid.getView().getEl(columnHeader).focus((Ext.isWebKit || Ext.isIE) ? 10 : false);
         }
     },
 
@@ -258,8 +285,9 @@ grid.on('validateedit', function(e) {
     },
 
     getEditor: function(record, column) {
-        var editors = this.editors,
-            editorId = column.itemId || column.id,
+        var me = this,
+            editors = me.editors,
+            editorId = column.getItemId(),
             editor = editors.getByKey(editorId);
 
         if (editor) {
@@ -277,13 +305,13 @@ grid.on('validateedit', function(e) {
                     field: editor
                 });
             }
-            editor.parentEl = this.grid.getEditorParent();
+            editor.parentEl = me.grid.getEditorParent();
             // editor.parentEl should be set here.
             editor.on({
-                scope: this,
-                specialkey: this.onSpecialKey,
-                complete: this.onEditComplete,
-                canceledit: this.cancelEdit
+                scope: me,
+                specialkey: me.onSpecialKey,
+                complete: me.onEditComplete,
+                canceledit: me.cancelEdit
             });
             editors.add(editor);
             return editor;
@@ -316,18 +344,33 @@ grid.on('validateedit', function(e) {
         var me = this,
             grid = me.grid,
             sm = grid.getSelectionModel(),
-            dataIndex = me.getActiveColumn().dataIndex;
+            activeColumn = me.getActiveColumn(),
+            dataIndex;
 
-        me.setActiveEditor(null);
-        me.setActiveColumn(null);
-        me.setActiveRecord(null);
-        delete sm.wasEditing;
+        if (activeColumn) {
+            dataIndex = activeColumn.dataIndex;
 
-        if (!me.validateEdit()) {
-            return;
+            me.setActiveEditor(null);
+            me.setActiveColumn(null);
+            me.setActiveRecord(null);
+            delete sm.wasEditing;
+    
+            if (!me.validateEdit()) {
+                return;
+            }
+            // Only update the record if the new value is different than the
+            // startValue, when the view refreshes its el will gain focus
+            if (value !== startValue) {
+                me.context.record.set(dataIndex, value);
+            // Restore focus back to the view's element.
+            } else {
+                grid.getView().getEl(activeColumn).focus();
+            }
+            me.context.value = value;
+            me.fireEvent('edit', me, me.context);
+            
+
         }
-        me.context.record.set(dataIndex, value);
-        me.fireEvent('edit', me, me.context);
     },
 
     /**
@@ -336,7 +379,7 @@ grid.on('validateedit', function(e) {
     cancelEdit: function() {
         var me = this,
             activeEd = me.getActiveEditor(),
-            viewEl = me.grid.getView().el;
+            viewEl = me.grid.getView().getEl(me.getActiveColumn());
 
         me.setActiveEditor(null);
         me.setActiveColumn(null);

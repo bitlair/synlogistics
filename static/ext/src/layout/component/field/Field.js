@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.layout.component.field.Field
  * @extends Ext.layout.component.Component
@@ -54,6 +68,7 @@ Ext.define('Ext.layout.component.field.Field', {
             autoHeight: autoHeight,
             width: autoWidth ? owner.getBodyNaturalWidth() : width, //always give a pixel width
             height: height,
+            setOuterWidth: false, //whether the outer el width should be set to the calculated width
 
             // insets for the bodyEl from each side of the component layout area
             insets: {
@@ -91,9 +106,9 @@ Ext.define('Ext.layout.component.field.Field', {
         // perform sizing of the elements based on the final dimensions and insets
         if (autoWidth && autoHeight) {
             // Don't use setTargetSize if auto-sized, so the calculated size is not reused next time
-            me.setElementSize(owner.el, info.width, info.height);
+            me.setElementSize(owner.el, (info.setOuterWidth ? info.width : undef), info.height);
         } else {
-            me.setTargetSize(info.width, info.height);
+            me.setTargetSize((!autoWidth || info.setOuterWidth ? info.width : undef), info.height);
         }
         me.sizeBody(info);
 
@@ -131,7 +146,7 @@ Ext.define('Ext.layout.component.field.Field', {
 
     /**
      * Return the set of strategy functions from the {@link #labelStrategies labelStrategies collection}
-     * that is appropriate for the field's {@link Ext.form.field.Field#labelAlign labelAlign} config.
+     * that is appropriate for the field's {@link Ext.form.Labelable#labelAlign labelAlign} config.
      */
     getLabelStrategy: function() {
         var me = this,
@@ -142,7 +157,7 @@ Ext.define('Ext.layout.component.field.Field', {
 
     /**
      * Return the set of strategy functions from the {@link #errorStrategies errorStrategies collection}
-     * that is appropriate for the field's {@link Ext.form.field.Field#msgTarget msgTarget} config.
+     * that is appropriate for the field's {@link Ext.form.Labelable#msgTarget msgTarget} config.
      */
     getErrorStrategy: function() {
         var me = this,
@@ -158,7 +173,7 @@ Ext.define('Ext.layout.component.field.Field', {
 
     /**
      * Collection of named strategies for laying out and adjusting labels to accommodate error messages.
-     * An appropriate one will be chosen based on the owner field's {@link Ext.form.field.Field#labelAlign} config.
+     * An appropriate one will be chosen based on the owner field's {@link Ext.form.Labelable#labelAlign} config.
      */
     labelStrategies: (function() {
         var applyIf = Ext.applyIf,
@@ -183,6 +198,8 @@ Ext.define('Ext.layout.component.field.Field', {
                     if (info.autoWidth) {
                         info.width += (!owner.labelEl ? 0 : owner.labelWidth + owner.labelPad);
                     }
+                    // Must set outer width to prevent field from wrapping below floated label
+                    info.setOuterWidth = true;
                 },
                 adjustHorizInsets: function(owner, info) {
                     if (owner.labelEl) {
@@ -236,7 +253,7 @@ Ext.define('Ext.layout.component.field.Field', {
 
     /**
      * Collection of named strategies for laying out and adjusting insets to accommodate error messages.
-     * An appropriate one will be chosen based on the owner field's {@link Ext.form.field.Field#msgTarget} config.
+     * An appropriate one will be chosen based on the owner field's {@link Ext.form.Labelable#msgTarget} config.
      */
     errorStrategies: (function() {
         function setDisplayed(el, displayed) {
@@ -387,3 +404,4 @@ Ext.define('Ext.layout.component.field.Field', {
     }
 
 });
+

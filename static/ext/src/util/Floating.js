@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.util.Floating
  * A mixin to add floating capability to a Component
@@ -77,8 +91,10 @@ Ext.define('Ext.util.Floating', {
     },
 
     onFloatParentHide: function() {
-        this.showOnParentShow = this.isVisible();
-        this.hide();
+        if (this.hideOnParentHide !== false) {
+            this.showOnParentShow = this.isVisible();
+            this.hide();
+        }
     },
 
     onFloatParentShow: function() {
@@ -139,23 +155,32 @@ Ext.define('Ext.util.Floating', {
      */
     doConstrain: function(constrainTo) {
         var me = this,
-            constrainEl,
-            vector,
+            vector = me.getConstrainVector(constrainTo),
             xy;
 
+        if (vector) {
+            xy = me.getPosition();
+            xy[0] += vector[0];
+            xy[1] += vector[1];
+            me.setPosition(xy);
+        }
+    },
+
+
+    /**
+     * Gets the x/y offsets to constrain this float
+     * @private
+     * @param {Mixed} constrainTo Optional. The Element or {@link Ext.util.Region Region} into which this Component is to be constrained.
+     * @return {Array} The x/y constraints
+     */
+    getConstrainVector: function(constrainTo){
+        var me = this,
+            el;
+
         if (me.constrain || me.constrainHeader) {
-            if (me.constrainHeader) {
-                constrainEl = me.header.el;
-            } else {
-                constrainEl = me.el;
-            }
-            vector = constrainEl.getConstrainVector(constrainTo || (me.floatParent && me.floatParent.getTargetEl()) || me.container);
-            if (vector) {
-                xy = me.getPosition();
-                xy[0] += vector[0];
-                xy[1] += vector[1];
-                me.setPosition(xy);
-            }
+            el = me.constrainHeader ? me.header.el : me.el;
+            constrainTo = constrainTo || (me.floatParent && me.floatParent.getTargetEl()) || me.container;
+            return el.getConstrainVector(constrainTo);
         }
     },
 

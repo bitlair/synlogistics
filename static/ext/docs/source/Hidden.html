@@ -1,5 +1,22 @@
-<!DOCTYPE html><html><head><title>Sencha Documentation Project</title><link rel="stylesheet" href="../reset.css" type="text/css"><link rel="stylesheet" href="../prettify.css" type="text/css"><link rel="stylesheet" href="../prettify_sa.css" type="text/css"><script type="text/javascript" src="../prettify.js"></script></head><body onload="prettyPrint()"><pre class="prettyprint"><pre><span id='Ext-form.field.Hidden-method-constructor'><span id='Ext-form.field.Hidden'>/**
-</span></span> * @class Ext.form.field.Hidden
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Ext-form-field-Hidden'>/**
+</span> * @class Ext.form.field.Hidden
  * @extends Ext.form.field.Base
  * &lt;p&gt;A basic hidden field for storing hidden values in forms that need to be passed in the form submit.&lt;/p&gt;
  * &lt;p&gt;This creates an actual input element with type=&quot;submit&quot; in the DOM. While its label is
@@ -36,11 +53,6 @@
  * &lt;p&gt;Submitting the above form will result in three values sent to the server:
  * &lt;code&gt;text_field=value+from+text+field&amp;hidden_field_1=value+from+hidden+field&amp;&lt;br&gt;hidden_field_2=value+from+submit+call&lt;/code&gt;&lt;/p&gt;
  *
- * @constructor
- * Create a new Hidden field.
- * @param {Object} config Configuration options
- * 
- * @xtype hiddenfield
  */
 Ext.define('Ext.form.field.Hidden', {
     extend:'Ext.form.field.Base',
@@ -66,4 +78,6 @@ Ext.define('Ext.form.field.Hidden', {
     markInvalid : Ext.emptyFn,
     clearInvalid : Ext.emptyFn
 });
-</pre></pre></body></html>
+</pre>
+</body>
+</html>

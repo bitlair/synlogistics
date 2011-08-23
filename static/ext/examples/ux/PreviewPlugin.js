@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.ux.PreviewPlugin
  * @extends Ext.AbstractPlugin
@@ -34,22 +48,26 @@ Ext.define('Ext.ux.PreviewPlugin', {
         this.callParent(arguments);
         var bodyField   = this.bodyField,
             hideBodyCls = this.hideBodyCls,
-            section     = this.getCmp();
+            section     = this.getCmp(),
+            features = [{
+                ftype: 'rowbody',
+                getAdditionalData: function(data, idx, record, orig, view) {
+                    var o = Ext.grid.feature.RowBody.prototype.getAdditionalData.apply(this, arguments);
+                    Ext.apply(o, {
+                        rowBody: data[bodyField],
+                        rowBodyCls: section.previewExpanded ? '' : hideBodyCls
+                    });
+                    return o;
+                }
+            },{
+                ftype: 'rowwrap'
+            }];
         
         section.previewExpanded = this.previewExpanded;
-        section.features = [{
-            ftype: 'rowbody',
-            getAdditionalData: function(data, idx, record, orig, view) {
-                var o = Ext.grid.feature.RowBody.prototype.getAdditionalData.apply(this, arguments);
-                Ext.apply(o, {
-                    rowBody: data[bodyField],
-                    rowBodyCls: section.previewExpanded ? '' : hideBodyCls
-                });
-                return o;
-            }
-        },{
-            ftype: 'rowwrap'
-        }];
+        if (!section.features) {
+            section.features = [];
+        }
+        section.features = features.concat(section.features);
     },
     
     /**

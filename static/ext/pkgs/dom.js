@@ -1,8 +1,16 @@
 /*
-Ext JS - JavaScript Library
-Copyright (c) 2006-2011, Sencha Inc.
-All rights reserved.
-licensing@sencha.com
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
 */
 /**
  * @class Ext.core.DomHelper
@@ -23,6 +31,11 @@ licensing@sencha.com
  * for a DOM node, depending on whether DomHelper is using fragments or DOM.</div></li>
  * <li><b><tt>html</tt></b> : <div class="sub-desc">The innerHTML for the element</div></li>
  * </ul></div></p>
+ * <p><b>NOTE:</b> For other arbitrary attributes, the value will currently <b>not</b> be automatically
+ * HTML-escaped prior to building the element's HTML string. This means that if your attribute value
+ * contains special characters that would not normally be allowed in a double-quoted attribute value,
+ * you <b>must</b> manually HTML-encode it beforehand (see {@link Ext.String#htmlEncode}) or risk
+ * malformed HTML being created. This behavior may change in a future release.</p>
  *
  * <p><b><u>Insertion methods</u></b></p>
  * <p>Commonly used insertion methods:
@@ -520,6 +533,7 @@ Ext.core.DomHelper = function(){
          * Creates new DOM element(s) without inserting them to the document.
          * @param {Object/String} o The DOM object spec (and children) or raw HTML blob
          * @return {HTMLElement} The new uninserted node
+         * @method
          */
         createDom: createDom,
         
@@ -1064,7 +1078,10 @@ Ext.core.DomQuery = Ext.DomQuery = function(){
         },
 
         /**
-         * Selects a group of elements.
+         * Selects an array of DOM nodes using JavaScript-only implementation.
+         *
+         * Use {@link #select} to take advantage of browsers built-in support for CSS selectors.
+         *
          * @param {String} selector The selector/xpath query (can be a comma separated list of selectors)
          * @param {Node/String} root (optional) The start of the query (defaults to document).
          * @return {Array} An Array of DOM elements which match the selector. If there are
@@ -1114,7 +1131,23 @@ Ext.core.DomQuery = Ext.DomQuery = function(){
             var docEl = (el ? el.ownerDocument || el : 0).documentElement;
             return docEl ? docEl.nodeName !== "HTML" : false;
         },
-        
+
+        /**
+         * Selects an array of DOM nodes by CSS/XPath selector.
+         *
+         * Uses [document.querySelectorAll][0] if browser supports that, otherwise falls back to
+         * {@link #jsSelect} to do the work.
+         * 
+         * Aliased as {@link Ext#query}.
+         * 
+         * [0]: https://developer.mozilla.org/en/DOM/document.querySelectorAll
+         *
+         * @param {String} path The selector/xpath query
+         * @param {Node} root (optional) The start of the query (defaults to document).
+         * @return {Array} An array of DOM elements (not a NodeList as returned by `querySelectorAll`).
+         * Empty array when no matches.
+         * @method
+         */
         select : document.querySelectorAll ? function(path, root, type) {
             root = root || document;
             if (!Ext.DomQuery.isXml(root)) {
@@ -2178,6 +2211,7 @@ el.un('click', this.handlerFn);
          * @param {String} name The attribute name
          * @param {String} namespace (optional) The namespace in which to look for the attribute
          * @return {String} The attribute value
+         * @method
          */
         getAttribute: (Ext.isIE && !(Ext.isIE9 && document.documentMode === 9)) ?
         function(name, ns) {
@@ -2932,11 +2966,11 @@ Ext.core.Element.addMethods({
                 cls = [],
                 space = ((me.dom.className.replace(trimRe, '') == '') ? "" : " "),
                 i, len, v;
-            if (!Ext.isDefined(className)) {
+            if (className === undefined) {
                 return me;
             }
             // Separate case is for speed
-            if (!Ext.isArray(className)) {
+            if (Object.prototype.toString.call(className) !== '[object Array]') {
                 if (typeof className === 'string') {
                     className = className.replace(trimRe, '').split(spacesRe);
                     if (className.length === 1) {
@@ -2970,10 +3004,10 @@ Ext.core.Element.addMethods({
         removeCls : function(className){
             var me = this,
                 i, idx, len, cls, elClasses;
-            if (!Ext.isDefined(className)) {
+            if (className === undefined) {
                 return me;
             }
-            if (!Ext.isArray(className)){
+            if (Object.prototype.toString.call(className) !== '[object Array]') {
                 className = className.replace(trimRe, '').split(spacesRe);
             }
             if (me.dom && me.dom.className) {
@@ -2984,7 +3018,7 @@ Ext.core.Element.addMethods({
                         cls = cls.replace(trimRe, '');
                         idx = Ext.Array.indexOf(elClasses, cls);
                         if (idx != -1) {
-                            elClasses.splice(idx, 1);
+                            Ext.Array.erase(elClasses, idx, 1);
                         }
                     }
                 }
@@ -3015,6 +3049,7 @@ Ext.core.Element.addMethods({
          * Toggles the specified CSS class on this element (removes it if it already exists, otherwise adds it).
          * @param {String} className The CSS class to toggle
          * @return {Ext.core.Element} this
+         * @method
          */
         toggleCls : Ext.supports.ClassList ?
             function(className) {
@@ -3029,6 +3064,7 @@ Ext.core.Element.addMethods({
          * Checks if the specified CSS class exists on this element's DOM node.
          * @param {String} className The CSS class to check for
          * @return {Boolean} True if the class exists, else false
+         * @method
          */
         hasCls : Ext.supports.ClassList ?
             function(className) {
@@ -3067,12 +3103,13 @@ Ext.core.Element.addMethods({
          * Normalizes currentStyle and computedStyle.
          * @param {String} property The style property whose value is returned.
          * @return {String} The current value of the style property for this element.
+         * @method
          */
         getStyle : function(){
             return view && view.getComputedStyle ?
                 function(prop){
                     var el = this.dom,
-                        v, cs, out, display;
+                        v, cs, out, display, cleaner;
 
                     if(el == document){
                         return null;
@@ -3084,10 +3121,12 @@ Ext.core.Element.addMethods({
                     // Ignore cases when the margin is correctly reported as 0, the bug only shows
                     // numbers larger.
                     if(prop == 'marginRight' && out != '0px' && !supports.RightMargin){
+                        cleaner = Ext.core.Element.getRightMarginFixCleaner(el);
                         display = this.getStyle('display');
                         el.style.display = 'inline-block';
                         out = view.getComputedStyle(el, '').marginRight;
                         el.style.display = display;
+                        cleaner();
                     }
                     
                     if(prop == 'backgroundColor' && out == 'rgba(0, 0, 0, 0)' && !supports.TransparentColor){
@@ -3161,8 +3200,7 @@ Ext.core.Element.addMethods({
             if (!me.dom) {
                 return me;
             }
-
-            if (!Ext.isObject(prop)) {
+            if (typeof prop === 'string') {
                 tmp = {};
                 tmp[prop] = value;
                 prop = tmp;
@@ -3632,7 +3670,8 @@ Ext.fly('elId').setHeight(150, {
          */
         setSize : function(width, height, animate){
             var me = this;
-            if (Ext.isObject(width)){ // in case of object from getSize()
+            if (Ext.isObject(width)) { // in case of object from getSize()
+                animate = height;
                 height = width.height;
                 width = width.width;
             }
@@ -3643,7 +3682,7 @@ Ext.fly('elId').setHeight(150, {
                 me.dom.style.height = me.addUnits(height);
             }
             else {
-                if (!Ext.isObject(animate)) {
+                if (animate === true) {
                     animate = {};
                 }
                 me.animate(Ext.applyIf({
@@ -5022,7 +5061,7 @@ el.fadeOut({
    /**
     * @deprecated 4.0
     * Animates the transition of an element's dimensions from a starting height/width
-    * to an ending height/width.  This method is a convenience implementation of {@link shift}.
+    * to an ending height/width.  This method is a convenience implementation of {@link #shift}.
     * Usage:
 <pre><code>
 // change height and width to 100x100 pixels
@@ -5529,7 +5568,7 @@ Ext.CompositeElementLite.prototype = {
                 d.parentNode.insertBefore(replacement, d);
                 Ext.removeNode(d);
             }
-            this.elements.splice(index, 1, replacement);
+            Ext.Array.splice(this.elements, index, 1, replacement);
         }
         return this;
     },
@@ -5646,7 +5685,7 @@ Ext.select = Ext.core.Element.select;
  * 
  * @constructor The parameters to this constructor serve as defaults and are not required.
  * @param {Function} fn (optional) The default function to call.
- * @param {Object} scope The default scope (The <code><b>this</b></code> reference) in which the
+ * @param {Object} scope (optional) The default scope (The <code><b>this</b></code> reference) in which the
  * function is called. If not specified, <code>this</code> will refer to the browser window.
  * @param {Array} args (optional) The default Array of arguments.
  */
@@ -5827,7 +5866,7 @@ Ext.require('Ext.util.DelayedTask', function() {
                     }
 
                     // remove this listener from the listeners array
-                    me.listeners.splice(index, 1);
+                    Ext.Array.erase(me.listeners, index, 1);
                     return true;
                 }
 
@@ -6187,7 +6226,7 @@ Ext.EventManager = {
     */
     addListener: function(element, eventName, fn, scope, options){
         // Check if we've been passed a "config style" event.
-        if (Ext.isObject(eventName)) {
+        if (typeof eventName !== 'string') {
             this.prepareListenerConfig(element, eventName);
             return;
         }
@@ -6253,7 +6292,7 @@ Ext.EventManager = {
     */
     removeListener : function(element, eventName, fn, scope) {
         // handle our listener config object syntax
-        if (Ext.isObject(eventName)) {
+        if (typeof eventName !== 'string') {
             this.prepareListenerConfig(element, eventName, true);
             return;
         }
@@ -6297,7 +6336,7 @@ Ext.EventManager = {
                 }
 
                 // remove listener from cache
-                cache.splice(i, 1);
+                Ext.Array.erase(cache, i, 1);
             }
         }
     },
@@ -6354,74 +6393,79 @@ Ext.EventManager = {
      * @param {String} ename The event name
      * @param {Function} fn The function to execute
      * @param {Object} scope The scope to execute callback in
-     * @param {Object} o The options
+     * @param {Object} options The options
+     * @return {Function} the wrapper function
      */
     createListenerWrap : function(dom, ename, fn, scope, options) {
-        options = !Ext.isObject(options) ? {} : options;
+        options = options || {};
 
-        var f = ['if(!Ext) {return;}'],
-            gen;
-
-        if(options.buffer || options.delay || options.freezeEvent) {
-            f.push('e = new Ext.EventObjectImpl(e, ' + (options.freezeEvent ? 'true' : 'false' ) + ');');
-        } else {
-            f.push('e = Ext.EventObject.setEvent(e);');
-        }
-
-        if (options.delegate) {
-            f.push('var t = e.getTarget("' + options.delegate + '", this);');
-            f.push('if(!t) {return;}');
-        } else {
-            f.push('var t = e.target;');
-        }
-
-        if (options.target) {
-            f.push('if(e.target !== options.target) {return;}');
-        }
-
-        if(options.stopEvent) {
-            f.push('e.stopEvent();');
-        } else {
-            if(options.preventDefault) {
-                f.push('e.preventDefault();');
-            }
-            if(options.stopPropagation) {
-                f.push('e.stopPropagation();');
-            }
-        }
-
-        if(options.normalized === false) {
-            f.push('e = e.browserEvent;');
-        }
-
-        if(options.buffer) {
-            f.push('(wrap.task && clearTimeout(wrap.task));');
-            f.push('wrap.task = setTimeout(function(){');
-        }
-
-        if(options.delay) {
-            f.push('wrap.tasks = wrap.tasks || [];');
-            f.push('wrap.tasks.push(setTimeout(function(){');
-        }
-
-        // finally call the actual handler fn
-        f.push('fn.call(scope || dom, e, t, options);');
-
-        if(options.single) {
-            f.push('Ext.EventManager.removeListener(dom, ename, fn, scope);');
-        }
-
-        if(options.delay) {
-            f.push('}, ' + options.delay + '));');
-        }
-
-        if(options.buffer) {
-            f.push('}, ' + options.buffer + ');');
-        }
-
-        gen = Ext.functionFactory('e', 'options', 'fn', 'scope', 'ename', 'dom', 'wrap', 'args', f.join('\n'));
+        var f, gen;
 
         return function wrap(e, args) {
+            // Compile the implementation upon first firing
+            if (!gen) {
+                f = ['if(!Ext) {return;}'];
+
+                if(options.buffer || options.delay || options.freezeEvent) {
+                    f.push('e = new Ext.EventObjectImpl(e, ' + (options.freezeEvent ? 'true' : 'false' ) + ');');
+                } else {
+                    f.push('e = Ext.EventObject.setEvent(e);');
+                }
+
+                if (options.delegate) {
+                    f.push('var t = e.getTarget("' + options.delegate + '", this);');
+                    f.push('if(!t) {return;}');
+                } else {
+                    f.push('var t = e.target;');
+                }
+
+                if (options.target) {
+                    f.push('if(e.target !== options.target) {return;}');
+                }
+
+                if(options.stopEvent) {
+                    f.push('e.stopEvent();');
+                } else {
+                    if(options.preventDefault) {
+                        f.push('e.preventDefault();');
+                    }
+                    if(options.stopPropagation) {
+                        f.push('e.stopPropagation();');
+                    }
+                }
+
+                if(options.normalized === false) {
+                    f.push('e = e.browserEvent;');
+                }
+
+                if(options.buffer) {
+                    f.push('(wrap.task && clearTimeout(wrap.task));');
+                    f.push('wrap.task = setTimeout(function(){');
+                }
+
+                if(options.delay) {
+                    f.push('wrap.tasks = wrap.tasks || [];');
+                    f.push('wrap.tasks.push(setTimeout(function(){');
+                }
+
+                // finally call the actual handler fn
+                f.push('fn.call(scope || dom, e, t, options);');
+
+                if(options.single) {
+                    f.push('Ext.EventManager.removeListener(dom, ename, fn, scope);');
+                }
+
+                if(options.delay) {
+                    f.push('}, ' + options.delay + '));');
+                }
+
+                if(options.buffer) {
+                    f.push('}, ' + options.buffer + ');');
+                }
+
+                gen = Ext.functionFactory('e', 'options', 'fn', 'scope', 'ename', 'dom', 'wrap', 'args', f.join('\n'));
+            }
+
             gen.call(dom, e, options, fn, scope, ename, dom, wrap, args);
         };
     },
@@ -6434,6 +6478,10 @@ Ext.EventManager = {
      * @return {Array} The events for the element
      */
     getEventListenerCache : function(element, eventName) {
+        if (!element) {
+            return [];
+        }
+        
         var eventCache = this.getElementEventCache(element);
         return eventCache[eventName] || (eventCache[eventName] = []);
     },
@@ -6445,6 +6493,9 @@ Ext.EventManager = {
      * @return {Object} The event cache for the object
      */
     getElementEventCache : function(element) {
+        if (!element) {
+            return {};
+        }
         var elementCache = Ext.cache[this.getId(element)];
         return elementCache.events || (elementCache.events = {});
     },
@@ -6737,7 +6788,7 @@ Ext.EventManager.un = Ext.EventManager.removeListener;
         // find the body element
         var bd = document.body || document.getElementsByTagName('body')[0],
             baseCSSPrefix = Ext.baseCSSPrefix,
-            cls = [],
+            cls = [baseCSSPrefix + 'body'],
             htmlCls = [],
             html;
 
@@ -7041,6 +7092,54 @@ Ext.define('Ext.EventObjectImpl', {
     F11: 122,
     /** Key constant @type Number */
     F12: 123,
+    /**
+     * The mouse wheel delta scaling factor. This value depends on browser version and OS and
+     * attempts to produce a similar scrolling experience across all platforms and browsers.
+     * 
+     * To change this value:
+     * 
+     *      Ext.EventObjectImpl.prototype.WHEEL_SCALE = 72;
+     * 
+     * @type Number
+     * @markdown
+     */
+    WHEEL_SCALE: (function () {
+        var scale;
+
+        if (Ext.isGecko) {
+            // Firefox uses 3 on all platforms
+            scale = 3;
+        } else if (Ext.isMac) {
+            // Continuous scrolling devices have momentum and produce much more scroll than
+            // discrete devices on the same OS and browser. To make things exciting, Safari
+            // (and not Chrome) changed from small values to 120 (like IE).
+
+            if (Ext.isSafari && Ext.webKitVersion >= 532.0) {
+                // Safari changed the scrolling factor to match IE (for details see
+                // https://bugs.webkit.org/show_bug.cgi?id=24368). The WebKit version where this
+                // change was introduced was 532.0
+                //      Detailed discussion:
+                //      https://bugs.webkit.org/show_bug.cgi?id=29601
+                //      http://trac.webkit.org/browser/trunk/WebKit/chromium/src/mac/WebInputEventFactory.mm#L1063
+                scale = 120;
+            } else {
+                // MS optical wheel mouse produces multiples of 12 which is close enough
+                // to help tame the speed of the continuous mice...
+                scale = 12;
+            }
+
+            // Momentum scrolling produces very fast scrolling, so increase the scale factor
+            // to help produce similar results cross platform. This could be even larger and
+            // it would help those mice, but other mice would become almost unusable as a
+            // result (since we cannot tell which device type is in use).
+            scale *= 3;
+        } else {
+            // IE, Opera and other Windows browsers use 120.
+            scale = 120;
+        }
+
+        return scale;
+    })(),
 
     /**
      * Simple click regex
@@ -7255,19 +7354,68 @@ Ext.define('Ext.EventObjectImpl', {
     },
 
     /**
-     * Normalizes mouse wheel delta across browsers
-     * @return {Number} The delta
+     * Correctly scales a given wheel delta.
+     * @param {Number} delta The delta value.
+     */
+    correctWheelDelta : function (delta) {
+        var scale = this.WHEEL_SCALE,
+            ret = Math.round(delta / scale + 0.5);
+
+        if (!ret && delta) {
+            ret = (delta < 0) ? -1 : 1; // don't allow non-zero deltas to go to zero!
+        }
+
+        return ret;
+    },
+
+    /**
+     * Returns the mouse wheel deltas for this event.
+     * @return {Object} An object with "x" and "y" properties holding the mouse wheel deltas.
+     */
+    getWheelDeltas : function () {
+        var me = this,
+            event = me.browserEvent,
+            dx = 0, dy = 0; // the deltas
+
+        if (Ext.isDefined(event.wheelDeltaX)) { // WebKit has both dimensions
+            dx = event.wheelDeltaX;
+            dy = event.wheelDeltaY;
+        } else if (event.wheelDelta) { // old WebKit and IE
+            dy = event.wheelDelta;
+        } else if (event.detail) { // Gecko
+            dy = -event.detail; // gecko is backwards
+
+            // Gecko sometimes returns really big values if the user changes settings to
+            // scroll a whole page per scroll
+            if (dy > 100) {
+                dy = 3;
+            } else if (dy < -100) {
+                dy = -3;
+            }
+
+            // Firefox 3.1 adds an axis field to the event to indicate direction of
+            // scroll.  See https://developer.mozilla.org/en/Gecko-Specific_DOM_Events
+            if (Ext.isDefined(event.axis) && event.axis === event.HORIZONTAL_AXIS) {
+                dx = dy;
+                dy = 0;
+            }
+        }
+
+        return {
+            x: me.correctWheelDelta(dx),
+            y: me.correctWheelDelta(dy)
+        };
+    },
+
+    /**
+     * Normalizes mouse wheel y-delta across browsers. To get x-delta information, use
+     * {@link #getWheelDeltas} instead.
+     * @return {Number} The mouse wheel y-delta
      */
     getWheelDelta : function(){
-        var event = this.browserEvent,
-            delta = 0;
+        var deltas = this.getWheelDeltas();
 
-        if (event.wheelDelta) { /* IE/Opera. */
-            delta = event.wheelDelta / 120;
-        } else if (event.detail){ /* Mozilla case. */
-            delta = -event.detail / 3;
-        }
-        return delta;
+        return deltas.y;
     },
 
     /**
@@ -7457,7 +7605,7 @@ Ext.getBody().on('click', function(e,t){
 
                     return target;
                 }
-            }
+            };
         } else if (document.createEventObject) { // else if (IE)
             var crazyIEButtons = { 0: 1, 1: 4, 2: 2 };
 
@@ -7612,6 +7760,7 @@ Ext.EventObject = new Ext.EventObjectImpl();
  */
 (function(){
     var doc = document,
+        activeElement = null,
         isCSS1 = doc.compatMode == "CSS1Compat",
         ELEMENT = Ext.core.Element,
         fly = function(el){
@@ -7621,6 +7770,28 @@ Ext.EventObject = new Ext.EventObjectImpl();
             _fly.dom = el;
             return _fly;
         }, _fly;
+
+    // If the browser does not support document.activeElement we need some assistance.
+    // This covers old Safari 3.2 (4.0 added activeElement along with just about all
+    // other browsers). We need this support to handle issues with old Safari.
+    if (!('activeElement' in doc) && doc.addEventListener) {
+        doc.addEventListener('focus',
+            function (ev) {
+                if (ev && ev.target) {
+                    activeElement = (ev.target == doc) ? null : ev.target;
+                }
+            }, true);
+    }
+
+    /*
+     * Helper function to create the function that will restore the selection.
+     */
+    function makeSelectionRestoreFn (activeEl, start, end) {
+        return function () {
+            activeEl.selectionStart = start;
+            activeEl.selectionEnd = end;
+        };
+    }
 
     Ext.apply(ELEMENT, {
         isAncestor : function(p, c) {
@@ -7640,6 +7811,59 @@ Ext.EventObject = new Ext.EventObjectImpl();
                 }
             }
             return ret;
+        },
+
+        /**
+         * Returns the active element in the DOM. If the browser supports activeElement
+         * on the document, this is returned. If not, the focus is tracked and the active
+         * element is maintained internally.
+         * @return {HTMLElement} The active (focused) element in the document.
+         */
+        getActiveElement: function () {
+            return doc.activeElement || activeElement;
+        },
+
+        /**
+         * Creates a function to call to clean up problems with the work-around for the
+         * WebKit RightMargin bug. The work-around is to add "display: 'inline-block'" to
+         * the element before calling getComputedStyle and then to restore its original
+         * display value. The problem with this is that it corrupts the selection of an
+         * INPUT or TEXTAREA element (as in the "I-beam" goes away but ths focus remains).
+         * To cleanup after this, we need to capture the selection of any such element and
+         * then restore it after we have restored the display style.
+         *
+         * @param target {Element} The top-most element being adjusted.
+         * @private
+         */
+        getRightMarginFixCleaner: function (target) {
+            var supports = Ext.supports,
+                hasInputBug = supports.DisplayChangeInputSelectionBug,
+                hasTextAreaBug = supports.DisplayChangeTextAreaSelectionBug;
+
+            if (hasInputBug || hasTextAreaBug) {
+                var activeEl = doc.activeElement || activeElement, // save a call
+                    tag = activeEl && activeEl.tagName,
+                    start,
+                    end;
+
+                if ((hasTextAreaBug && tag == 'TEXTAREA') ||
+                    (hasInputBug && tag == 'INPUT' && activeEl.type == 'text')) {
+                    if (ELEMENT.isAncestor(target, activeEl)) {
+                        start = activeEl.selectionStart;
+                        end = activeEl.selectionEnd;
+
+                        if (Ext.isNumber(start) && Ext.isNumber(end)) { // to be safe...
+                            // We don't create the raw closure here inline because that
+                            // will be costly even if we don't want to return it (nested
+                            // function decls and exprs are often instantiated on entry
+                            // regardless of whether execution ever reaches them):
+                            return makeSelectionRestoreFn(activeEl, start, end);
+                        }
+                    }
+                }
+            }
+
+            return Ext.emptyFn; // avoid special cases, just return a nop
         },
 
         getViewWidth : function(full) {
@@ -7792,7 +8016,7 @@ Ext.EventObject = new Ext.EventObjectImpl();
                         Ext.each(element.options, function(opt){
                             if (opt.selected) {
                                 hasValue = opt.hasAttribute ? opt.hasAttribute('value') : opt.getAttributeNode('value').specified;
-                                data += String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
+                                data += Ext.String.format("{0}={1}&", encoder(name), encoder(hasValue ? opt.value : opt.text));
                             }
                         });
                     } else if (!(/file|undefined|reset|button/i.test(type))) {
@@ -9466,7 +9690,7 @@ Ext.apply(Ext.CompositeElementLite.prototype, {
                         Ext.removeNode(el);
                     }
                 }
-                els.splice(val, 1);
+                Ext.Array.erase(els, val, 1);
             }
         });
         return this;

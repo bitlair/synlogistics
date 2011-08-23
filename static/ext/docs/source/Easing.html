@@ -1,4 +1,21 @@
-<!DOCTYPE html><html><head><title>Sencha Documentation Project</title><link rel="stylesheet" href="../reset.css" type="text/css"><link rel="stylesheet" href="../prettify.css" type="text/css"><link rel="stylesheet" href="../prettify_sa.css" type="text/css"><script type="text/javascript" src="../prettify.js"></script></head><body onload="prettyPrint()"><pre class="prettyprint"><pre><span id='Ext-fx.Easing'>/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Ext-fx-Easing'>/**
 </span> * @class Ext.fx.Easing
  * 
 This class contains a series of function definitions used to modify values during an animation.
@@ -18,8 +35,12 @@ speed over its duration. The following options are available:
 - elasticOut
 - cubic-bezier(x1, y1, x2, y2)
 
-Note that cubic-bezier will create a custom easing curve following the CSS3 transition-timing-function specification `{@link http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag}`. The four values specify points P1 and P2 of the curve
-as (x1, y1, x2, y2). All values must be in the range [0, 1] or the definition is invalid.
+Note that cubic-bezier will create a custom easing curve following the CSS3 [transition-timing-function][0]
+specification.  The four values specify points P1 and P2 of the curve as (x1, y1, x2, y2). All values must
+be in the range [0, 1] or the definition is invalid.
+
+[0]: http://www.w3.org/TR/css3-transitions/#transition-timing-function_tag
+
  * @markdown
  * @singleton
  */
@@ -130,4 +151,6 @@ Ext.require('Ext.fx.CubicBezier', function() {
         'bounce-out': Ext.fx.Easing.bounceOut,
         'ease-in-out': Ext.fx.Easing.easeInOut
     });
-});</pre></pre></body></html>
+});</pre>
+</body>
+</html>

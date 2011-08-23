@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.menu.Menu
  * @extends Ext.panel.Panel
@@ -11,44 +25,44 @@
  * specify `{@link Ext.menu.Item#iconCls iconCls}: 'no-icon'` _or_ `{@link Ext.menu.Item#indent indent}: true`.
  * This reserves a space for an icon, and indents the Component in line with the other menu items.
  * See {@link Ext.form.field.ComboBox}.{@link Ext.form.field.ComboBox#getListParent getListParent} for an example.
-
+ *
  * By default, Menus are absolutely positioned, floating Components. By configuring a Menu with `{@link #floating}:false`,
  * a Menu may be used as a child of a {@link Ext.container.Container Container}.
+ *
  * {@img Ext.menu.Item/Ext.menu.Item.png Ext.menu.Item component}
-__Example Usage__
-        Ext.create('Ext.menu.Menu', {
-                width: 100,
-                height: 100,
-                margin: '0 0 10 0',
-                floating: false,  // usually you want this set to True (default)
-                renderTo: Ext.getBody(),  // usually rendered by it's containing component
-                items: [{                        
-                        text: 'regular item 1'        
-                },{
-                    text: 'regular item 2'
-                },{
-                        text: 'regular item 3'  
-                }]
-        }); 
-        
-        Ext.create('Ext.menu.Menu', {
-                width: 100,
-                height: 100,
-                plain: true,
-                floating: false,  // usually you want this set to True (default)
-                renderTo: Ext.getBody(),  // usually rendered by it's containing component
-                items: [{                        
-                        text: 'plain item 1'    
-                },{
-                    text: 'plain item 2'
-                },{
-                        text: 'plain item 3'
-                }]
-        }); 
- * @xtype menu
- * @markdown
- * @constructor
- * @param {Object} config The config object
+ *
+ *__Example Usage__
+ *
+ *     Ext.create('Ext.menu.Menu', {
+ *         width: 100,
+ *         height: 100,
+ *         margin: '0 0 10 0',
+ *         floating: false,  // usually you want this set to True (default)
+ *         renderTo: Ext.getBody(),  // usually rendered by it's containing component
+ *         items: [{                        
+ *             text: 'regular item 1'        
+ *         },{
+ *             text: 'regular item 2'
+ *         },{
+ *             text: 'regular item 3'  
+ *         }]
+ *     }); 
+ *     
+ *     Ext.create('Ext.menu.Menu', {
+ *         width: 100,
+ *         height: 100,
+ *         plain: true,
+ *         floating: false,  // usually you want this set to True (default)
+ *         renderTo: Ext.getBody(),  // usually rendered by it's containing component
+ *         items: [{                        
+ *             text: 'plain item 1'    
+ *         },{
+ *             text: 'plain item 2'
+ *         },{
+ *             text: 'plain item 3'
+ *         }]
+ *     }); 
+ *
  */
 Ext.define('Ext.menu.Menu', {
     extend: 'Ext.panel.Panel',
@@ -99,9 +113,9 @@ Ext.define('Ext.menu.Menu', {
 
     /**
      * @cfg {Boolean} @hide
-     * Menu performs its own size changing constraining, so ensure Component's constraining is not applied
+     * Menus are constrained to the document body by default
      */
-    constrain: false,
+    constrain: true,
 
     /**
      * @cfg {Boolean} hidden
@@ -110,6 +124,8 @@ Ext.define('Ext.menu.Menu', {
      * @markdown
      */
     hidden: true,
+
+    hideMode: 'visibility',
 
     /**
      * @cfg {Boolean} ignoreParentClicks
@@ -146,7 +162,9 @@ Ext.define('Ext.menu.Menu', {
 
     initComponent: function() {
         var me = this,
-            prefix = Ext.baseCSSPrefix;
+            prefix = Ext.baseCSSPrefix,
+            cls = [prefix + 'menu'],
+            bodyCls = me.bodyCls ? [me.bodyCls] : [];
 
         me.addEvents(
             /**
@@ -190,14 +208,12 @@ Ext.define('Ext.menu.Menu', {
         Ext.menu.Manager.register(me);
 
         // Menu classes
-        var cls = [prefix + 'menu'];
         if (me.plain) {
             cls.push(prefix + 'menu-plain');
         }
         me.cls = cls.join(' ');
 
         // Menu body classes
-        var bodyCls = me.bodyCls ? [me.bodyCls] : [];
         bodyCls.unshift(prefix + 'menu-body');
         me.bodyCls = bodyCls.join(' ');
 
@@ -328,6 +344,47 @@ Ext.define('Ext.menu.Menu', {
         }
     },
 
+    clearStretch: function () {
+        // the vbox/stretchmax will set the el sizes and subsequent layouts will not
+        // reconsider them unless we clear the dimensions on the el's here:
+        if (this.rendered) {
+            this.items.each(function (item) {
+                // each menuItem component needs to layout again, so clear its cache
+                if (item.componentLayout) {
+                    delete item.componentLayout.lastComponentSize;
+                }
+                if (item.el) {
+                    item.el.setWidth(null);
+                }
+            });
+        }
+    },
+
+    onAdd: function () {
+        var me = this;
+
+        me.clearStretch();
+        me.callParent(arguments);
+
+        if (Ext.isIE6 || Ext.isIE7) {
+            // TODO - why does this need to be done (and not ok to do now)?
+            Ext.Function.defer(me.doComponentLayout, 10, me);
+        }
+    },
+
+    onRemove: function () {
+        this.clearStretch();
+        this.callParent(arguments);
+
+    },
+
+    redoComponentLayout: function () {
+        if (this.rendered) {
+            this.clearStretch();
+            this.doComponentLayout();
+        }
+    },
+
     // inherit docs
     getFocusEl: function() {
         return this.focusEl;
@@ -363,7 +420,9 @@ Ext.define('Ext.menu.Menu', {
     // private
     lookupItemFromObject: function(cmp) {
         var me = this,
-            prefix = Ext.baseCSSPrefix;
+            prefix = Ext.baseCSSPrefix,
+            cls,
+            intercept;
 
         if (!cmp.isComponent) {
             if (!cmp.xtype) {
@@ -378,11 +437,8 @@ Ext.define('Ext.menu.Menu', {
         }
 
         if (!cmp.isMenuItem && !cmp.dock) {
-            var cls = [
-                    prefix + 'menu-item',
-                    prefix + 'menu-item-cmp'
-                ],
-                intercept = Ext.Function.createInterceptor;
+            cls = [prefix + 'menu-item', prefix + 'menu-item-cmp'];
+            intercept = Ext.Function.createInterceptor;
 
             // Wrap focus/blur to control component focus
             cmp.focus = intercept(cmp.focus, function() {
@@ -525,32 +581,44 @@ Ext.define('Ext.menu.Menu', {
      * @markdown
      */
     showBy: function(cmp, pos, off) {
-        var me = this;
+        var me = this,
+            xy,
+            region;
 
         if (me.floating && cmp) {
             me.layout.autoSize = true;
-            me.show();
+
+            // show off-screen first so that we can calc position without causing a visual jump
+            me.doAutoRender();
 
             // Component or Element
             cmp = cmp.el || cmp;
 
             // Convert absolute to floatParent-relative coordinates if necessary.
-            var xy = me.el.getAlignToXY(cmp, pos || me.defaultAlign, off);
+            xy = me.el.getAlignToXY(cmp, pos || me.defaultAlign, off);
             if (me.floatParent) {
-                var r = me.floatParent.getTargetEl().getViewRegion();
-                xy[0] -= r.x;
-                xy[1] -= r.y;
+                region = me.floatParent.getTargetEl().getViewRegion();
+                xy[0] -= region.x;
+                xy[1] -= region.y;
             }
             me.showAt(xy);
-            me.doConstrain();
         }
         return me;
+    },
+    
+    // inherit docs
+    showAt: function(){
+        this.callParent(arguments);
+        if (this.floating) {
+            this.doConstrain();
+        }    
     },
 
     doConstrain : function() {
         var me = this,
-            y = this.el.getY(),
+            y = me.el.getY(),
             max, full,
+            vector,
             returnY = y, normalY, parentEl, scrollTop, viewHeight;
 
         delete me.height;
@@ -585,6 +653,10 @@ Ext.define('Ext.menu.Menu', {
             if (me.showSeparator){
                 me.iconSepEl.setHeight(me.layout.getRenderTarget().dom.scrollHeight);
             }
+        }
+        vector = me.getConstrainVector(me.el.dom.parentNode);
+        if (vector) {
+            me.setPosition(me.getPosition()[0] + vector[0]);
         }
         me.el.setY(returnY);
     }

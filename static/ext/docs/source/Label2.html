@@ -1,4 +1,21 @@
-<!DOCTYPE html><html><head><title>Sencha Documentation Project</title><link rel="stylesheet" href="../reset.css" type="text/css"><link rel="stylesheet" href="../prettify.css" type="text/css"><link rel="stylesheet" href="../prettify_sa.css" type="text/css"><script type="text/javascript" src="../prettify.js"></script></head><body onload="prettyPrint()"><pre class="prettyprint"><pre><span id='Ext-chart.Label'>/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Ext-chart-Label'>/**
 </span> * @class Ext.chart.Label
  *
  * Labels is a mixin whose methods are appended onto the Series class. Labels is an interface with methods implemented
@@ -32,45 +49,45 @@ Ext.define('Ext.chart.Label', {
     
     /* End Definitions */
 
-<span id='Ext-chart.Label-cfg-display'>    /**
+<span id='Ext-chart-Label-cfg-display'>    /**
 </span>     * @cfg {String} display
      * Specifies the presence and position of labels for each pie slice. Either &quot;rotate&quot;, &quot;middle&quot;, &quot;insideStart&quot;,
      * &quot;insideEnd&quot;, &quot;outside&quot;, &quot;over&quot;, &quot;under&quot;, or &quot;none&quot; to prevent label rendering.
      * Default value: 'none'.
      */
 
-<span id='Ext-chart.Label-cfg-color'>    /**
+<span id='Ext-chart-Label-cfg-color'>    /**
 </span>     * @cfg {String} color
      * The color of the label text.
      * Default value: '#000' (black).
      */
 
-<span id='Ext-chart.Label-cfg-field'>    /**
+<span id='Ext-chart-Label-cfg-field'>    /**
 </span>     * @cfg {String} field
      * The name of the field to be displayed in the label.
      * Default value: 'name'.
      */
 
-<span id='Ext-chart.Label-cfg-minMargin'>    /**
+<span id='Ext-chart-Label-cfg-minMargin'>    /**
 </span>     * @cfg {Number} minMargin
      * Specifies the minimum distance from a label to the origin of the visualization.
      * This parameter is useful when using PieSeries width variable pie slice lengths.
      * Default value: 50.
      */
 
-<span id='Ext-chart.Label-cfg-font'>    /**
+<span id='Ext-chart-Label-cfg-font'>    /**
 </span>     * @cfg {String} font
      * The font used for the labels.
      * Defautl value: &quot;11px Helvetica, sans-serif&quot;.
      */
 
-<span id='Ext-chart.Label-cfg-orientation'>    /**
+<span id='Ext-chart-Label-cfg-orientation'>    /**
 </span>     * @cfg {String} orientation
      * Either &quot;horizontal&quot; or &quot;vertical&quot;.
      * Dafault value: &quot;horizontal&quot;.
      */
 
-<span id='Ext-chart.Label-cfg-renderer'>    /**
+<span id='Ext-chart-Label-cfg-renderer'>    /**
 </span>     * @cfg {Function} renderer
      * Optional function for formatting the label into a displayable value.
      * Default value: function(v) { return v; }
@@ -106,7 +123,6 @@ Ext.define('Ext.chart.Label', {
         var me = this,
             chart = me.chart,
             gradients = chart.gradients,
-            gradient,
             items = me.items,
             animate = chart.animate,
             config = me.label,
@@ -116,24 +132,28 @@ Ext.define('Ext.chart.Label', {
             group = me.labelsGroup,
             store = me.chart.store,
             len = store.getCount(),
-            ratio = items.length / len,
-            i, count, j, 
-            k, gradientsCount = (gradients || 0) &amp;&amp; gradients.length,
-            colorStopTotal, colorStopIndex, colorStop,
-            item, label, storeItem,
-            sprite, spriteColor, spriteBrightness, labelColor,
+            itemLength = (items || 0) &amp;&amp; items.length,
+            ratio = itemLength / len,
+            gradientsCount = (gradients || 0) &amp;&amp; gradients.length,
             Color = Ext.draw.Color,
-            colorString;
+            gradient, i, count, index, j, k, colorStopTotal, colorStopIndex, colorStop, item, label,
+            storeItem, sprite, spriteColor, spriteBrightness, labelColor, colorString;
 
         if (display == 'none') {
             return;
         }
 
         for (i = 0, count = 0; i &lt; len; i++) {
+            index = 0;
             for (j = 0; j &lt; ratio; j++) {
                 item = items[count];
                 label = group.getAt(count);
                 storeItem = store.getAt(i);
+                
+                //check the excludes
+                while(this.__excludes &amp;&amp; this.__excludes[index]) {
+                    index++;
+                }
 
                 if (!item &amp;&amp; label) {
                     label.hide(true);
@@ -141,14 +161,25 @@ Ext.define('Ext.chart.Label', {
 
                 if (item &amp;&amp; field[j]) {
                     if (!label) {
-                        label = me.onCreateLabel(storeItem, item, i, display, j, count);
+                        label = me.onCreateLabel(storeItem, item, i, display, j, index);
                     }
-                    me.onPlaceLabel(label, storeItem, item, i, display, animate, j, count);
+                    me.onPlaceLabel(label, storeItem, item, i, display, animate, j, index);
 
                     //set contrast
                     if (config.contrast &amp;&amp; item.sprite) {
                         sprite = item.sprite;
-                        colorString = sprite._to &amp;&amp; sprite._to.fill || sprite.attr.fill;
+                        //set the color string to the color to be set.
+                        if (sprite._endStyle) {
+                            colorString = sprite._endStyle.fill;
+                        }
+                        else if (sprite._to) {
+                            colorString = sprite._to.fill;
+                        }
+                        else {
+                            colorString = sprite.attr.fill;
+                        }
+                        colorString = colorString || sprite.attr.fill;
+                        
                         spriteColor = Color.fromString(colorString);
                         //color wasn't parsed property maybe because it's a gradient id
                         if (colorString &amp;&amp; !spriteColor) {
@@ -170,15 +201,18 @@ Ext.define('Ext.chart.Label', {
                         else {
                             spriteBrightness = spriteColor.getGrayscale() / 255;
                         }
+                        if (label.isOutside) {
+                            spriteBrightness = 1;
+                        }
                         labelColor = Color.fromString(label.attr.color || label.attr.fill).getHSL();
-                        
-                        labelColor[2] = spriteBrightness &gt; 0.5? 0.2 : 0.8;
+                        labelColor[2] = spriteBrightness &gt; 0.5 ? 0.2 : 0.8;
                         label.setAttributes({
                             fill: String(Color.fromHSL.apply({}, labelColor))
                         }, true);
                     }
                 }
                 count++;
+                index++;
             }
         }
         me.hideLabels(count);
@@ -194,4 +228,6 @@ Ext.define('Ext.chart.Label', {
             }
         }
     }
-});</pre></pre></body></html>
+});</pre>
+</body>
+</html>

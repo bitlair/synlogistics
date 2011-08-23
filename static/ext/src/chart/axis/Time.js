@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.chart.axis.Time
  * @extends Ext.chart.axis.Axis
@@ -9,31 +23,28 @@
  *
  * For example:
  *
-  <pre><code>
-    axes: [{
-        type: 'Time',
-        position: 'bottom',
-        fields: 'date',
-        title: 'Day',
-        dateFormat: 'M d',
-        groupBy: 'year,month,day',
-        aggregateOp: 'sum',
-
-        constrain: true,
-        fromDate: new Date('1/1/11'),
-        toDate: new Date('1/7/11')
-    }]
-  </code></pre>
+ *     axes: [{
+ *         type: 'Time',
+ *         position: 'bottom',
+ *         fields: 'date',
+ *         title: 'Day',
+ *         dateFormat: 'M d',
+ *         groupBy: 'year,month,day',
+ *         aggregateOp: 'sum',
+ *     
+ *         constrain: true,
+ *         fromDate: new Date('1/1/11'),
+ *         toDate: new Date('1/7/11')
+ *     }]
  *
- * In this example we're creating a time axis that has as title <em>Day</em>.
- * The field the axis is bound to is <em>date</em>.
- * The date format to use to display the text for the axis labels is <em>M d</em>
+ * In this example we're creating a time axis that has as title *Day*.
+ * The field the axis is bound to is `date`.
+ * The date format to use to display the text for the axis labels is `M d`
  * which is a three letter month abbreviation followed by the day number.
- * The time axis will show values for dates betwee <em>fromDate</em> and <em>toDate</em>.
- * Since <em>constrain</em> is set to true all other values for other dates not between
+ * The time axis will show values for dates between `fromDate` and `toDate`.
+ * Since `constrain` is set to true all other values for other dates not between
  * the fromDate and toDate will not be displayed.
  * 
- * @constructor
  */
 Ext.define('Ext.chart.axis.Time', {
 
@@ -350,4 +361,5 @@ Ext.define('Ext.chart.axis.Time', {
          };
      }
  });
+
 

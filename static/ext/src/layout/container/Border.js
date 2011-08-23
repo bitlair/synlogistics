@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.layout.container.Border
  * @extends Ext.layout.container.Container
@@ -79,8 +93,6 @@ Ext.define('Ext.layout.container.Border', {
 
     bindToOwnerCtContainer: true,
 
-    fixedLayout: false,
-
     percentageRe: /(\d+)%/,
 
     slideDirection: {
@@ -102,6 +114,7 @@ Ext.define('Ext.layout.container.Border', {
         }
 
         // Delegate this operation to the shadow "V" or "H" box layout, and then down to any embedded layout.
+        me.fixHeightConstraints();
         me.shadowLayout.onLayout();
         if (me.embeddedContainer) {
             me.embeddedContainer.layout.onLayout();
@@ -135,6 +148,8 @@ Ext.define('Ext.layout.container.Border', {
 
         // Delegate this operation to the shadow "V" or "H" box layout.
         this.shadowLayout.beforeLayout();
+
+        // note: don't call base because that does a renderItems again
     },
 
     renderItems: function(items, target) {
@@ -147,6 +162,22 @@ Ext.define('Ext.layout.container.Border', {
         //<debug>
         Ext.Error.raise('This should not be called');
         //</debug>
+    },
+
+    renderChildren: function() {
+        if (!this.borderLayoutInitialized) {
+            this.initializeBorderLayout();
+        }
+
+        this.shadowLayout.renderChildren();
+    },
+
+    /*
+     * Gathers items for a layout operation. Injected into child Box layouts through configuration.
+     * We must not include child items which are floated over the layout (are primed with a slide out animation)
+     */
+    getVisibleItems: function() {
+        return Ext.ComponentQuery.query(':not([slideOutAnim])', this.callParent(arguments));
     },
 
     initializeBorderLayout: function() {
@@ -239,7 +270,8 @@ Ext.define('Ext.layout.container.Border', {
                     maintainFlex: true,
                     layout: {
                         type: 'hbox',
-                        align: 'stretch'
+                        align: 'stretch',
+                        getVisibleItems: me.getVisibleItems
                     }
                 }));
                 hBoxItems.push(regions.center);
@@ -293,7 +325,8 @@ Ext.define('Ext.layout.container.Border', {
                 el: me.getTarget(),
                 layout: Ext.applyIf({
                     type: 'vbox',
-                    align: 'stretch'
+                    align: 'stretch',
+                    getVisibleItems: me.getVisibleItems
                 }, me.initialConfig)
             });
             me.createItems(me.shadowContainer, vBoxItems);
@@ -318,6 +351,17 @@ Ext.define('Ext.layout.container.Border', {
                 if (me.splitters.west) {
                     me.splitters.west.ownerCt = me.embeddedContainer;
                 }
+
+                // These spliiters need to be constrained by components one-level below
+                // the component in their vobx. We update the min/maxHeight on the helper
+                // (embeddedContainer) prior to starting the split/drag. This has to be
+                // done on-the-fly to allow min/maxHeight of the E/C/W regions to be set
+                // dynamically.
+                Ext.each([me.splitters.north, me.splitters.south], function (splitter) {
+                    if (splitter) {
+                        splitter.on('beforedragstart', me.fixHeightConstraints, me);
+                    }
+                });
 
                 // The east or west region wanted a percentage
                 if (horizontalFlex) {
@@ -377,7 +421,6 @@ Ext.define('Ext.layout.container.Border', {
         me.borderLayoutInitialized = true;
     },
 
-
     setupState: function(comp){
         var getState = comp.getState;
         comp.getState = function(){
@@ -430,6 +473,7 @@ Ext.define('Ext.layout.container.Border', {
         // Mini collapse means that the splitter is the placeholder Component
         if (comp.collapseMode == 'mini') {
             comp.placeholder = resizer;
+            resizer.collapsedCls = comp.collapsedCls;
         }
 
         // Arrange to hide/show a region's associated splitter when the region is hidden/shown
@@ -439,6 +483,30 @@ Ext.define('Ext.layout.container.Border', {
             scope: me
         });
         return resizer;
+    },
+
+    // Private
+    // Propagates the min/maxHeight values from the inner hbox items to its container.
+    fixHeightConstraints: function () {
+        var me = this,
+            ct = me.embeddedContainer,
+            maxHeight = 1e99, minHeight = -1;
+
+        if (!ct) {
+            return;
+        }
+
+        ct.items.each(function (item) {
+            if (Ext.isNumber(item.maxHeight)) {
+                maxHeight = Math.max(maxHeight, item.maxHeight);
+            }
+            if (Ext.isNumber(item.minHeight)) {
+                minHeight = Math.max(minHeight, item.minHeight);
+            }
+        });
+
+        ct.maxHeight = maxHeight;
+        ct.minHeight = minHeight;
     },
 
     // Hide/show a region's associated splitter when the region is hidden/shown
@@ -507,7 +575,7 @@ Ext.define('Ext.layout.container.Border', {
                     baseCls: comp.baseCls + '-header',
                     ui: comp.ui,
                     indicateDrag: comp.draggable,
-                    cls: Ext.baseCSSPrefix + 'region-collapsed-placeholder ' + Ext.baseCSSPrefix + 'region-collapsed-' + comp.collapseDirection + '-placeholder',
+                    cls: Ext.baseCSSPrefix + 'region-collapsed-placeholder ' + Ext.baseCSSPrefix + 'region-collapsed-' + comp.collapseDirection + '-placeholder ' + comp.collapsedCls,
                     listeners: comp.floatable ? {
                         click: {
                             fn: function(e) {
@@ -521,13 +589,15 @@ Ext.define('Ext.layout.container.Border', {
                 if ((Ext.isIE6 || Ext.isIE7 || (Ext.isIEQuirks)) && !horiz) {
                     placeholder.width = 25;
                 }
-                placeholder[horiz ? 'tools' : 'items'] = [{
-                    xtype: 'tool',
-                    client: comp,
-                    type: 'expand-' + oppositeDirection,
-                    handler: me.onPlaceHolderToolClick,
-                    scope: me
-                }];
+                if (!comp.hideCollapseTool) {
+                    placeholder[horiz ? 'tools' : 'items'] = [{
+                        xtype: 'tool',
+                        client: comp,
+                        type: 'expand-' + oppositeDirection,
+                        handler: me.onPlaceHolderToolClick,
+                        scope: me
+                    }];
+                }
             }
             placeholder = me.owner.createComponent(placeholder);
             if (comp.isXType('panel')) {
@@ -591,12 +661,11 @@ Ext.define('Ext.layout.container.Border', {
     onBeforeRegionCollapse: function(comp, direction, animate) {
         var me = this,
             compEl = comp.el,
+            width,
             miniCollapse = comp.collapseMode == 'mini',
             shadowContainer = comp.shadowOwnerCt,
             shadowLayout = shadowContainer.layout,
             placeholder = comp.placeholder,
-            placeholderBox,
-            targetSize = shadowLayout.getLayoutTargetSize(),
             sl = me.owner.suspendLayout,
             scsl = shadowContainer.suspendLayout,
             isNorthOrWest = (comp.region == 'north' || comp.region == 'west'); // Flag to keep the placeholder non-adjacent to any Splitter
@@ -639,11 +708,21 @@ Ext.define('Ext.layout.container.Border', {
 
         if (!placeholder.rendered) {
             shadowLayout.renderItem(placeholder, shadowLayout.innerCt);
+
+            // The inserted placeholder does not have the proper size, so copy the width
+            // for N/S or the height for E/W from the component. This fixes EXTJSIV-1562
+            // without recursive layouts. This is only an issue initially. After this time,
+            // placeholder will have the correct width/height set by the layout (which has
+            // already happened when we get here initially).
+            if (comp.region == 'north' || comp.region == 'south') {
+                placeholder.setCalculatedSize(comp.getWidth());
+            } else {
+                placeholder.setCalculatedSize(undefined, comp.getHeight());
+            }
         }
 
         // Jobs to be done after the collapse has been done
         function afterCollapse() {
-
             // Reinstate automatic laying out.
             me.owner.suspendLayout = sl;
             shadowContainer.suspendLayout = scsl;
@@ -695,11 +774,6 @@ Ext.define('Ext.layout.container.Border', {
             compEl.setLeftTop(-10000, -10000);
             shadowLayout.layout();
             afterCollapse();
-
-            // Horrible workaround for https://sencha.jira.com/browse/EXTJSIV-1562
-            if (Ext.isIE) {
-                placeholder.setCalculatedSize(placeholder.el.getWidth());
-            }
         }
 
         return false;
@@ -1017,3 +1091,4 @@ Ext.define('Ext.layout.container.Border', {
         me.callParent(arguments);
     }
 });
+

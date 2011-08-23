@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.window.Window
  * @extends Ext.panel.Panel
@@ -26,9 +40,6 @@ Ext.create('Ext.window.Window', {
     }
 }).show();
 </pre></code>
- * @constructor
- * @param {Object} config The config object
- * @xtype window
  */
 Ext.define('Ext.window.Window', {
     extend: 'Ext.panel.Panel',
@@ -353,7 +364,15 @@ Ext.define('Ext.window.Window', {
         if (me.closable) {
             keyMap = me.getKeyMap();
             keyMap.on(27, me.onEsc, me);
-            keyMap.disable();
+
+            //if (hidden) { ? would be consistent w/before/afterShow...
+                keyMap.disable();
+            //}
+        }
+
+        if (!hidden) {
+            me.syncMonitorWindowResize();
+            me.doConstrain();
         }
     },
 
@@ -370,33 +389,40 @@ Ext.define('Ext.window.Window', {
         if (!me.header) {
             me.updateHeader(true);
         }
-
-        ddConfig = Ext.applyIf({
-            el: me.el,
-            delegate: '#' + me.header.id
-        }, me.draggable);
-
-        // Add extra configs if Window is specified to be constrained
-        if (me.constrain || me.constrainHeader) {
-            ddConfig.constrain = me.constrain;
-            ddConfig.constrainDelegate = me.constrainHeader;
-            ddConfig.constrainTo = me.constrainTo || me.container;
-        }
-
-        /**
-         * <p>If this Window is configured {@link #draggable}, this property will contain
-         * an instance of {@link Ext.util.ComponentDragger} (A subclass of {@link Ext.dd.DragTracker DragTracker})
-         * which handles dragging the Window's DOM Element, and constraining according to the {@link #constrain}
-         * and {@link #constrainHeader} .</p>
-         * <p>This has implementations of <code>onBeforeStart</code>, <code>onDrag</code> and <code>onEnd</code>
-         * which perform the dragging action. If extra logic is needed at these points, use
-         * {@link Ext.Function#createInterceptor createInterceptor} or {@link Ext.Function#createSequence createSequence} to
-         * augment the existing implementations.</p>
-         * @type Ext.util.ComponentDragger
-         * @property dd
+        
+        /*
+         * Check the header here again. If for whatever reason it wasn't created in
+         * updateHeader (preventHeader) then we'll just ignore the rest since the
+         * header acts as the drag handle.
          */
-        me.dd = Ext.create('Ext.util.ComponentDragger', this, ddConfig);
-        me.relayEvents(me.dd, ['dragstart', 'drag', 'dragend']);
+        if (me.header) {
+            ddConfig = Ext.applyIf({
+                el: me.el,
+                delegate: '#' + me.header.id
+            }, me.draggable);
+
+            // Add extra configs if Window is specified to be constrained
+            if (me.constrain || me.constrainHeader) {
+                ddConfig.constrain = me.constrain;
+                ddConfig.constrainDelegate = me.constrainHeader;
+                ddConfig.constrainTo = me.constrainTo || me.container;
+            }
+
+            /**
+             * <p>If this Window is configured {@link #draggable}, this property will contain
+             * an instance of {@link Ext.util.ComponentDragger} (A subclass of {@link Ext.dd.DragTracker DragTracker})
+             * which handles dragging the Window's DOM Element, and constraining according to the {@link #constrain}
+             * and {@link #constrainHeader} .</p>
+             * <p>This has implementations of <code>onBeforeStart</code>, <code>onDrag</code> and <code>onEnd</code>
+             * which perform the dragging action. If extra logic is needed at these points, use
+             * {@link Ext.Function#createInterceptor createInterceptor} or {@link Ext.Function#createSequence createSequence} to
+             * augment the existing implementations.</p>
+             * @type Ext.util.ComponentDragger
+             * @property dd
+             */
+            me.dd = Ext.create('Ext.util.ComponentDragger', this, ddConfig);
+            me.relayEvents(me.dd, ['dragstart', 'drag', 'dragend']);
+        }
     },
 
     // private
@@ -485,8 +511,17 @@ Ext.define('Ext.window.Window', {
     // private
     afterShow: function(animateTarget) {
         var me = this,
-            size;
+            animating = animateTarget || me.animateTarget;
 
+        
+        if (animating) {
+            /*
+             * If we're animating, constrain the positioning before calling the
+             * superclass, otherwise we'll be animating to the unconstrained
+             * window position.
+             */
+            me.doConstrain();
+        }
         // Perform superclass's afterShow tasks
         // Which might include animating a proxy from an animTarget
         me.callParent(arguments);
@@ -495,10 +530,11 @@ Ext.define('Ext.window.Window', {
             me.fitContainer();
         }
 
-        if (me.monitorResize || me.constrain || me.constrainHeader) {
-            Ext.EventManager.onWindowResize(me.onWindowResize, me);
+        me.syncMonitorWindowResize();
+        if (!animating) {
+            me.doConstrain();
         }
-        me.doConstrain();
+
         if (me.keyMap) {
             me.keyMap.enable();
         }
@@ -523,9 +559,7 @@ Ext.define('Ext.window.Window', {
         var me = this;
 
         // No longer subscribe to resizing now that we're hidden
-        if (me.monitorResize || me.constrain || me.constrainHeader) {
-            Ext.EventManager.removeResizeListener(me.onWindowResize, me);
-        }
+        me.syncMonitorWindowResize();
 
         // Turn off keyboard handling once window is hidden
         if (me.keyMap) {
@@ -613,6 +647,7 @@ Ext.define('Ext.window.Window', {
             me.el.addCls(Ext.baseCSSPrefix + 'window-maximized');
             me.container.addCls(Ext.baseCSSPrefix + 'window-maximized-ct');
 
+            me.syncMonitorWindowResize();
             me.setPosition(0, 0);
             me.fitContainer();
             me.fireEvent('maximize', me);
@@ -665,10 +700,38 @@ Ext.define('Ext.window.Window', {
 
             me.container.removeCls(Ext.baseCSSPrefix + 'window-maximized-ct');
 
+            me.syncMonitorWindowResize();
             me.doConstrain();
             me.fireEvent('restore', me);
         }
         return me;
+    },
+
+    /**
+     * Synchronizes the presence of our listener for window resize events. This method
+     * should be called whenever this status might change.
+     * @private
+     */
+    syncMonitorWindowResize: function () {
+        var me = this,
+            currentlyMonitoring = me._monitoringResize,
+            // all the states where we should be listening to window resize:
+            yes = me.monitorResize || me.constrain || me.constrainHeader || me.maximized,
+            // all the states where we veto this:
+            veto = me.hidden || me.destroying || me.isDestroyed;
+
+        if (yes && !veto) {
+            // we should be listening...
+            if (!currentlyMonitoring) {
+                // but we aren't, so set it up
+                Ext.EventManager.onWindowResize(me.onWindowResize, me);
+                me._monitoringResize = true;
+            }
+        } else if (currentlyMonitoring) {
+            // we should not be listening, but we are, so tear it down
+            Ext.EventManager.removeResizeListener(me.onWindowResize, me);
+            me._monitoringResize = false;
+        }
     },
 
     /**

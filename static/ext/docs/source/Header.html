@@ -1,8 +1,24 @@
-<!DOCTYPE html><html><head><title>Sencha Documentation Project</title><link rel="stylesheet" href="../reset.css" type="text/css"><link rel="stylesheet" href="../prettify.css" type="text/css"><link rel="stylesheet" href="../prettify_sa.css" type="text/css"><script type="text/javascript" src="../prettify.js"></script></head><body onload="prettyPrint()"><pre class="prettyprint"><pre><span id='Ext-panel.Header'>/**
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Ext-panel-Header'>/**
 </span> * @class Ext.panel.Header
  * @extends Ext.container.Container
  * Simple header class which is used for on {@link Ext.panel.Panel} and {@link Ext.window.Window}
- * @xtype header
  */
 Ext.define('Ext.panel.Header', {
     extend: 'Ext.container.Container',
@@ -88,6 +104,7 @@ Ext.define('Ext.panel.Header', {
                 ariaRole  : 'heading',
                 focusable: false,
                 viewBox: false,
+                flex : 1,
                 autoSize: true,
                 margins: '5 0 0 0',
                 items: [ me.textConfig ],
@@ -106,6 +123,7 @@ Ext.define('Ext.panel.Header', {
                 xtype     : 'component',
                 ariaRole  : 'heading',
                 focusable: false,
+                flex : 1,
                 renderTpl : ['&lt;span class=&quot;{cls}-text {cls}-text-{ui}&quot;&gt;{title}&lt;/span&gt;'],
                 renderData: {
                     title: me.title,
@@ -118,14 +136,6 @@ Ext.define('Ext.panel.Header', {
             });
         }
         me.items.push(me.titleCmp);
-
-        // Spacer -&gt;
-        me.items.push({
-            xtype: 'component',
-            html : '&amp;nbsp;',
-            flex : 1,
-            focusable: false
-        });
 
         // Add Tools
         me.items = me.items.concat(me.tools);
@@ -175,36 +185,90 @@ Ext.define('Ext.panel.Header', {
 
     // inherit docs
     addUIClsToElement: function(cls, force) {
-        var me = this;
-
-        me.callParent(arguments);
+        var me = this,
+            result = me.callParent(arguments),
+            classes = [me.baseCls + '-body-' + cls, me.baseCls + '-body-' + me.ui + '-' + cls],
+            array, i;
 
         if (!force &amp;&amp; me.rendered) {
-            me.body.addCls(me.baseCls + '-body-' + cls);
-            me.body.addCls(me.baseCls + '-body-' + me.ui + '-' + cls);
+            if (me.bodyCls) {
+                me.body.addCls(me.bodyCls);
+            } else {
+                me.body.addCls(classes);
+            }
+        } else {
+            if (me.bodyCls) {
+                array = me.bodyCls.split(' ');
+
+                for (i = 0; i &lt; classes.length; i++) {
+                    if (!Ext.Array.contains(array, classes[i])) {
+                        array.push(classes[i]);
+                    }
+                }
+
+                me.bodyCls = array.join(' ');
+            } else {
+                me.bodyCls = classes.join(' ');
+            }
         }
+ 
+        return result;
     },
 
     // inherit docs
     removeUIClsFromElement: function(cls, force) {
-        var me = this;
-
-        me.callParent(arguments);
+        var me = this,
+            result = me.callParent(arguments),
+            classes = [me.baseCls + '-body-' + cls, me.baseCls + '-body-' + me.ui + '-' + cls],
+            array, i;
 
         if (!force &amp;&amp; me.rendered) {
-            me.body.removeCls(me.baseCls + '-body-' + cls);
-            me.body.removeCls(me.baseCls + '-body-' + me.ui + '-' + cls);
+            if (me.bodyCls) {
+                me.body.removeCls(me.bodyCls);
+            } else {
+                me.body.removeCls(classes);
+            }
+        } else {
+            if (me.bodyCls) {
+                array = me.bodyCls.split(' ');
+
+                for (i = 0; i &lt; classes.length; i++) {
+                    Ext.Array.remove(array, classes[i]);
+                }
+
+                me.bodyCls = array.join(' ');
+            }
         }
+
+       return result;
     },
 
     // inherit docs
     addUIToElement: function(force) {
-        var me = this;
+        var me = this,
+            array, cls;
 
         me.callParent(arguments);
 
+        cls = me.baseCls + '-body-' + me.ui;
         if (!force &amp;&amp; me.rendered) {
-            me.body.addCls(me.baseCls + '-body-' + me.ui);
+            if (me.bodyCls) {
+                me.body.addCls(me.bodyCls);
+            } else {
+                me.body.addCls(cls);
+            }
+        } else {
+            if (me.bodyCls) {
+                array = me.bodyCls.split(' ');
+
+                if (!Ext.Array.contains(array, cls)) {
+                    array.push(cls);
+                }
+
+                me.bodyCls = array.join(' ');
+            } else {
+                me.bodyCls = cls;
+            }
         }
 
         if (!force &amp;&amp; me.titleCmp &amp;&amp; me.titleCmp.rendered &amp;&amp; me.titleCmp.textEl) {
@@ -214,12 +278,26 @@ Ext.define('Ext.panel.Header', {
 
     // inherit docs
     removeUIFromElement: function() {
-        var me = this;
+        var me = this,
+            array, cls;
 
         me.callParent(arguments);
 
+        cls = me.baseCls + '-body-' + me.ui;
         if (me.rendered) {
-            me.body.removeCls(me.baseCls + '-body-' + me.ui);
+            if (me.bodyCls) {
+                me.body.removeCls(me.bodyCls);
+            } else {
+                me.body.removeCls(cls);
+            }
+        } else {
+            if (me.bodyCls) {
+                array = me.bodyCls.split(' ');
+                Ext.Array.remove(array, cls);
+                me.bodyCls = array.join(' ');
+            } else {
+                me.bodyCls = cls;
+            }
         }
 
         if (me.titleCmp &amp;&amp; me.titleCmp.rendered &amp;&amp; me.titleCmp.textEl) {
@@ -237,7 +315,7 @@ Ext.define('Ext.panel.Header', {
         return this.body || this.frameBody || this.el;
     },
 
-<span id='Ext-panel.Header-method-setTitle'>    /**
+<span id='Ext-panel-Header-method-setTitle'>    /**
 </span>     * Sets the title of the header.
      * @param {String} title The title to be set
      */
@@ -283,7 +361,7 @@ Ext.define('Ext.panel.Header', {
         }
     },
 
-<span id='Ext-panel.Header-method-setIconCls'>    /**
+<span id='Ext-panel-Header-method-setIconCls'>    /**
 </span>     * Sets the CSS class that provides the icon image for this panel.  This method will replace any existing
      * icon class if one has already been set and fire the {@link #iconchange} event after completion.
      * @param {String} cls The new CSS class name
@@ -309,7 +387,7 @@ Ext.define('Ext.panel.Header', {
         }
     },
 
-<span id='Ext-panel.Header-method-addTool'>    /**
+<span id='Ext-panel-Header-method-addTool'>    /**
 </span>     * Add a tool to the header
      * @param {Object} tool
      */
@@ -317,7 +395,7 @@ Ext.define('Ext.panel.Header', {
         this.tools.push(this.add(tool));
     },
 
-<span id='Ext-panel.Header-method-onAdd'>    /**
+<span id='Ext-panel-Header-method-onAdd'>    /**
 </span>     * @private
      * Set up the tools.&amp;lt;tool type&gt; link in the owning Panel.
      * Bind the tool to its owning Panel.
@@ -332,4 +410,6 @@ Ext.define('Ext.panel.Header', {
         }
     }
 });
-</pre></pre></body></html>
+</pre>
+</body>
+</html>

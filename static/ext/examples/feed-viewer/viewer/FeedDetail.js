@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class FeedViewer.FeedDetail
  * @extends Ext.panel.Panel
@@ -44,6 +58,8 @@ Ext.define('FeedViewer.FeedDetail', {
             region: 'center',
             dockedItems: [this.createTopToolbar()],
             flex: 2,
+            minHeight: 200,
+            minWidth: 150,
             listeners: {
                 scope: this,
                 select: this.onSelect
@@ -169,6 +185,7 @@ Ext.define('FeedViewer.FeedDetail', {
             region: 'south',
             split: true,
             flex: 2,
+            minHeight: 150,
             items: this.display
         });
         return this.south;
@@ -186,6 +203,7 @@ Ext.define('FeedViewer.FeedDetail', {
             flex: 1,
             split: true,
             hidden: true,
+            minWidth: 150,
             border: false
         });
         return this.east;

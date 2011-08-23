@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.window.MessageBox
  * @extends Ext.window.Window
@@ -35,7 +49,6 @@ that should only run *after* some user feedback from the MessageBox, you must us
 
  * @markdown
  * @singleton
- * @xtype messagebox
  */
 Ext.define('Ext.window.MessageBox', {
     extend: 'Ext.window.Window',
@@ -49,7 +62,7 @@ Ext.define('Ext.window.MessageBox', {
         'Ext.layout.container.HBox',
         'Ext.ProgressBar'
     ],
-    
+
     alternateClassName: 'Ext.MessageBox',
 
     alias: 'widget.messagebox',
@@ -171,7 +184,7 @@ Ext.define('Ext.window.MessageBox', {
         wait: 'Loading...',
         alert: 'Attention'
     },
-    
+
     iconHeight: 35,
 
     makeButton: function(btnIdx) {
@@ -295,7 +308,7 @@ Ext.define('Ext.window.MessageBox', {
     onPromptKey: function(textField, e) {
         var me = this,
             blur;
-            
+
         if (e.keyCode === Ext.EventObject.RETURN || e.keyCode === 10) {
             if (me.msgButtons.ok.isVisible()) {
                 blur = true;
@@ -304,7 +317,7 @@ Ext.define('Ext.window.MessageBox', {
                 me.msgButtons.yes.handler.call(me, me.msgButtons.yes);
                 blur = true;
             }
-            
+
             if (blur) {
                 me.textField.blur();
             }
@@ -326,7 +339,7 @@ Ext.define('Ext.window.MessageBox', {
 
         // Default to allowing the Window to take focus.
         delete me.defaultFocus;
-        
+
         // clear any old animateTarget
         me.animateTarget = cfg.animateTarget || undefined;
 
@@ -342,6 +355,7 @@ Ext.define('Ext.window.MessageBox', {
             me.width = initialWidth;
             me.render(Ext.getBody());
         } else {
+            me.hidden = false;
             me.setSize(initialWidth, me.maxHeight);
         }
         me.setPosition(-10000, -10000);
@@ -508,7 +522,7 @@ icon: Ext.window.MessageBox.INFO
      */
     show: function(cfg) {
         var me = this;
-            
+
         me.reconfigure(cfg);
         me.addCls(cfg.cls);
         if (cfg.animateTarget) {
@@ -520,11 +534,11 @@ icon: Ext.window.MessageBox.INFO
         }
         return me;
     },
-    
+
     afterShow: function(){
         if (this.animateTarget) {
             this.center();
-        }    
+        }
         this.callParent(arguments);
     },
 
@@ -536,7 +550,7 @@ icon: Ext.window.MessageBox.INFO
         if (!Ext.isDefined(me.frameWidth)) {
             me.frameWidth = me.el.getWidth() - me.body.getWidth();
         }
-        
+
         // reset to the original dimensions
         icon.setHeight(iconHeight);
 

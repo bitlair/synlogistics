@@ -1,9 +1,41 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.util.History
- * History management component that allows you to register arbitrary tokens that signify application
- * history state on navigation actions.  You can then handle the history {@link #change} event in order
- * to reset your application UI to the appropriate state when the user navigates forward or backward through
- * the browser history stack.
+
+History management component that allows you to register arbitrary tokens that signify application
+history state on navigation actions.  You can then handle the history {@link #change} event in order
+to reset your application UI to the appropriate state when the user navigates forward or backward through
+the browser history stack.
+
+__Initializing__
+The {@link #init} method of the History object must be called before using History. This sets up the internal
+state and must be the first thing called before using History.
+
+__Setup__
+The History objects requires elements on the page to keep track of the browser history. For older versions of IE,
+an IFrame is required to do the tracking. For other browsers, a hidden field can be used. The history objects expects
+these to be on the page before the {@link #init} method is called. The following markup is suggested in order
+to support all browsers:
+
+    <form id="history-form" class="x-hide-display">
+        <input type="hidden" id="x-history-field" />
+        <iframe id="x-history-frame"></iframe>
+    </form>
+
+ * @markdown
  * @singleton
  */
 Ext.define('Ext.util.History', {

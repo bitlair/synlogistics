@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.org.OrgPanel
  * @extends Ext.panel.Panel
@@ -26,7 +40,23 @@ Ext.define('Ext.org.OrgPanel', {
                 region: 'center',
                 padding: '5 5 5 0',
                 items: {
-                    xtype: 'imageview'
+                    xtype: 'imageview',
+                    /*  (add a '/' at the front of this line to turn this on)
+                    listeners: {
+                        containermouseout: function (view, e) {
+                            Ext.log('ct', e.type);
+                        },
+                        containermouseover: function (view, e) {
+                            Ext.log('ct', e.type);
+                        },
+                        itemmouseleave: function (view, record, item, index, e) {
+                            Ext.log('item', e.type, ' id=', record.id);
+                        },
+                        itemmouseenter: function (view, record, item, index, e) {
+                            Ext.log('item', e.type, ' id=', record.id);
+                        }
+                    },/**/
+                    trackOver: true
                 }
             }
         ];

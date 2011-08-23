@@ -1,7 +1,22 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.grid.column.Number
  * @extends Ext.grid.column.Column
- * <p>A Column definition class which renders a numeric data field according to a {@link #format} string.</p>
+ *
+ * A Column definition class which renders a numeric data field according to a {@link #format} string.
  *
  * {@img Ext.grid.column.Number/Ext.grid.column.Number.png Ext.grid.column.Number cell editing}
  *
@@ -20,23 +35,21 @@
  *            {symbol:"apple", price:342.41, change:1.35, volume:24484858},            
  *            {symbol:"sencha", price:142.08, change:8.85, volume:5556351}            
  *        ]
- *    });
- *    
- *    Ext.create('Ext.grid.Panel', {
- *        title: 'Number Column Demo',
- *        store: Ext.data.StoreManager.lookup('sampleStore'),
- *        columns: [
- *            {text: 'Symbol',  dataIndex: 'symbol', flex: 1},
- *            {text: 'Current Price',  dataIndex: 'price', renderer: Ext.util.Format.usMoney},
- *            {text: 'Change',  dataIndex: 'change', xtype: 'numbercolumn', format:'0.00'},
- *            {text: 'Volume',  dataIndex: 'volume', xtype: 'numbercolumn', format:'0,000'}
- *        ],
- *        height: 200,
- *        width: 400,
- *        renderTo: Ext.getBody()
- *    });
- * 
- * @xtype numbercolumn
+ *     });
+ *     
+ *     Ext.create('Ext.grid.Panel', {
+ *         title: 'Number Column Demo',
+ *         store: Ext.data.StoreManager.lookup('sampleStore'),
+ *         columns: [
+ *             {text: 'Symbol',  dataIndex: 'symbol', flex: 1},
+ *             {text: 'Current Price',  dataIndex: 'price', renderer: Ext.util.Format.usMoney},
+ *             {text: 'Change',  dataIndex: 'change', xtype: 'numbercolumn', format:'0.00'},
+ *             {text: 'Volume',  dataIndex: 'volume', xtype: 'numbercolumn', format:'0,000'}
+ *         ],
+ *         height: 200,
+ *         width: 400,
+ *         renderTo: Ext.getBody()
+ *     });
  */
 Ext.define('Ext.grid.column.Number', {
     extend: 'Ext.grid.column.Column',

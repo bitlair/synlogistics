@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.form.field.Trigger
  * @extends Ext.form.field.Text
@@ -8,27 +22,27 @@
  * {@img Ext.form.field.Trigger/Ext.form.field.Trigger.png Ext.form.field.Trigger component}
  * For example:</p>
  * <pre><code>
-    Ext.define('Ext.ux.CustomTrigger', {
-        extend: 'Ext.form.field.Trigger',
-        alias: 'widget.customtrigger',
-        
-        // override onTriggerClick
-        onTriggerClick: function() {
-            Ext.Msg.alert('Status', 'You clicked my trigger!');
-        }
-    });
+Ext.define('Ext.ux.CustomTrigger', {
+    extend: 'Ext.form.field.Trigger',
+    alias: 'widget.customtrigger',
     
-    Ext.create('Ext.form.FormPanel', {
-        title: 'Form with TriggerField',
-        bodyPadding: 5,
-        width: 350,
-        renderTo: Ext.getBody(),
-        items:[{
-            xtype: 'customtrigger',
-            fieldLabel: 'Sample Trigger',
-            emptyText: 'click the trigger',
-        }]
-    });
+    // override onTriggerClick
+    onTriggerClick: function() {
+        Ext.Msg.alert('Status', 'You clicked my trigger!');
+    }
+});
+
+Ext.create('Ext.form.FormPanel', {
+    title: 'Form with TriggerField',
+    bodyPadding: 5,
+    width: 350,
+    renderTo: Ext.getBody(),
+    items:[{
+        xtype: 'customtrigger',
+        fieldLabel: 'Sample Trigger',
+        emptyText: 'click the trigger',
+    }]
+});
 </code></pre>
  *
  * <p>However, in general you will most likely want to use Trigger as the base class for a reusable component.
@@ -38,7 +52,6 @@
  * Create a new Trigger field.
  * @param {Object} config Configuration options (valid {@Ext.form.field.Text} config options will also be applied
  * to the base Text field)
- * @xtype triggerfield
  */
 Ext.define('Ext.form.field.Trigger', {
     extend:'Ext.form.field.Text',
@@ -410,3 +423,4 @@ Ext.define('Ext.form.field.Trigger', {
      * @cfg {Number} growMax @hide
      */
 });
+

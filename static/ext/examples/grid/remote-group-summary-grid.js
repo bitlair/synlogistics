@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 Ext.require([
     'Ext.grid.*',
     'Ext.data.*'
@@ -68,10 +82,11 @@ Ext.onReady(function(){
             text: 'Task',
             flex: 1,
             sortable: true,
+            tdCls: 'task',
             dataIndex: 'description',
             hideable: false,
-            summaryRenderer: function(v, params, data){
-                return ((v === 0 || v > 1) ? '(' + v + ' Tasks)' : '(1 Task)');
+            summaryRenderer: function(value, summaryData, dataIndex) {
+                return ((value === 0 || value > 1) ? '(' + value + ' Tasks)' : '(1 Task)');
             }
         }, {
             header: 'Project',
@@ -89,14 +104,18 @@ Ext.onReady(function(){
             width: 75,
             sortable: true,
             dataIndex: 'estimate',
-            renderer: function(v){
-                return v + ' hours';
+            renderer: function(value, metaData, record, rowIdx, colIdx, store, view){
+                return value + ' hours';
+            },
+            summaryRenderer: function(value, summaryData, dataIndex) {
+                return value + ' hours';
             }
         }, {
             header: 'Rate',
             width: 75,
             sortable: true,
             renderer: Ext.util.Format.usMoney,
+            summaryRenderer: Ext.util.Format.usMoney,
             dataIndex: 'rate',
             summaryType: 'average'
         }, {
@@ -105,7 +124,7 @@ Ext.onReady(function(){
             width: 75,
             sortable: false,
             groupable: false,
-            renderer: function(v, params, record){
+            renderer: function(value, metaData, record, rowIdx, colIdx, store, view) {
                 return Ext.util.Format.usMoney(record.get('estimate') * record.get('rate'));
             },
             dataIndex: 'cost',
@@ -113,3 +132,4 @@ Ext.onReady(function(){
         }]
     });
 });
+

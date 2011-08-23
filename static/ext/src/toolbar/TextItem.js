@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.toolbar.TextItem
  * @extends Ext.toolbar.Item
@@ -8,20 +22,19 @@
  *
  * {@img Ext.toolbar.TextItem/Ext.toolbar.TextItem.png TextItem component}
  *
- *     Ext.create('Ext.panel.Panel', {
- *         title: 'Panel with TextItem',
- *         width: 300,
- *         height: 200,
- *         tbar: [
- *             {xtype: 'tbtext', text: 'Sample TextItem'}
- *         ],
- *         renderTo: Ext.getBody()
- *     });
+ *      Ext.create('Ext.panel.Panel', {
+ *          title: 'Panel with TextItem',
+ *          width: 300,
+ *          height: 200,
+ *          tbar: [
+ *              {xtype: 'tbtext', text: 'Sample TextItem'}
+ *          ],
+ *          renderTo: Ext.getBody()
+ *      });
  *
  * @constructor
  * Creates a new TextItem
  * @param {Object} text A text string, or a config object containing a <tt>text</tt> property
- * @xtype tbtext
  */
 Ext.define('Ext.toolbar.TextItem', {
     extend: 'Ext.toolbar.Item',

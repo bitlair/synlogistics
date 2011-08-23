@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @author Ed Spencer
  * @class Ext.data.reader.Xml
@@ -169,52 +183,37 @@ Ext.define('Ext.data.reader.Xml', {
     alias : 'reader.xml',
     
     /**
+     * @cfg {String} record The DomQuery path to the repeated element which contains record information.
+     */
+
+    /**
      * @private
      * Creates a function to return some particular key of data from a response. The totalProperty and
      * successProperty are treated as special cases for type casting, everything else is just a simple selector.
      * @param {String} key
      * @return {Function}
      */
-
-    /**
-     * @cfg {String} record The DomQuery path to the repeated element which contains record information.
-     */
-
-    createAccessor: function() {
-        var selectValue = function(expr, root){
-            var node = Ext.DomQuery.selectNode(expr, root),
-                val;
-                
-            
-            
+    createAccessor: function(expr) {
+        var me = this;
+        
+        if (Ext.isEmpty(expr)) {
+            return Ext.emptyFn;
+        }
+        
+        if (Ext.isFunction(expr)) {
+            return expr;
+        }
+        
+        return function(root) {
+            return me.getNodeValue(Ext.DomQuery.selectNode(expr, root));
         };
-
-        return function(expr) {
-            var me = this;
-            
-            if (Ext.isEmpty(expr)) {
-                return Ext.emptyFn;
-            }
-            
-            if (Ext.isFunction(expr)) {
-                return expr;
-            }
-            
-            return function(root) {
-                var node = Ext.DomQuery.selectNode(expr, root),
-                    val = me.getNodeValue(node);
-                    
-                return Ext.isEmpty(val) ? null : val;
-            };
-        };
-    }(),
+    },
     
     getNodeValue: function(node) {
-        var val;
         if (node && node.firstChild) {
-            val = node.firstChild.nodeValue;
+            return node.firstChild.nodeValue;
         }
-        return val || null;
+        return undefined;
     },
 
     //inherit docs

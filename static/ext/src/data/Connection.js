@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.data.Connection
  * The Connection class encapsulates a connection to the page's originating domain, allowing requests to be made either
@@ -47,14 +61,12 @@ Ext.define('Ext.data.Connection', {
 
     /**
      * @cfg {Boolean} disableCaching (Optional) True to add a unique cache-buster param to GET requests. (defaults to true)
-     * @type Boolean
      */
     disableCaching: true,
 
     /**
      * @cfg {String} disableCachingParam (Optional) Change the parameter which is sent went disabling caching
      * through a cache buster. Defaults to '_dc'
-     * @type String
      */
     disableCachingParam: '_dc',
 
@@ -64,7 +76,7 @@ Ext.define('Ext.data.Connection', {
     timeout : 30000,
 
     /**
-     * @param {Object} extraParams (Optional) Any parameters to be appended to the request.
+     * @cfg {Object} extraParams (Optional) Any parameters to be appended to the request.
      */
 
     useDefaultHeader : true,
@@ -645,7 +657,7 @@ failure: function(response, opts) {
             id;
 
         if (request && me.isLoading(request)) {
-            /**
+            /*
              * Clear out the onreadystatechange here, this allows us
              * greater control, the browser may/may not fire the function
              * depending on a series of conditions.
@@ -709,9 +721,20 @@ failure: function(response, opts) {
     onComplete : function(request) {
         var me = this,
             options = request.options,
-            result = me.parseStatus(request.xhr.status),
-            success = result.success,
+            result,
+            success,
             response;
+            
+        try {
+            result = me.parseStatus(request.xhr.status);
+        } catch (e) {
+            // in some browsers we can't access the status if the readyState is not 4, so the request has failed
+            result = {
+                success : false, 
+                isException : false 
+            };
+        }
+        success = result.success;
 
         if (success) {
             response = me.createResponse(request);
@@ -821,3 +844,4 @@ failure: function(response, opts) {
         };
     }
 });
+

@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.form.field.Checkbox
  * @extends Ext.form.field.Base
@@ -71,7 +85,7 @@ __Example usage:__
                     var checkbox1 = Ext.getCmp('checkbox1'),
                         checkbox2 = Ext.getCmp('checkbox2'),
                         checkbox3 = Ext.getCmp('checkbox3');
-    
+
                     checkbox1.setValue(true);
                     checkbox2.setValue(true);
                     checkbox3.setValue(true);
@@ -83,7 +97,7 @@ __Example usage:__
                     var checkbox1 = Ext.getCmp('checkbox1'),
                         checkbox2 = Ext.getCmp('checkbox2'),
                         checkbox3 = Ext.getCmp('checkbox3');
-    
+
                     checkbox1.setValue(false);
                     checkbox2.setValue(false);
                     checkbox3.setValue(false);
@@ -93,10 +107,6 @@ __Example usage:__
         renderTo: Ext.getBody()
     });
 
- * @constructor
- * Creates a new Checkbox
- * @param {Object} config Configuration options
- * @xtype checkboxfield
  * @docauthor Robert Dougan <rob@sencha.com>
  * @markdown
  */
@@ -284,11 +294,9 @@ Ext.define('Ext.form.field.Checkbox', {
      * @return {Boolean/null} True if checked; otherwise either the {@link #uncheckedValue} or null.
      */
     getSubmitValue: function() {
-        return this.checked ? this.inputValue : (this.uncheckedValue || null);
-    },
-
-    getModelData: function() {
-        return this.getSubmitData();
+        var unchecked = this.uncheckedValue,
+            uncheckedVal = Ext.isDefined(unchecked) ? unchecked : null;
+        return this.checked ? this.inputValue : uncheckedVal;
     },
 
     /**
@@ -401,3 +409,4 @@ Ext.define('Ext.form.field.Checkbox', {
     }
 
 });
+

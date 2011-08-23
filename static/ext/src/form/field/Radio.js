@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.form.field.Radio
  * @extends Ext.form.field.Checkbox
@@ -95,19 +109,19 @@ __Example usage:__
                     var radio1 = Ext.getCmp('radio1'),
                         radio2 = Ext.getCmp('radio2'),
                         radio3 = Ext.getCmp('radio3');
-    
+
                     //if L is selected, change to M
                     if (radio2.getValue()) {
                         radio1.setValue(true);
                         return;
                     }
-    
+
                     //if XL is selected, change to L
                     if (radio3.getValue()) {
                         radio2.setValue(true);
                         return;
                     }
-    
+
                     //if nothing is set, set size to S
                     radio1.setValue(true);
                 }
@@ -118,19 +132,19 @@ __Example usage:__
                     var radio1 = Ext.getCmp('radio1'),
                         radio2 = Ext.getCmp('radio2'),
                         radio3 = Ext.getCmp('radio3');
-    
+
                     //if M is selected, change to L
                     if (radio1.getValue()) {
                         radio2.setValue(true);
                         return;
                     }
-    
+
                     //if L is selected, change to XL
                     if (radio2.getValue()) {
                         radio3.setValue(true);
                         return;
                     }
-    
+
                     //if nothing is set, set size to XL
                     radio3.setValue(true);
                 }
@@ -169,10 +183,6 @@ __Example usage:__
     });
 
 
- * @constructor
- * Creates a new Radio
- * @param {Object} config Configuration options
- * @xtype radio
  * @docauthor Robert Dougan <rob@sencha.com>
  * @markdown
  */
@@ -240,6 +250,10 @@ Ext.define('Ext.form.field.Radio', {
         return this.checked ? this.inputValue : null;
     },
 
+    getModelData: function() {
+        return this.getSubmitData();
+    },
+
     // inherit docs
     onChange: function(newVal, oldVal) {
         var me = this;
@@ -265,3 +279,4 @@ Ext.define('Ext.form.field.Radio', {
         return Ext.form.RadioManager;
     }
 });
+

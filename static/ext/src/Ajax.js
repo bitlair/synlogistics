@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.Ajax
  * @singleton
@@ -18,7 +32,7 @@ is used to communicate with your server side code. It can be used as follows:
         }
     });
 
-Default options for all requests can be set be changing a property on the Ext.Ajax class:
+Default options for all requests can be set by changing a property on the Ext.Ajax class:
 
     Ext.Ajax.timeout = 60000; // 60 seconds
 

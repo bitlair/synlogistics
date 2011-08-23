@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @author Ed Spencer
  * @class Ext.data.AbstractStore
@@ -19,11 +33,9 @@
  * in {@link Ext.data.Store} the data is saved as a flat {@link Ext.util.MixedCollection MixedCollection}, whereas in
  * {@link Ext.data.TreeStore TreeStore} we use a {@link Ext.data.Tree} to maintain the data's hierarchy.</p>
  * 
- * TODO: Update these docs to explain about the sortable and filterable mixins.
- * <p>Finally, AbstractStore provides an API for sorting and filtering data via its {@link #sorters} and {@link #filters}
- * {@link Ext.util.MixedCollection MixedCollections}. Although this functionality is provided by AbstractStore, there's a
- * good description of how to use it in the introduction of {@link Ext.data.Store}.
- * 
+ * The store provides filtering and sorting support. This sorting/filtering can happen on the client side
+ * or can be completed on the server. This is controlled by the {@link #remoteSort} and (@link #remoteFilter{ config
+ * options. For more information see the {@link #sort} and {@link #filter} methods.
  */
 Ext.define('Ext.data.AbstractStore', {
     requires: ['Ext.util.MixedCollection', 'Ext.data.Operation', 'Ext.util.Filter'],
@@ -136,7 +148,8 @@ Ext.define('Ext.data.AbstractStore', {
     
     //documented above
     constructor: function(config) {
-        var me = this;
+        var me = this,
+            filters;
         
         me.addEvents(
             /**
@@ -211,6 +224,7 @@ Ext.define('Ext.data.AbstractStore', {
         );
         
         Ext.apply(me, config);
+        // don't use *config* anymore from here on... use *me* instead...
 
         /**
          * Temporary cache in which removed model instances are kept until successfully synchronised with a Proxy,
@@ -222,7 +236,7 @@ Ext.define('Ext.data.AbstractStore', {
         me.removed = [];
 
         me.mixins.observable.constructor.apply(me, arguments);
-        me.model = Ext.ModelManager.getModel(config.model || me.model);
+        me.model = Ext.ModelManager.getModel(me.model);
 
         /**
          * @property modelDefaults
@@ -250,7 +264,7 @@ Ext.define('Ext.data.AbstractStore', {
         }
 
         //ensures that the Proxy is instantiated correctly
-        me.setProxy(config.proxy || me.proxy || me.model.getProxy());
+        me.setProxy(me.proxy || me.model.getProxy());
 
         if (me.id && !me.storeId) {
             me.storeId = me.id;
@@ -268,8 +282,9 @@ Ext.define('Ext.data.AbstractStore', {
          * @property filters
          * @type Ext.util.MixedCollection
          */
+        filters = me.decodeFilters(me.filters);
         me.filters = Ext.create('Ext.util.MixedCollection');
-        me.filters.addAll(me.decodeFilters(config.filters));
+        me.filters.addAll(filters);
     },
 
     /**
@@ -472,7 +487,10 @@ Ext.define('Ext.data.AbstractStore', {
         return item.dirty === true && item.phantom !== true && item.isValid();
     },
 
-    //returns any records that have been removed from the store but not yet destroyed on the proxy
+    /**
+     * Returns any records that have been removed from the store but not yet destroyed on the proxy.
+     * @return {Array} The removed Model instances
+     */
     getRemovedRecords: function() {
         return this.removed;
     },
@@ -702,6 +720,7 @@ Ext.define('Ext.data.AbstractStore', {
      * Removes all records from the store. This method does a "fast remove",
      * individual remove events are not called. The {@link #clear} event is
      * fired upon completion.
+     * @method
      */
     removeAll: Ext.emptyFn,
     // individual substores should implement a "fast" remove
@@ -715,3 +734,4 @@ Ext.define('Ext.data.AbstractStore', {
         return this.loading;
      }
 });
+

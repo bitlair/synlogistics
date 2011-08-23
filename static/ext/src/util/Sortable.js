@@ -1,3 +1,17 @@
+/*
+
+This file is part of Ext JS 4
+
+Copyright (c) 2011 Sencha Inc
+
+Contact:  http://www.sencha.com/contact
+
+GNU General Public License Usage
+This file may be used under the terms of the GNU General Public License version 3.0 as published by the Free Software Foundation and appearing in the file LICENSE included in the packaging of this file.  Please review the following information to ensure the GNU General Public License version 3.0 requirements will be met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please contact the sales department at http://www.sencha.com/contact.
+
+*/
 /**
  * @class Ext.util.Sortable
 
@@ -29,10 +43,9 @@ Ext.define("Ext.util.Sortable", {
     ],
 
     /**
-     * The property in each item that contains the data to sort. (defaults to null)
+     * The property in each item that contains the data to sort.
      * @type String
      */    
-    sortRoot: null,
     
     /**
      * Performs initialization of this mixin. Component classes using this mixin should call this method
@@ -235,17 +248,5 @@ store.sort('myField', 'DESC');
     
     getSorters: function() {
         return this.sorters.items;
-    },
-    
-    /**
-     * Returns an object describing the current sort state of this Store.
-     * @return {Object} The sort state of the Store. An object with two properties:<ul>
-     * <li><b>field</b> : String<p class="sub-desc">The name of the field by which the Records are sorted.</p></li>
-     * <li><b>direction</b> : String<p class="sub-desc">The sort order, 'ASC' or 'DESC' (case-sensitive).</p></li>
-     * </ul>
-     * See <tt>{@link #sortInfo}</tt> for additional details.
-     */
-    getSortState : function() {
-        return this.sortInfo;
     }
 });
