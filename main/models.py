@@ -45,7 +45,7 @@ class Relation(models.Model):
 
 class Contact(models.Model):
 	""" Contacts per relation """
-	relation = models.ForeignKey(Relation)
+	relation = models.ForeignKey(Relation, related_name='contacts')
 	givenname = models.CharField(max_length=75, blank=True)
 	infix = models.CharField(max_length=75, blank=True)
 	surname = models.CharField(max_length=180, blank=True)
@@ -60,9 +60,9 @@ class Contact(models.Model):
 class PurchaseOrder(models.Model):
 	""" External purchase order """
 	purchasing_date = models.DateTimeField(null=True, blank=True)
-	customer = models.ForeignKey(Relation)
+	customer = models.ForeignKey(Relation, related_name='purchase_orders')
 	order_method = models.IntegerField(null=True, blank=True)
-	relation_contact = models.ForeignKey(Contact)
+	relation_contact = models.ForeignKey(Contact, related_name='purchase_orders')
 	external_order_reference = models.CharField(max_length=90, blank=True)
 	class Meta:
 		""" Metadata """
@@ -122,14 +122,14 @@ class Account(models.Model):
 class Transaction(models.Model):
 	""" Transactions in the accounting ledger """
 	date = models.DateField(null=False, blank=False)
-	account = models.ForeignKey(Account, related_name='transaction')
-	transfer = models.ForeignKey(Account, related_name='transaction_transfer')
+	account = models.ForeignKey(Account, related_name='transactions')
+	transfer = models.ForeignKey(Account, related_name='+')
 	related = models.ManyToManyField('self', blank=False)
-	relation = models.ForeignKey(Relation, null=True)
+	relation = models.ForeignKey(Relation, null=True, related_name='transactions')
 	description = models.CharField(max_length=765, blank=True)
 	amount = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	invoice_number = models.CharField(max_length=45, null=True, blank=True)
-	purchase_order = models.ForeignKey(PurchaseOrder, null=True)
+	purchase_order = models.ForeignKey(PurchaseOrder, related_name='transactions', null=True)
 	#sale = models.ForeignKey('SaleItem')
 	document = models.TextField(blank=True)
 	class Meta:
@@ -154,7 +154,7 @@ class Vat(models.Model):
 	""" VAT table: Describes VAT/GST percentage and to which account it's to be booked """
 	name = models.CharField(max_length=30, blank=True)
 	percent = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
-	account = models.ForeignKey(Account, null=False)
+	account = models.ForeignKey(Account, related_name='+', null=True)
 	class Meta:
 		""" Metadata """
 		db_table = u'vat'
@@ -181,14 +181,14 @@ class Product(models.Model):
 		(03, 'Quarterly'),
 		(04, 'Annually'))
 	product_type = models.IntegerField(null=False, choices=TYPE_CHOICES)
-	product_group = models.ForeignKey(ProductGroup)
+	product_group = models.ForeignKey(ProductGroup, related_name='products', null=False)
 	code = models.CharField(unique=True, max_length=120, blank=False)
 	name = models.CharField(max_length=300, blank=True)
 	description = models.TextField(blank=True)
 	minimum_stock = models.IntegerField(null=True, blank=True)
 	maximum_stock = models.IntegerField(null=True, blank=True)
 	active = models.BooleanField(default=True)
-	vat = models.ForeignKey(Vat)
+	vat = models.ForeignKey(Vat, related_name='products', null=True)
 	has_own_serials = models.BooleanField(default=True)
 	invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
 	invoice_interval_count = models.IntegerField(null=True, default=1)
@@ -198,7 +198,7 @@ class Product(models.Model):
 
 class Subproduct(models.Model):
 	""" Specific product, like "High-End 10GbE Switch" -> "Arista 7500" or "Linksys WRT54g" -> "Linksys WRT54g rev. 3". """
-	product = models.ForeignKey(Product)
+	product = models.ForeignKey(Product, related_name='subproducts')
 	ean_upc_code = models.CharField(unique=True, max_length=180, blank=False)
 	name = models.CharField(max_length=300, blank=False)
 	class Meta:
@@ -207,8 +207,8 @@ class Subproduct(models.Model):
 
 class Subscription(models.Model):
 	""" Customer subscriptions to products of type 02 'Periodic'. """
-	product = models.ForeignKey(Product)
-	customer = models.ForeignKey(Relation)
+	product = models.ForeignKey(Product, related_name='subscriptions')
+	customer = models.ForeignKey(Relation, related_name='subscriptions')
 	start_date = models.DateTimeField(null=False, blank=False)
 	end_date = models.DateTimeField(null=True)
 	discount = models.DecimalField(decimal_places=5, max_digits=9, null=False, default=0.0)
@@ -224,16 +224,16 @@ class InternalOrder(models.Model):
 	""" Internal ordering for things that are to be purchased externally, kind of like an order queue. """
 	state = models.IntegerField(null=True, blank=True)
 	sale_order_date = models.DateTimeField(null=True, blank=True)
-	ordered_by_user = models.ForeignKey(User)
+	ordered_by_user = models.ForeignKey(User, related_name='internal_orders')
 	amount_needed = models.IntegerField(null=True, blank=True)
-	product = models.ForeignKey(Product)
-	product_group = models.ForeignKey(ProductGroup)
+	product = models.ForeignKey(Product, related_name='internal_orders')
+	product_group = models.ForeignKey(ProductGroup, related_name='internal_orders')
 	product_description = models.CharField(max_length=300, blank=True)
 	purchase_price_indication = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	selling_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	supplier_suggestion = models.ForeignKey(Relation, related_name='+')
 	for_customer = models.BooleanField(default=False)
-	customer = models.ForeignKey(Relation)
+	customer = models.ForeignKey(Relation, related_name='internal_orders')
 	customer_reference = models.CharField(max_length=180, blank=True)
 	class Meta:
 		""" Metadata """
@@ -241,13 +241,13 @@ class InternalOrder(models.Model):
 
 class PurchaseOrderItem(models.Model):
 	""" Purchase Order contents """
-	purchase_order = models.ForeignKey(PurchaseOrder)
-	internal_order = models.ForeignKey(InternalOrder)
+	purchase_order = models.ForeignKey(PurchaseOrder, related_name='data')
+	internal_order = models.ForeignKey(InternalOrder, related_name='purchase_data')
 	state = models.IntegerField(null=True, blank=True)
 	purchase_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	order_amount = models.IntegerField(null=True, blank=True)
 	units_per_pack = models.IntegerField(null=True, blank=True)
-	subproduct = models.ForeignKey(Subproduct)
+	subproduct = models.ForeignKey(Subproduct, related_name='purchase_data')
 	supplier_has_in_stock = models.BooleanField(default=False)
 	expected_date = models.DateField(null=True, blank=True)
 	class Meta:
@@ -257,7 +257,7 @@ class PurchaseOrderItem(models.Model):
 class Item(models.Model):
 	""" Individual units that are in stock. """
 	serial_number = models.CharField(unique=True, max_length=180, blank=False)
-	purchase_order_data = models.ForeignKey(PurchaseOrderItem)
+	purchase_order_data = models.ForeignKey(PurchaseOrderItem, related_name='items')
 	input_by_user = models.ForeignKey(User, related_name='items_input')
 	reserved = models.BooleanField(default=False)
 	reserved_for_relation = models.ForeignKey(Relation, related_name='items_reserved')
@@ -266,7 +266,7 @@ class Item(models.Model):
 	sold = models.BooleanField(default=False)
 	written_off = models.BooleanField(default=False)
 	written_off_by_user = models.ForeignKey(User, related_name='items_writtenoff')
-	location = models.ForeignKey(Location)
+	location = models.ForeignKey(Location, related_name='items')
 	arrival_date = models.DateTimeField(null=True, blank=True)
 	class Meta:
 		""" Metadata """
@@ -286,8 +286,8 @@ class Container(models.Model):
 
 class ContainerItem(models.Model):
 	""" Item inside a container """
-	container = models.ForeignKey(Container)
-	item = models.ForeignKey(Item)
+	container = models.ForeignKey(Container, related_name='data')
+	item = models.ForeignKey(Item, related_name='container_data')
 	added_date = models.DateTimeField(null=True, blank=True)
 	class Meta:
 		""" Metadata """
@@ -315,9 +315,9 @@ class Inventory(models.Model):
 
 class InventoryItem(models.Model):
 	""" Stock inventory contents """
-	inventory = models.ForeignKey('Inventory')
-	item = models.ForeignKey(Item)
-	location = models.ForeignKey(Location)
+	inventory = models.ForeignKey('Inventory', related_name='data')
+	item = models.ForeignKey(Item, related_name='item')
+	location = models.ForeignKey(Location, related_name='+')
 	value = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	class Meta:
 		""" Metadata """
@@ -326,13 +326,26 @@ class InventoryItem(models.Model):
 
 class ProductSellingprice(models.Model):
 	""" Active selling prices of products for given dates. """
-	product = models.ForeignKey(Product)
-	commencing_date = models.DateField(null=True, blank=True)
-	set_date = models.DateField(null=True, blank=True)
+	product = models.ForeignKey(Product, related_name='sellingprices')
+	commencing_date = models.DateField(null=False)
+	set_date = models.DateField(null=False)
 	price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	class Meta:
 		""" Metadata """
 		db_table = u'product_sellingprices'
 
+class BookingPeriod(models.Model):
+	number = models.IntegerField(null=False, db_index=True)
+	start_date = models.DateField(null=False)
+	end_date = models.DateField(null=False)
+	class Meta:
+		""" Metadata """
+		db_table = u'booking_periods'
+	
 
-
+class Settings(models.Model):
+	""" SynLogistics application settings """
+	invoice_format_string = models.CharField(max_length=60, null=False, blank=False)
+	class Meta:
+		""" Metadata """
+		db_table = u'settings'
