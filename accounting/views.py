@@ -189,7 +189,7 @@ def transaction_data(request):
 				transaction.relation = Relation.objects.get(pk=int(response['relation']))
 
 			# This should always be exactly one related transaction
-			# TODO Create a test for this (database integrity checker)
+			assert transaction.related.count() == 1
 			for related in transaction.related.all():
 				related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
 				related.account = Account.objects.get(pk=int(response['transfer']))
@@ -230,6 +230,7 @@ def transaction_data(request):
 			transaction = Transaction.objects.get(pk=response['id'])
 
 			# Delete the related transaction first (There can be only one!)
+			assert transaction.related.count() == 1
 			for related in transaction.related.all():
 				related.delete()
 			transaction.delete()
