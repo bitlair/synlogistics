@@ -93,7 +93,8 @@ def subscription_data(request):
 			# The decimal can't be serialized by json
 			response['discount'] = str(response['discount'])
 
-
+			# Give the id to the frontend
+			response['id'] = subscription.id
 		except:
 			db_trans.rollback()
 			raise
