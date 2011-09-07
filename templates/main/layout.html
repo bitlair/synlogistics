@@ -212,6 +212,31 @@ Ext.require([
 				items: []
 			})]
 		});
+	
+		/* Map F1..F12 to the tab positions 0..12 */	
+		document.onkeydown = function (e) {
+			if (e.keyCode >= 112 && e.keyCode <= 123) {
+				tabs = Ext.getCmp('tabs');
+				if (tabs.items.length > e.keyCode - 112) {
+					tabs.setActiveTab(e.keyCode - 112);
+				}
+				return false;
+			}
+
+		};
+		/* Ctrl-W closes internal tabs and only if other tabs are closed should
+		   it close the browser tab */
+		document.onkeypress = function (e) {
+			key = e.keyCode ? e.keyCode : e.charCode;
+			/* Ctrl-W */
+			if (e.ctrlKey && key == '119') {
+				if (tabs.activeTab) {
+					tabs.activeTab.close();
+					return false
+				}
+			}
+			return true;
+		};
 	});
 
 	function addTab (title, page, params) {
@@ -236,7 +261,7 @@ Ext.require([
 
 	</script>
 </head>
-<body>
+<body onbeforeunload="return 'Are you sure you wish to close SynLogistics?'">
 <noscript>
 	Sorry, you need a javascript browser for this to work.
 </noscript>
