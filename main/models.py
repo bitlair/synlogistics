@@ -22,6 +22,7 @@ SynLogistics database model
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from datetime import datetime
 	
 
 class Relation(models.Model):
@@ -192,12 +193,27 @@ class Product(models.Model):
 	has_own_serials = models.BooleanField(default=True)
 	invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
 	invoice_interval_count = models.IntegerField(null=True, default=1)
+
+	def get_price(self, date=None):
+		""" Get the active price for a given date or now.. """
+		if date == None:
+			date = datetime.utcnow()
+	
+		price = ProductSellingprice.objects.raw("SELECT s1.* FROM product_sellingprices s1 " +
+				"LEFT JOIN product_sellingprices s2 ON s1.product_id=s2.product_id " +
+				"AND s1.commencing_date < s2.commencing_date " +
+				"WHERE s2.commencing_date IS NULL AND s1.product_id=%s", [ self.id ])
+		for p in price:
+			return p.price
+		return None
+		
+
 	class Meta:
 		""" Metadata """
 		db_table = u'products'
 
 class Subproduct(models.Model):
-	""" Specific product, like "High-End 10GbE Switch" -> "Arista 7500" or "Linksys WRT54g" -> "Linksys WRT54g rev. 3". """
+	""" Specific product, like "High-End 48p 10GbE Switch" -> "Arista 7148S" or "Linksys WRT54g" -> "Linksys WRT54g rev. 3". """
 	product = models.ForeignKey(Product, related_name='subproducts')
 	ean_upc_code = models.CharField(unique=True, max_length=180, blank=False)
 	name = models.CharField(max_length=300, blank=False)

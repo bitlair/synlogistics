@@ -25,10 +25,11 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../..")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 from django.db.models import Q, F
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from main.models import Subscription
-from invoicing.models import Invoice
+from invoicing.models import Invoice, InvoiceItem
 
+# FIXME This code should use database transactions!
 
 def main():
 	"""
@@ -55,11 +56,60 @@ def main():
 		invoice.customer = subscription.customer
 		invoice.date = date.today()
 		invoice.save()
-		# TODO Add the subscription lines to the invoice
+
+		#
+		# Calculate the date until which we are invoicing
+		#
+		if subscription.invoiced_until_date:
+			start_date = subscription.invoiced_until_date
+		else:
+			start_date = subscription.start_date
+
+		if subscription.product.invoice_interval == 0:
+			subscription.invoiced_until_date = start_date + timedelta(days = subscription.product.invoice_interval_count * subscription.intervals_per_invoice)
+
+		if subscription.product.invoice_interval == 1:
+			subscription.invoiced_until_date = start_date + timedelta(weeks = subscription.product.invoice_interval_count * subscription.intervals_per_invoice)
+
+		elif subscription.product.invoice_interval == 2:
+			months = subscription.product.invoice_interval_count * subscription.intervals_per_invoice
+			month = start_date.month + months % 12
+			year = start_date.year + int(months / 12)
+			subscription.invoiced_until_date = date(year, month, start_date.day)
+
+		elif subscription.product.invoice_interval == 3:
+			quarters = subscription.product.invoice_interval_count * subscription.intervals_per_invoice
+			month = start_date.month + (quarters * 3) % 12
+			year = start_date.year + int((quarters * 3) / 12)
+			subscription.invoiced_until_date = date(year, month, start_date.day)
+
+		elif subscription.product.invoice_interval == 4:
+			years = subscription.product.invoice_interval_count * subscription.intervals_per_invoice
+			subscription.invoiced_until_date = date(start_date.year + years, month, day)
+
+		print subscription.invoiced_until_date
+		
+		# Add the subscription lines to the invoice
+		invoiceline = InvoiceItem()
+		invoiceline.invoice = invoice
+		invoiceline.item = None # Only used for products with serials
+		invoiceline.product = subscription.product
+		invoiceline.period = start_date.isoformat() + " - " + subscription.invoiced_until_date.isoformat()
+		invoiceline.description = subscription.extra_info
+		invoiceline.count = 1
+		invoiceline.amount = subscription.product.get_price()
+		if invoiceline.amount == None:
+			# FIXME This should be an exception with transaction rollback
+			print "NO PRICE!!"
+		else:
+			print invoiceline.amount
+		invoiceline.vat = subscription.product.vat
+		invoiceline.save()
 
 		pdf = invoice.pdf()
-		# TODO Mail the invoice to the client if requested, otherwise put the PDF in the outgoing snailmail queue
 
+		# TODO Mail the invoice to the client if requested, otherwise put the PDF in the outgoing snailmail queue
+		
 
 	
 if __name__ == "__main__":

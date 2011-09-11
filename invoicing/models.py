@@ -70,6 +70,8 @@ class Invoice(models.Model):
 					'month': self.date.month,
 					'day': self.date.day,
 					'number': self.number, }
+
+			# Call the superclass's save function to write to the database
 			super(Invoice, self).save(*args, **kwargs)
 
 		except:
@@ -81,6 +83,7 @@ class Invoice(models.Model):
 	def pdf(self):
 		""" Generates PDF invoice """
 
+		# Test if we're already stored. Programmer error if this invoice is not in the database yet.
 		assert self.id
 
 		print self.id
