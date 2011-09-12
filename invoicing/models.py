@@ -18,13 +18,12 @@ SynLogistics: Invoice class
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from django.db import models, transaction as db_trans
-from main.models import Relation, Item, Product, Vat, BookingPeriod, Settings
 
 class Invoice(models.Model):
 	""" Invoice """
-	customer = models.ForeignKey(Relation, related_name='invoices', null=False)
+	customer = models.ForeignKey('main.Relation', related_name='invoices', null=False)
 	date = models.DateField(null=False, db_index=True)
-	booking_period = models.ForeignKey(BookingPeriod, null=False)
+	booking_period = models.ForeignKey('main.BookingPeriod', null=False)
 	number = models.IntegerField(null=False, db_index=True)
 	full_invoice_no = models.CharField(max_length=25, db_index=True)
 	
@@ -94,14 +93,28 @@ class Invoice(models.Model):
 class InvoiceItem(models.Model):
 	""" Invoice contents """
 	invoice = models.ForeignKey(Invoice, related_name="data")
-	item = models.ForeignKey(Item, related_name="invoice_data", null=True)
-	product = models.ForeignKey(Product, related_name="invoice_date")
+	item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
+	product = models.ForeignKey('main.Product', related_name="invoice_date")
 	period = models.CharField(max_length=30, blank=True, null=True)
 	description = models.CharField(max_length=255, blank=False, null=False)
 	count = models.IntegerField(null=False)
 	amount = models.DecimalField(decimal_places=5, max_digits=25, null=False)
-	vat = models.ForeignKey(Vat, null=True)
+	vat = models.ForeignKey('accounting.Vat', null=True)
 	class Meta:
 		""" Metadata """
 		db_table = u'invoice_data'
 
+class Subscription(models.Model):
+	""" Customer subscriptions to products of type 02 'Periodic'. """
+	product = models.ForeignKey('main.Product', related_name='subscriptions')
+	customer = models.ForeignKey('main.Relation', related_name='subscriptions')
+	start_date = models.DateTimeField(null=False, blank=False)
+	end_date = models.DateTimeField(null=True)
+	discount = models.DecimalField(decimal_places=5, max_digits=9, null=False, default=0.0)
+	invoiced_until_date = models.DateTimeField(null=True)
+	intervals_per_invoice = models.IntegerField(null=False, default=0)
+	extra_info = models.TextField(null=False, blank=False)
+	active = models.BooleanField(null=False, default=1)
+	class Meta:
+		""" Metadata """
+		db_table = u'subscriptions'

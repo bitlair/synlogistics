@@ -21,7 +21,6 @@ SynLogistics accounting models
 from django.db import models
 from django.db import transaction as db_trans
 from django.db.models import Sum
-from main.models import Relation, PurchaseOrder
 
 class Account(models.Model):
 	""" Accounting ledger account """
@@ -80,12 +79,12 @@ class Transaction(models.Model):
 	account = models.ForeignKey(Account, related_name='transactions')
 	transfer = models.ForeignKey(Account, related_name='+')
 	related = models.ManyToManyField('self', blank=False)
-	relation = models.ForeignKey(Relation, null=True, related_name='transactions')
+	relation = models.ForeignKey('main.Relation', null=True, related_name='transactions')
 	description = models.CharField(max_length=765, blank=True)
 	amount = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 	invoice_number = models.CharField(max_length=45, null=True, blank=True)
-	purchase_order = models.ForeignKey(PurchaseOrder, related_name='transactions', null=True)
-	#sale = models.ForeignKey('SaleItem')
+	purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True)
+	invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True)
 	document = models.TextField(blank=True)
 
 	@db_trans.commit_manually

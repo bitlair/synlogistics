@@ -111,7 +111,7 @@ class Product(models.Model):
 	maximum_stock = models.IntegerField(null=True, blank=True)
 	active = models.BooleanField(default=True)
 	# Vat is done as a string because of recursive import issues
-	vat = models.ForeignKey('Vat', related_name='products', null=True)  
+	vat = models.ForeignKey('accounting.Vat', related_name='products', null=True)  
 	has_own_serials = models.BooleanField(default=True)
 	invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
 	invoice_interval_count = models.IntegerField(null=True, default=1)
@@ -142,21 +142,6 @@ class Subproduct(models.Model):
 	class Meta:
 		""" Metadata """
 		db_table = u'subproducts'
-
-class Subscription(models.Model):
-	""" Customer subscriptions to products of type 02 'Periodic'. """
-	product = models.ForeignKey(Product, related_name='subscriptions')
-	customer = models.ForeignKey(Relation, related_name='subscriptions')
-	start_date = models.DateTimeField(null=False, blank=False)
-	end_date = models.DateTimeField(null=True)
-	discount = models.DecimalField(decimal_places=5, max_digits=9, null=False, default=0.0)
-	invoiced_until_date = models.DateTimeField(null=True)
-	intervals_per_invoice = models.IntegerField(null=False, default=0)
-	extra_info = models.TextField(null=False, blank=False)
-	active = models.BooleanField(null=False, default=1)
-	class Meta:
-		""" Metadata """
-		db_table = u'subscriptions'
 
 class InternalOrder(models.Model):
 	""" Internal ordering for things that are to be purchased externally, kind of like an order queue. """
