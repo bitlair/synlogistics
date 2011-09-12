@@ -51,6 +51,7 @@ Ext.onReady(function() {
 		folderSort: false,		
 	});
 
+
 	// create the grid and specify what field you want
 	// to use for the editor at each column.
 	var grid = Ext.create('Ext.tree.Panel', {
@@ -129,6 +130,9 @@ Ext.onReady(function() {
 			},
 		},
 	});
+	/* Set focus element and steal focus now. */
+	tabs.activeTab.focusEl = grid.getView();
+	grid.getView().focus();
 });
 </script>
 <div id="editor-grid{{ uniquestring }}"></div>

@@ -65,11 +65,25 @@ Ext.require([
 		Ext.define('MenuItem', {
 			extend: 'Ext.data.Model',
 			fields: [
+				{ name: 'shortcut', type: 'string' },
 				{ name: 'title', type: 'string' },
-				{ name: 'action', type: 'string' }
+				{ name: 'page', type: 'string' },
+				{ name: 'params', type: 'json' }
 			]
 		});
+		var menusearch = new Ext.data.Store({ 
+			model: 'MenuItem',
+			proxy: {
+				type: 'memory',
+			},
+			data: [],
+		});
+
+		
 		function createMenu(data) {
+			/* Yes, this copy is abso-fucking-lutely necessary */
+			menusearch.add(data.slice(0));
+
 			return Ext.create('widget.dataview', {
 						store: Ext.data.Store({
 							model: 'MenuItem',
@@ -80,25 +94,6 @@ Ext.require([
 
 								addTab(record.get('title'), record.get('page'), record.get('params'));
 							},
-							beforeitemkeydown: function(context, record, el, index, e) {
-								if (e.keyCode == 13) { /* Return key */
-									addTab(record.get('title'), record.get('page'), record.get('params'));
-									return false;
-								}
-								/* Make sure active item is always in view */
-								if (e.keyCode == 40) { /* Down key */
-									obj = el.offsetParent;
-									if (obj.scrollHeight > obj.clientHeight && el.offsetTop > obj.clientHeight) {
-										obj.scrollTop = el.offsetTop;
-									}
-								}
-								if (e.keyCode == 38) { /* Up key */
-									obj = el.offsetParent;
-									if (obj.scrollTop > el.offsetTop) {
-										obj.scrollTop = el.offsetTop;
-									}
-								}
-							}
 						},
 						cls: 'menu-list',
 						itemSelector: '.menu-list-item',
@@ -123,86 +118,117 @@ Ext.require([
 				}
 			}), {
 				region: 'west',
-				id: 'west-panel',
-				title: 'Menu',
 				split: true,
 				width: 200,
-				minWidth: 175,
-				maxWidth: 200,
 				collapsible: true,
-				animCollapse: false,
+				layout: 'vbox',
+				id: 'west-panel',
+				title: 'Menu',
 				margins: '0 0 0 5',
-				layout: 'accordion',
-				items: [{
-					title: 'Administration',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Accounting', page: '{{ BASE_URL }}accounting/overview', params: {} },
-						{ title: 'Reports', page: '{{ BASE_URL }}accounting/reports', params: {} },
-						{ title: 'Invoices/reminders to send', page: '{{ BASE_URL }}accounting/send', params: {} },
-						{ title: 'Manage accounts', page: '{{ BASE_URL }}accounting/manage', params: {} },
-					])
- 				}, {
-					title: 'Sales',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Invoicing', page: '{{ BASE_URL }}sales/invoicing', params: {} },
-						{ title: 'Subscriptions', page: '{{ BASE_URL }}sales/subscriptions', params: {} },
-						{ title: 'Relations', page: '{{ BASE_URL }}sales/relations', params: {} },
-						/*{ title: 'Stock query', page: '{{ BASE_URL }}sales/stockquery', params: {} },
-						{ title: 'Cash register', page: '{{ BASE_URL }}sales/cashregister', params: {} },
-						{ title: 'Internal order', page: '{{ BASE_URL }}sales/internalorder', params: {} },
-						{ title: 'Item information', page: '{{ BASE_URL }}sales/iteminfo', params: {} },
-						{ title: 'RMA', page: '{{ BASE_URL }}sales/rma', params: {} },
-						{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },*/
-					]),
-				}, {
-					title: 'Purchasing',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Purchasing overview', page: '{{ BASE_URL }}purchasing/overview', params: {} },
-						{ title: 'Orders', page: '{{ BASE_URL }}purchasing/orders', params: {} },
-						{ title: 'Products', page: '{{ BASE_URL }}purchasing/products', params: {} },
-					])
-				}, {
-					title: 'Logistics',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Delivery acceptance', page: '{{ BASE_URL }}logistics/delivery', params: {} },
-						{ title: 'Inter-location acceptance', page: '{{ BASE_URL }}logistics/locationaccept', params: {} },
-						{ title: 'Destination changing', page: '{{ BASE_URL }}logistics/destination', params: {} },
-						{ title: 'All Items in transit', page: '{{ BASE_URL }}logistics/intransit', params: {} },
-					])
-				}, {
-					title: 'Manufacturing',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Containers', page: '{{ BASE_URL }}manufacturing/containers', params: {} },
-						/*{ title: 'Bill of Materials', page: '{{ BASE_URL }}manufacturing/containers', params: {} }, */
-					])
-				}, {
-					title: 'Inventory',
-					iconCls: 'nav',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Stock count', page: '{{ BASE_URL }}inventory/stockcount', params: {} },
-						{ title: 'Input item without order', page: '{{ BASE_URL }}inventory/itemwithoutorder', params: {} }
-					])
-				}, {
-					title: 'Settings',
-					iconCls: 'settings',
-					autoScroll: true,
-					items: createMenu([
-						{ title: 'Users and permissions', page: '{{ BASE_URL }}settings/users', params: {} },
-						{ title: 'Locations', page: '{{ BASE_URL }}settings/locations', params: {} },
-						{ title: 'Settings', page: '{{ BASE_URL }}settings/settings', params: {} }
-					])
-				}]
+				border: 1,
+				items: [ {
+					layout: 'fit',
+					width: 200,
+					height: 23,
+					border: 0,
+					margins: '-1 -1 -1 -1',
+					items: [ Ext.create('Ext.form.ComboBox', {
+						store: menusearch,
+						queryMode: 'local',
+						displayField: 'title',
+						listeners: {
+							select: function (field, selection, options) {
+								r=selection[0];
+								addTab(r.get('title'), r.get('page'), r.get('params'));
+							},
+							blur: function(field, options) {
+								if (tabs.activeTab && tabs.activeTab.focusEl) {
+									tabs.activeTab.focusEl.focus(null, true);
+									return false;
+								}
+								return true;
+							}
+						},
+					})],
+				}, { 
+					flex: 1,
+					width: 200,
+					minWidth: 175,
+					maxWidth: 200,
+					animCollapse: false,
+					layout: 'accordion',
+					border: 0,
+					items: [{
+						title: 'Administration',
+						iconCls: 'nav',
+						autoScroll: true,
+							items: createMenu([
+							{ title: 'Accounting', page: '{{ BASE_URL }}accounting/overview', params: {} },
+							{ title: 'Reports', page: '{{ BASE_URL }}accounting/reports', params: {} },
+							{ title: 'Invoices/reminders to send', page: '{{ BASE_URL }}accounting/send', params: {} },
+							{ title: 'Manage accounts', page: '{{ BASE_URL }}accounting/manage', params: {} },
+						])
+ 					}, {
+						title: 'Sales',
+						iconCls: 'nav',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Invoicing', page: '{{ BASE_URL }}sales/invoicing', params: {} },
+							{ title: 'Subscriptions', page: '{{ BASE_URL }}sales/subscriptions', params: {} },
+							{ title: 'Relations', page: '{{ BASE_URL }}sales/relations', params: {} },
+							/*{ title: 'Stock query', page: '{{ BASE_URL }}sales/stockquery', params: {} },
+							{ title: 'Cash register', page: '{{ BASE_URL }}sales/cashregister', params: {} },
+							{ title: 'Internal order', page: '{{ BASE_URL }}sales/internalorder', params: {} },
+							{ title: 'Item information', page: '{{ BASE_URL }}sales/iteminfo', params: {} },
+							{ title: 'RMA', page: '{{ BASE_URL }}sales/rma', params: {} },
+							{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },*/
+						]),
+					}, {
+						title: 'Purchasing',
+						iconCls: 'nav',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Purchasing overview', page: '{{ BASE_URL }}purchasing/overview', params: {} },
+							{ title: 'Orders', page: '{{ BASE_URL }}purchasing/orders', params: {} },
+							{ title: 'Products', page: '{{ BASE_URL }}purchasing/products', params: {} },
+						])
+					}, {
+						title: 'Logistics',
+						iconCls: 'nav',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Delivery acceptance', page: '{{ BASE_URL }}logistics/delivery', params: {} },
+							{ title: 'Inter-location acceptance', page: '{{ BASE_URL }}logistics/locationaccept', params: {} },
+							{ title: 'Destination changing', page: '{{ BASE_URL }}logistics/destination', params: {} },
+							{ title: 'All Items in transit', page: '{{ BASE_URL }}logistics/intransit', params: {} },
+						])
+					}, {
+						title: 'Manufacturing',
+						iconCls: 'nav',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Containers', page: '{{ BASE_URL }}manufacturing/containers', params: {} },
+							/*{ title: 'Bill of Materials', page: '{{ BASE_URL }}manufacturing/containers', params: {} }, */
+						])
+					}, {
+						title: 'Inventory',
+						iconCls: 'nav',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Stock count', page: '{{ BASE_URL }}inventory/stockcount', params: {} },
+							{ title: 'Input item without order', page: '{{ BASE_URL }}inventory/itemwithoutorder', params: {} }
+						])
+					}, {
+						title: 'Settings',
+						iconCls: 'settings',
+						autoScroll: true,
+						items: createMenu([
+							{ title: 'Users and permissions', page: '{{ BASE_URL }}settings/users', params: {} },
+							{ title: 'Locations', page: '{{ BASE_URL }}settings/locations', params: {} },
+							{ title: 'Settings', page: '{{ BASE_URL }}settings/settings', params: {} }
+						])
+					}]
+				}],
 			},
 			Ext.create('Ext.tab.Panel', {
 				id: 'tabs',
@@ -219,6 +245,9 @@ Ext.require([
 				tabs = Ext.getCmp('tabs');
 				if (tabs.items.length > e.keyCode - 112) {
 					tabs.setActiveTab(e.keyCode - 112);
+					if (tabs.activeTab && tabs.activeTab.focusEl) {
+						tabs.activeTab.focusEl.focus();
+					}
 				}
 				return false;
 			}

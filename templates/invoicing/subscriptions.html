@@ -256,6 +256,9 @@ Ext.onReady(function() {
 			rowEditing.startEdit(store.count(false)-1,0);
 		}
 	});
+	/* Set focus element and steal focus now. */
+	tabs.activeTab.focusEl = grid.getView();
+	grid.getView().focus();
 });
 </script>
 <div id="editor-grid{{ uniquestring }}"></div>
