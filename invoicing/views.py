@@ -29,7 +29,8 @@ from django.db import transaction as db_trans
 from decimal import Decimal
 from datetime import datetime
 
-from main.models import Subscription, Relation, Product
+from main.models import Relation, Product
+from invoicing.models import Subscription
 import settings
 
 @login_required
