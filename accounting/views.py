@@ -26,7 +26,8 @@ from django.contrib.auth.decorators import login_required
 from django.template import RequestContext 
 from django.http import HttpResponse
 from django.utils import simplejson as json
-from main.models import Account, Transaction, Relation
+from accounting.models import Account, Transaction
+from main.models import Relation
 from django.db import transaction as db_trans
 from decimal import Decimal
 
@@ -119,7 +120,7 @@ def transaction_data(request):
 			return HttpResponse('')
 
 		try:
-			# insert the main transaction
+			# Insert the main transaction
 			transaction = Transaction()
 			transaction.account = Account.objects.get(pk=int(request.GET['account']))
 			transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
@@ -129,38 +130,6 @@ def transaction_data(request):
 				transaction.relation = Relation.objects.get(pk=int(response['relation']))
 			transaction.amount = Decimal(response['amount'])
 			transaction.save()
-		
-			# insert the related transaction for the transfer account.
-			related = Transaction()
-			related.account = Account.objects.get(pk=int(response['transfer']))
-			related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-			related.transfer = Account.objects.get(pk=int(request.GET['account'])) 
-			related.description = response['description']
-
-			if response['relation'] != 0:
-				related.relation = Relation.objects.get(pk=int(response['relation']))
-			
-			related.amount = Decimal(response['amount'])
-
-			# Some accounts, like liabilities and expenses are inverted.
-			# Determine if we need to invert the amount on the related transaction
-			if (transaction.account.account_type < 10 or transaction.account.account_type == 40) \
- 				==	(transaction.transfer.account_type < 10 or transaction.transfer.account_type == 40):
-				related.amount = -Decimal(response['amount'])
-
-
-
-			#
-			# We need related to be in the database to reference it from transaction
-			# but then we also need to add the crossreference, so the double save below is in fact necessary.
-			#
-			related.save()
-
-			transaction.related.add(related)
-			transaction.save()
-
-			related.related.add(transaction)
-			related.save()
 
 			response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
 			response['id'] = transaction.id
@@ -187,26 +156,6 @@ def transaction_data(request):
 
 			if response['relation']:
 				transaction.relation = Relation.objects.get(pk=int(response['relation']))
-
-			# This should always be exactly one related transaction
-			assert transaction.related.count() == 1
-			for related in transaction.related.all():
-				related.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-				related.account = Account.objects.get(pk=int(response['transfer']))
-				related.description = response['description']
-
-				if response['relation']:
-					related.relation = Relation.objects.get(pk=int(response['relation']))
-
-				related.amount = Decimal(response['amount'])
-
-				# Some accounts, like liabilities and expenses are inverted.
-				# Determine if we need to invert the amount on the related transaction
-				if (transaction.account.account_type < 10 or transaction.account.account_type == 40) \
-						== (transaction.transfer.account_type < 10 or transaction.transfer.account_type == 40):
-					related.amount = -Decimal(response['amount'])
-				related.save()
-
 			transaction.save()
 		
 
