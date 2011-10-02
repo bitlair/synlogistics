@@ -17,6 +17,9 @@
 
 {% endcomment %}<script type="text/javascript">	
 Ext.onReady(function() {
+	var el = document.getElementById('editor-grid{{ uniquestring }}');
+	var id = Ext.get(el.parentNode.parentNode).id;
+	var tab = Ext.getCmp(id);
 
 	if (!Ext.ClassManager.isCreated('Transaction')) {
 		Ext.define('Transaction', {
@@ -110,11 +113,10 @@ Ext.onReady(function() {
 
 	// create the grid and specify what field you want
 	// to use for the editor at each column.
+	
 	var grid = Ext.create('Ext.grid.Panel', {
-		renderTo: 'editor-grid{{ uniquestring }}',
 		title: 'Transactions',
-		height: tabs.activeTab.getHeight(),
-		anchor: '100%',
+		layout: 'fit',
 		frame: true,
 		store: store,
 		columns: [{
@@ -189,13 +191,13 @@ Ext.onReady(function() {
 				text: 'Add',
 				iconCls: 'icon-add',
 				handler: function() {
-					grid.addRow();
+					tab.grid.addRow();
 				},
 			},{
 				text: 'Delete',
 				iconCls: 'icon-delete',
 				handler: function() {
-					grid.deleteSelection();
+					tab.grid.deleteSelection();
 				},
 			}],
 		}],
@@ -214,9 +216,13 @@ Ext.onReady(function() {
 			rowEditing.startEdit(store.count(false)-1,0);
 		}
 	});
+	tab.add(grid);
+	tab.doLayout();
+
 	/* Set focus element and steal focus now. */
-	tabs.activeTab.focusEl = grid.getView();
+	tab.focusEl = grid.getView();
 	grid.getView().focus();
+
 });
 </script>
 <div id="editor-grid{{ uniquestring }}"></div>

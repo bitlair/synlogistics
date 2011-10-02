@@ -22,6 +22,9 @@
 </style>
 <script type="text/javascript">	
 Ext.onReady(function() {
+	var el = document.getElementById('editor-grid{{ uniquestring }}');
+	var id = Ext.get(el.parentNode.parentNode).id;
+	var tab = Ext.getCmp(id);
 
 	if (!Ext.ClassManager.isCreated('Account')) {
 		Ext.define('Account', {
@@ -51,13 +54,11 @@ Ext.onReady(function() {
 		folderSort: false,		
 	});
 
-
 	// create the grid and specify what field you want
 	// to use for the editor at each column.
 	var grid = Ext.create('Ext.tree.Panel', {
-		renderTo: 'editor-grid{{ uniquestring }}',
+		layout: 'fit',
 		title: 'Accounts',
-		height: tabs.activeTab.getHeight(),
 		frame: true,
         collapsible: false,
         useArrows: true,
@@ -130,8 +131,12 @@ Ext.onReady(function() {
 			},
 		},
 	});
+
+	tab.add(grid);
+	tab.doLayout();
+
 	/* Set focus element and steal focus now. */
-	tabs.activeTab.focusEl = grid.getView();
+	tab.focusEl = grid.getView();
 	grid.getView().focus();
 });
 </script>

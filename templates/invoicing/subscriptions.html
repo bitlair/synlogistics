@@ -17,6 +17,9 @@
 
 {% endcomment %}<script type="text/javascript">	
 Ext.onReady(function() {
+	var el = document.getElementById('editor-grid{{ uniquestring }}');
+	var id = Ext.get(el.parentNode.parentNode).id;
+	var tab = Ext.getCmp(id);
 
 	if (!Ext.ClassManager.isCreated('Subscription')) {
 		Ext.define('Subscription', {
@@ -256,6 +259,9 @@ Ext.onReady(function() {
 			rowEditing.startEdit(store.count(false)-1,0);
 		}
 	});
+	tab.add(grid);
+	tab.doLayout();
+
 	/* Set focus element and steal focus now. */
 	tabs.activeTab.focusEl = grid.getView();
 	grid.getView().focus();

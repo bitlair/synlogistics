@@ -17,6 +17,9 @@
 
 {% endcomment %}
 <script type="text/javascript">
+var el = document.getElementById('editor-grid{{ uniquestring }}');
+var id = Ext.get(el.parentNode.parentNode).id;
+var tab = Ext.getCmp(id);
 if (!Ext.ClassManager.isCreated('Search')) {
 	Ext.define("Search", {
 		extend: 'Ext.data.Model',
@@ -42,10 +45,9 @@ var relations = Ext.create('Ext.data.Store', {
 
 var store = Ext.create('Ext.data.Store', {model: 'Search',});
 Ext.create('Ext.form.Panel', {
-		frame:true,
+		layout: 'fit',
+		frame: true,
 		title: 'Invoicing',
-		renderTo: 'editor-grid{{ uniquestring }}',
-		height: tabs.activeTab.getHeight(),
 		fieldDefaults: {
 			labelAlign: 'left',
 			msgTarget: 'side'
@@ -169,5 +171,8 @@ Ext.create('Ext.form.Panel', {
 			}]
 
 	});
+	tab.add(grid);
+	tab.doLayout();
+
 </script>
 <div id="editor-grid{{ uniquestring }}"></div>
