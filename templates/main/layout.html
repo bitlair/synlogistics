@@ -74,9 +74,9 @@ Ext.require([
 		var menusearch = new Ext.data.Store({ 
 			model: 'MenuItem',
 			proxy: {
-				type: 'memory',
+				type: 'memory'
 			},
-			data: [],
+			data: []
 		});
 
 		
@@ -93,13 +93,13 @@ Ext.require([
 							beforeitemclick: function(context, record, el, index, e) {
 
 								addTab(record.get('title'), record.get('page'), record.get('params'));
-							},
+							}
 						},
 						cls: 'menu-list',
 						itemSelector: '.menu-list-item',
 						trackOver: true, 
 						overItemCls: 'menu-list-item-hover',
-						tpl: '<tpl for="."><div class="menu-list-item">{title}</div></tpl>',
+						tpl: '<tpl for="."><div class="menu-list-item">{title}</div></tpl>'
 
 					});
 		}	
@@ -150,8 +150,8 @@ Ext.require([
 								}
 								return true;
 							}
-						},
-					})],
+						}
+					})]
 				}, { 
 					flex: 1,
 					width: 200,
@@ -184,7 +184,7 @@ Ext.require([
 							{ title: 'Item information', page: '{{ BASE_URL }}sales/iteminfo', params: {} },
 							{ title: 'RMA', page: '{{ BASE_URL }}sales/rma', params: {} },
 							{ title: 'Reserved items', page: '{{ BASE_URL }}sales/reserved', params: {} },*/
-						]),
+						])
 					}, {
 						title: 'Purchasing',
 						iconCls: 'nav',
@@ -230,7 +230,7 @@ Ext.require([
 							{ title: 'Settings', page: '{{ BASE_URL }}settings/settings', params: {} }
 						])
 					}]
-				}],
+				}]
 			},
 			Ext.create('Ext.tab.Panel', {
 				id: 'tabs',
