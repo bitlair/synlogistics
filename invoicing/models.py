@@ -126,10 +126,11 @@ class Invoice(models.Model):
 		# Draw the address
 		# FIXME the invoice contact should be added
 		canvas.setFont("FreeSerif", 12)
-		canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.displayname)
-		canvas.drawString(40 * mm, A4[1] - (65 * mm), self.customer.address)
-		canvas.drawString(40 * mm, A4[1] - (70 * mm), self.customer.postalzip + " " + self.customer.city)
-		canvas.drawString(40 * mm, A4[1] - (75 * mm), self.customer.country)
+		canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.invoice_name)
+		canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.invoice_contact.displayname)
+		canvas.drawString(40 * mm, A4[1] - (65 * mm), self.customer.postal_address)
+		canvas.drawString(40 * mm, A4[1] - (70 * mm), self.customer.postal_code_zip + " " + self.customer.postal_city)
+		canvas.drawString(40 * mm, A4[1] - (75 * mm), self.customer.postal_country)
 
 		# Draw the invoice information
 		# FIXME 1. Need locale support for invoices
