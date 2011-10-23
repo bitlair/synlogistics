@@ -27,9 +27,9 @@ class Relation(models.Model):
 	""" Relations: customers, members or suppliers """
 	displayname = models.CharField(unique=True, max_length=180, blank=False)
 	visit_address = models.CharField(max_length=180, blank=True, default='')
-	visit_postalcode_zip = models.CharField(max_length=30, blank=True)
-	visit_city = models.CharField(max_length=180, blank=True)
-	visit_country = models.CharField(max_length=180, blank=True)
+	visit_postalcode_zip = models.CharField(max_length=30, blank=True, null=True)
+	visit_city = models.CharField(max_length=180, blank=True, null=True)
+	visit_country = models.CharField(max_length=180, blank=True, null=True)
 	postal_address = models.CharField(max_length=180, blank=True)
 	postal_code_zip = models.CharField(max_length=30, blank=True)
 	postal_city = models.CharField(max_length=180, blank=True)
