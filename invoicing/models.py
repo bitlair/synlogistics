@@ -28,6 +28,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from cStringIO import StringIO
 from pyPdf import PdfFileReader, PdfFileWriter
 from os.path import exists
+from settings import STATIC_ROOT
 import os
 import errno
 
@@ -202,8 +203,10 @@ class Invoice(models.Model):
 		output.addPage(page)
 		pdf_buffer.close()
 
-		output.write(file("%s.pdf" % self.full_invoice_no, "wb"))
-		return "%s.pdf" % self.full_invoice_no
+		filename = "%s/invoices/%s.pdf" % (STATIC_ROOT, self.full_invoice_no)
+		output.write(file(filename, "wb"))
+
+		return filename
 
 class InvoiceItem(models.Model):
 	""" Invoice contents """
