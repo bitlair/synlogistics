@@ -57,7 +57,6 @@ class Invoice(models.Model):
 			booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
 			assert booking_periods.count() == 1
 			self.booking_period = booking_periods[0]
-			print "Booking period: %d" % self.booking_period.number
 		
 			# Get the list of invoices in this booking period ordered by number
 			invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
@@ -93,6 +92,7 @@ class Invoice(models.Model):
 
 	def book(self):
 		""" Books the invoice """
+		# FIXME This is a stub function
 
 		for item in self.items.all():
 			print item.amount
@@ -106,6 +106,8 @@ class Invoice(models.Model):
 
 		# Test if we're already stored. Programmer error if this invoice is not in the database yet.
 		assert self.id
+
+		# FIXME This function only works for periodic invoices at this time
 
 		# FIXME Use a configuration variable to find the PDF
 		if not exists("letterhead_paper.pdf"):
@@ -191,6 +193,7 @@ class Invoice(models.Model):
 		canvas.save()
 
 		# Merge the letterhead paper with the data
+		# FIXME Use configurable paths
 		letterhead = PdfFileReader(file("letterhead_paper.pdf", "rb"))
 		page = letterhead.getPage(0)
 		pdfInput = PdfFileReader(StringIO(pdf_buffer.getvalue())) 
@@ -200,12 +203,7 @@ class Invoice(models.Model):
 		pdf_buffer.close()
 
 		output.write(file("%s.pdf" % self.full_invoice_no, "wb"))
-		
-		print self.id
-		print self.number
-		print self.full_invoice_no
-		print self.customer.displayname
-		print "Excellent, you've done it!"
+		return "%s.pdf" % self.full_invoice_no
 
 class InvoiceItem(models.Model):
 	""" Invoice contents """
