@@ -23,7 +23,8 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 
-from main.models import Account, Relation, Product
+from accounting.models import Account
+from main.models import Relation, Product
 
 @login_required
 def get_relations(request):
