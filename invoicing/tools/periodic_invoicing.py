@@ -26,8 +26,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 from django.db.models import Q, F
 from datetime import datetime, date, timedelta
-from main.models import Subscription
-from invoicing.models import Invoice, InvoiceItem
+from invoicing.models import Invoice, InvoiceItem, Subscription
 
 # FIXME This code should use database transactions!
 
@@ -43,7 +42,6 @@ def main():
 	subscriptions = subscriptions.filter(Q(end_date__isnull = True) | Q(invoiced_until_date__lt = F('end_date')))
 	subscriptions = subscriptions.filter(Q(invoiced_until_date__isnull = True) | Q(invoiced_until_date__lt = datetime.utcnow()))
 
-	print datetime.utcnow()
 	for subscription in subscriptions:
 
 		print "Subscription: %s %s inv: %s start: %s end: %s, int: %d, active: %d" % (subscription.customer.displayname,
@@ -90,21 +88,26 @@ def main():
 		print subscription.invoiced_until_date
 		
 		# Add the subscription lines to the invoice
-		invoiceline = InvoiceItem()
-		invoiceline.invoice = invoice
-		invoiceline.item = None # Only used for products with serials
-		invoiceline.product = subscription.product
-		invoiceline.period = start_date.isoformat() + " - " + subscription.invoiced_until_date.isoformat()
-		invoiceline.description = subscription.extra_info
-		invoiceline.count = 1
-		invoiceline.amount = subscription.product.get_price()
-		if invoiceline.amount == None:
+		invoiceitem = InvoiceItem()
+		invoiceitem.invoice = invoice
+		invoiceitem.item = None # Only used for products with serials
+		invoiceitem.product = subscription.product
+		invoiceitem.period = start_date.strftime("%Y-%m-%d") + " - " + subscription.invoiced_until_date.strftime("%Y-%m-%d")
+		invoiceitem.description = subscription.extra_info
+		invoiceitem.count = 1
+		invoiceitem.amount = subscription.product.get_price()
+		if invoiceitem.amount == None:
 			# FIXME This should be an exception with transaction rollback
 			print "NO PRICE!!"
 		else:
-			print invoiceline.amount
-		invoiceline.vat = subscription.product.vat
-		invoiceline.save()
+			print invoiceitem.amount
+		invoiceitem.vat = subscription.product.vat
+		invoiceitem.save()
+
+		# This subscription has been invoiced.
+		subscription.save()
+
+		invoice.book()		
 
 		pdf = invoice.pdf()
 

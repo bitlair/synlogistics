@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 SynLogistics: Invoice class
 """
@@ -18,6 +19,17 @@ SynLogistics: Invoice class
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from django.db import models, transaction as db_trans
+from main.models import BookingPeriod, Settings
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from cStringIO import StringIO
+from pyPdf import PdfFileReader, PdfFileWriter
+from os.path import exists
+import os
+import errno
 
 class Invoice(models.Model):
 	""" Invoice """
@@ -79,20 +91,125 @@ class Invoice(models.Model):
 		else:
 			db_trans.commit()
 
+	def book(self):
+		""" Books the invoice """
+
+		for item in self.items.all():
+			print item.amount
+
+			# If there is VAT on this product, book that as well.
+			if item.product.vat.percent > 0:
+				print item.amount * item.product.vat.percent
+
 	def pdf(self):
 		""" Generates PDF invoice """
 
 		# Test if we're already stored. Programmer error if this invoice is not in the database yet.
 		assert self.id
 
+		# FIXME Use a configuration variable to find the PDF
+		if not exists("letterhead_paper.pdf"):
+			raise IOError(errno.ENOENT)
+
+		# Read the letterhead paper
+		# FIXME Make page size configurable
+		pdf_buffer = StringIO()
+		canvas = Canvas(pdf_buffer, pagesize=A4)
+		pdfmetrics.registerFont(TTFont('FreeSerif', 'fonts' + os.sep + 'FreeSerif.ttf'))
+		pdfmetrics.registerFont(TTFont('FreeSerifB', 'fonts' + os.sep + 'FreeSerifBold.ttf'))
+		pdfmetrics.registerFont(TTFont('FreeSerifI', 'fonts' + os.sep + 'FreeSerifItalic.ttf'))
+		pdfmetrics.registerFont(TTFont('FreeSerifBI', 'fonts' + os.sep + 'FreeSerifBoldItalic.ttf'))
+
+		# Draw the address
+		# FIXME the invoice contact should be added
+		canvas.setFont("FreeSerif", 12)
+		canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.displayname)
+		canvas.drawString(40 * mm, A4[1] - (65 * mm), self.customer.address)
+		canvas.drawString(40 * mm, A4[1] - (70 * mm), self.customer.postalzip + " " + self.customer.city)
+		canvas.drawString(40 * mm, A4[1] - (75 * mm), self.customer.country)
+
+		# Draw the invoice information
+		# FIXME 1. Need locale support for invoices
+		# FIXME 2. Need customer reference and order numbers for the subscriptions
+		canvas.drawString(10 * mm, A4[1] - (100 * mm), 'Invoice number:')
+		canvas.drawString(50 * mm, A4[1] - (100 * mm), self.full_invoice_no)
+		canvas.drawString(110 * mm, A4[1] - (100 * mm), 'Order number:')
+		canvas.drawString(140 * mm, A4[1] - (100 * mm), '-')
+		canvas.drawString(10 * mm, A4[1] - (105 * mm), 'Customer reference:')
+		canvas.drawString(50 * mm, A4[1] - (105 * mm), '-')
+
+		# Draw the invoice data header
+		canvas.setFont("FreeSerifB", 12)
+		canvas.drawString(10 * mm, A4[1] - (115 * mm), 'Product')
+		canvas.drawString(50 * mm, A4[1] - (115 * mm), 'Period')
+		canvas.drawString(110 * mm, A4[1] - (115 * mm), 'Extra information')
+		canvas.drawString(175 * mm, A4[1] - (115 * mm), 'Price')
+
+		total_amount = 0
+		total_vat = 0
+
+		y = 120
+		for item in self.items.all():
+			canvas.setFont("FreeSerif", 12)
+			canvas.drawString(10 * mm, A4[1] - (y * mm), item.product.name)
+			canvas.drawString(50 * mm, A4[1] - (y * mm), item.period)
+			canvas.drawString(110 * mm, A4[1] - (y * mm), item.description)
+			# FIXME Need variable currency
+			canvas.setFont("FreeSerif", 10)
+			canvas.drawString(175 * mm, A4[1] - (y * mm), '€')
+			canvas.setFont("Courier", 10)
+			canvas.drawString(178 * mm, A4[1] - (y * mm), "%10.2f" % item.amount)
+			y += 5
+			total_amount += item.amount
+			total_vat += item.amount * item.vat.percent
+
+		canvas.drawString(175 * mm, A4[1] - ((y-4) * mm), "____________")
+		canvas.setFont("FreeSerif", 12)
+		canvas.drawString(150 * mm, A4[1] - (y * mm), 'Subtotal')
+		canvas.setFont("FreeSerif", 10)
+		canvas.drawString(175 * mm, A4[1] - (y * mm), '€')
+		canvas.setFont("Courier", 10)
+		canvas.drawString(178 * mm, A4[1] - (y * mm), "%10.2f" % total_amount)
+		y += 5
+		canvas.setFont("FreeSerif", 12)
+		canvas.drawString(150 * mm, A4[1] - (y * mm), 'VAT')
+		canvas.setFont("FreeSerif", 10)
+		canvas.drawString(175 * mm, A4[1] - (y * mm), '€')
+		canvas.setFont("Courier", 10)
+		canvas.drawString(178 * mm, A4[1] - (y * mm), "%10.2f" % total_vat)
+		y += 5
+		canvas.setFont("FreeSerif", 12)
+		canvas.drawString(150 * mm, A4[1] - (y * mm), 'Total')
+		canvas.setFont("FreeSerif", 10)
+		canvas.drawString(175 * mm, A4[1] - (y * mm), '€')
+		canvas.setFont("Courier", 10)
+		canvas.drawString(178 * mm, A4[1] - (y * mm), "%10.2f" % (total_amount + total_vat))
+		y += 5
+
+		# Finish the page and save the PDF
+		canvas.showPage()
+		canvas.save()
+
+		# Merge the letterhead paper with the data
+		letterhead = PdfFileReader(file("letterhead_paper.pdf", "rb"))
+		page = letterhead.getPage(0)
+		pdfInput = PdfFileReader(StringIO(pdf_buffer.getvalue())) 
+		page.mergePage(pdfInput.getPage(0))
+		output = PdfFileWriter() 
+		output.addPage(page)
+		pdf_buffer.close()
+
+		output.write(file("%s.pdf" % self.full_invoice_no, "wb"))
+		
 		print self.id
 		print self.number
 		print self.full_invoice_no
+		print self.customer.displayname
 		print "Excellent, you've done it!"
 
 class InvoiceItem(models.Model):
 	""" Invoice contents """
-	invoice = models.ForeignKey(Invoice, related_name="data")
+	invoice = models.ForeignKey(Invoice, related_name="items")
 	item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
 	product = models.ForeignKey('main.Product', related_name="invoice_date")
 	period = models.CharField(max_length=30, blank=True, null=True)
