@@ -1,7 +1,6 @@
 LOCK TABLES `accounts` WRITE;
 INSERT INTO `accounts` VALUES (1,'0000','Assets','Assets',0,1,0,NULL);
 INSERT INTO `accounts` VALUES (2,'0100','Accounts receivable','Receivable from customers',1,0,0,1);
-INSERT INTO `accounts` VALUES (3,'0110','VAT','VAT to be received',1,0,0,2);
 INSERT INTO `accounts` VALUES (4,'0200','Current assets','Bank accounts, cash, etc',0,1,0,1);
 INSERT INTO `accounts` VALUES (5,'0210','Cash','Cash',3,0,0,4);
 INSERT INTO `accounts` VALUES (6,'0220','Current account','Main bank account',2,0,0,4);
@@ -15,12 +14,10 @@ INSERT INTO `accounts` VALUES (13,'1000','Liabilities','Debts, unpaid bills, etc
 INSERT INTO `accounts` VALUES (14,'1100','Accounts payable','Unpaid bills',11,0,0,13);
 INSERT INTO `accounts` VALUES (15,'1200','Taxes','Taxes you owe',10,0,0,13);
 INSERT INTO `accounts` VALUES (16,'1210','VAT','VAT owed',10,0,0,15);
-INSERT INTO `accounts` VALUES (17,'1211','Delayed','VAT owed at a later time',10,0,0,16);
 INSERT INTO `accounts` VALUES (18,'2000','Equity','Results',20,1,0,NULL);
 INSERT INTO `accounts` VALUES (19,'2100','Opening balance','Opening balance',20,0,0,18);
 INSERT INTO `accounts` VALUES (20,'4000','Expenses','Expenses',40,1,0,NULL);
 INSERT INTO `accounts` VALUES (21,'4100','Taxes','Taxes paid',40,0,0,20);
-INSERT INTO `accounts` VALUES (22,'4110','VAT','VAT paid',40,0,0,21);
 INSERT INTO `accounts` VALUES (23,'4200','Products for resale','Purchases of goods for resale',40,0,0,20);
 INSERT INTO `accounts` VALUES (24,'8000','Income','Income',80,1,0,NULL);
 INSERT INTO `accounts` VALUES (25,'8100','Sales','All sales',80,0,0,24);

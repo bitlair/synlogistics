@@ -28,58 +28,58 @@ from main.models import Relation, Product
 
 @login_required
 def get_relations(request):
-	# Obscure errors ftw \o/
-	if not 'query' in request.GET:
-		return HttpResponse("")
+    # Obscure errors ftw \o/
+    if not 'query' in request.GET:
+        return HttpResponse("")
 
-	relations = Relation.objects.filter(displayname__icontains=request.GET['query'])
-	
-	# TODO Need filter here what type is needed: supplier, customer or both
-	relations = relations.filter(Q(active_customer=1)|Q(active_supplier=1))
-	
-	relations = relations.order_by('displayname')
+    relations = Relation.objects.filter(displayname__icontains=request.GET['query'])
+    
+    # TODO Need filter here what type is needed: supplier, customer or both
+    relations = relations.filter(Q(active_customer=1)|Q(active_supplier=1))
+    
+    relations = relations.order_by('displayname')
 
-	response = "{relations:["
-	for relation in relations:
-		response += "{ id:'"+str(relation.id)+"',name:'"+relation.displayname+"'},"
-	response += "]}"
+    response = "{relations:["
+    for relation in relations:
+        response += "{ id:'"+str(relation.id)+"',name:'"+relation.displayname+"'},"
+    response += "]}"
 
-	return HttpResponse(response, mimetype='application/json')
+    return HttpResponse(response, mimetype='application/json')
 
 
 @login_required
 def get_accounts(request):
-	# Obscure errors ftw \o/
-	if not 'query' in request.GET:
-		return HttpResponse("")
+    # Obscure errors ftw \o/
+    if not 'query' in request.GET:
+        return HttpResponse("")
 
-	accounts = Account.objects.filter(Q(number__icontains=request.GET['query']) \
-			| Q(name__icontains=request.GET['query']))
-	accounts.order_by('number')
+    accounts = Account.objects.filter(Q(number__icontains=request.GET['query']) \
+            | Q(name__icontains=request.GET['query']))
+    accounts.order_by('number')
 
-	response = "{accounts:["
-	for account in accounts:
-		response += "{ id:'"+str(account.id)+"',name:'"+account.number+" "+account.name+"'},"
-	response += "]}"
+    response = "{accounts:["
+    for account in accounts:
+        response += "{ id:'"+str(account.id)+"',name:'"+account.number+" "+account.name+"'},"
+    response += "]}"
 
-	return HttpResponse(response, mimetype='application/json' )
+    return HttpResponse(response, mimetype='application/json' )
 
 @login_required
 def get_products(request):
-	# Obscure errors ftw \o/
-	if not 'query' in request.GET:
-		return HttpResponse("")
+    # Obscure errors ftw \o/
+    if not 'query' in request.GET:
+        return HttpResponse("")
 
-	products = Product.objects.filter(active=1)
-	products = products.filter(name__icontains=request.GET['query'])
-	products = products.filter(product_type=03)
-	products = products.order_by('name')
+    products = Product.objects.filter(active=1)
+    products = products.filter(name__icontains=request.GET['query'])
+    products = products.filter(product_type=03)
+    products = products.order_by('name')
 
-	response = "{products:["
-	for product in products:
-		response += "{ id:'"+str(product.id)+"',name:'"+product.name+"'},"
-	response += "]}"
+    response = "{products:["
+    for product in products:
+        response += "{ id:'"+str(product.id)+"',name:'"+product.name+"'},"
+    response += "]}"
 
-	return HttpResponse(response, mimetype='application/json' )
+    return HttpResponse(response, mimetype='application/json' )
 
 

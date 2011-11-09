@@ -27,11 +27,11 @@ def lang_name(file):
     language = os.path.basename(file)
     m = regexp_language.search(open(file).read(512))
     if m:
-	language = m.groups()[0]
-	if not lang_dubs.has_key(language):
-	    lang_dubs[language] = file
-	else:
-	    raise Exception('Duplicate language '+language+' for file '+file)
+    language = m.groups()[0]
+    if not lang_dubs.has_key(language):
+        lang_dubs[language] = file
+    else:
+        raise Exception('Duplicate language '+language+' for file '+file)
     return language
 
 def print_locale(lang_code):
@@ -43,10 +43,10 @@ def main():
     base_dir = "../../src/locale"
     base_file = lambda f: os.path.join(base_dir, f)
     try:
-	locales = os.listdir(base_dir)
+    locales = os.listdir(base_dir)
     except IOError:
-	print "Cannot find source locale directory: %s ... exiting" % base_dir
-	sys.exit()
+    print "Cannot find source locale directory: %s ... exiting" % base_dir
+    sys.exit()
     
     valid_file = lambda e: e.endswith(".js") and e.startswith("ext-lang-")
     char_set = lambda f: chardet.detect(open(f).read())['encoding']
@@ -55,7 +55,7 @@ def main():
     locales = dict(info_set(file) for file in locales if valid_file(file) and print_locale(lang_code(file)))
     print "... done"
     locale_strarray = ',\n'.join(["\t[%r, %r, %r]" % (code, name, charset) \
-				     for name, (code, charset) in sorted(locales.items())])
+                     for name, (code, charset) in sorted(locales.items())])
     # create languages.js
     open("languages.js", "w").write(js_template % locale_strarray)
     print "saved %d languages to languages.js" % len(locales)
