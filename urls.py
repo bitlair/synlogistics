@@ -26,8 +26,8 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^$', 'main.views.login'),
-    url(r'^main/layout$', 'main.views.layout'),
+    url(r'^$', 'main.views.layout'),
+    url(r'^login$', 'django.contrib.auth.views.login', {'template_name': 'main/login.html'}),
     url(r'^accounting/overview$', 'accounting.views.overview'),
     url(r'^accounting/transactions$', 'accounting.views.transactions_view'),
     url(r'^accounting/transactiondata', 'accounting.views.transaction_data'),

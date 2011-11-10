@@ -64,7 +64,8 @@ STATIC_URL = '/synlogistics/static/'
 
 
 BASE_URL = "/synlogistics/"
-LOGIN_URL = BASE_URL
+LOGIN_URL = BASE_URL+'login/'
+LOGIN_REDIRECT_URL = BASE_URL
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
