@@ -411,13 +411,11 @@ class Transaction(models.Model):
         """ Inserts/updates the related transaction. This extends the models.Model save() function """
 
         try:
-            new = False
-
             # Insert or update the related transaction for the transfer account.
             if self.id:
-                assert self.related.count() == 1
-                for related in self.related.all():
-                    pass
+                new = False
+                # There must only be one related transaction, so we can use get() here.
+                related = self.related.get()
             else:
                 new = True
                 related = Transaction()
@@ -438,16 +436,10 @@ class Transaction(models.Model):
 
             # The super class does the actual saving to the database.
             super(Transaction, related).save()
-
-            if new:
-                self.related.add(related)
-
             super(Transaction, self).save(*args, **kwargs)
         
-            # If we just added the related bit we need to save again, because the related id is only known now.
             if new:
-                related.related.add(self)
-                super(Transaction, related).save()
+                self.related.add(related)
         except:
             db_trans.rollback()
             raise
