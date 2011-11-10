@@ -20,7 +20,6 @@ SynLogistics accounting models
 #
 
 from django.db import models
-from django.db import transaction as db_trans
 from django.db.models import Sum
 
 
@@ -406,45 +405,37 @@ class Transaction(models.Model):
     invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True)
     document = models.TextField(blank=True)
 
-    @db_trans.commit_manually
     def save(self, *args, **kwargs):
         """ Inserts/updates the related transaction. This extends the models.Model save() function """
-
-        try:
-            # Insert or update the related transaction for the transfer account.
-            if self.id:
-                new = False
-                # There must only be one related transaction, so we can use get() here.
-                related = self.related.get()
-            else:
-                new = True
-                related = Transaction()
-            
-            related.account = self.transfer
-            related.date = self.date
-            related.transfer = self.account
-            related.description = self.description
-            related.relation = self.relation
-            related.amount = self.amount
-
-            # Some accounts, like liabilities and expenses are inverted.
-            # Determine if we need to invert the amount on the related transaction
-            if (self.account.account_type < 10 or self.account.account_type == 40) \
-                ==    (self.transfer.account_type < 10 or self.transfer.account_type == 40):
-                related.amount = -self.amount
-
-
-            # The super class does the actual saving to the database.
-            super(Transaction, related).save()
-            super(Transaction, self).save(*args, **kwargs)
-        
-            if new:
-                self.related.add(related)
-        except:
-            db_trans.rollback()
-            raise
+        # Insert or update the related transaction for the transfer account.
+        if self.id:
+            new = False
+            # There must only be one related transaction, so we can use get() here.
+            related = self.related.get()
         else:
-            db_trans.commit()    
+            new = True
+            related = Transaction()
+
+        related.account = self.transfer
+        related.date = self.date
+        related.transfer = self.account
+        related.description = self.description
+        related.relation = self.relation
+        related.amount = self.amount
+
+        # Some accounts, like liabilities and expenses are inverted.
+        # Determine if we need to invert the amount on the related transaction
+        if (self.account.account_type < 10 or self.account.account_type == 40) \
+            ==    (self.transfer.account_type < 10 or self.transfer.account_type == 40):
+            related.amount = -self.amount
+
+
+        # The super class does the actual saving to the database.
+        super(Transaction, related).save()
+        super(Transaction, self).save(*args, **kwargs)
+
+        if new:
+            self.related.add(related)
 
     class Meta:
         """ Metadata """

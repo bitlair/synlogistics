@@ -28,7 +28,6 @@ from django.http import HttpResponse
 from django.utils import simplejson as json
 from accounting.models import Account, Transaction
 from main.models import Relation
-from django.db import transaction as db_trans
 from decimal import Decimal
 
 import settings
@@ -107,7 +106,6 @@ def transactions_view(request):
 
 
 @login_required
-@db_trans.commit_manually
 def transaction_data(request):
     """ AJAX handler for transaction data in the transaction view """
 
@@ -119,102 +117,79 @@ def transaction_data(request):
         if response['date'] == None:
             return HttpResponse('')
 
-        try:
-            # Insert the main transaction
-            transaction = Transaction()
-            transaction.account = Account.objects.get(pk=int(request.GET['account']))
-            transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-            transaction.transfer = Account.objects.get(pk=int(response['transfer']))
-            transaction.description = response['description']
-            if response['relation'] != 0:
-                transaction.relation = Relation.objects.get(pk=int(response['relation']))
-            transaction.amount = Decimal(response['amount'])
-            transaction.save()
+        # Insert the main transaction
+        transaction = Transaction()
+        transaction.account = Account.objects.get(pk=int(request.GET['account']))
+        transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+        transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+        transaction.description = response['description']
+        if response['relation'] != 0:
+            transaction.relation = Relation.objects.get(pk=int(response['relation']))
+        transaction.amount = Decimal(response['amount'])
+        transaction.save()
 
-            response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
-            response['id'] = transaction.id
-            if transaction.relation != None:
-                response['relation_display'] = transaction.relation.displayname
+        response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+        response['id'] = transaction.id
+        if transaction.relation != None:
+            response['relation_display'] = transaction.relation.displayname
 
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-
-            return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
     
     # Existing transactions come in through a PUT request on /transactiondata/id
     elif request.method == "PUT":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
-        try:
-            transaction = Transaction.objects.get(pk=response['id'])
-            transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
-            transaction.transfer = Account.objects.get(pk=int(response['transfer']))
-            transaction.description = response['description']
-            transaction.amount = Decimal(response['amount'])
 
-            if response['relation']:
-                transaction.relation = Relation.objects.get(pk=int(response['relation']))
-            transaction.save()
-        
+        transaction = Transaction.objects.get(pk=response['id'])
+        transaction.date = datetime.strptime(response['date'], '%Y-%m-%dT%H:%M:%S')
+        transaction.transfer = Account.objects.get(pk=int(response['transfer']))
+        transaction.description = response['description']
+        transaction.amount = Decimal(response['amount'])
 
-            response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
-            if transaction.relation != None:
-                response['relation_display'] = transaction.relation.displayname
-            else:
-                response['relation_display'] = ''
-        except:
-            db_trans.rollback()
-            raise
+        if response['relation']:
+            transaction.relation = Relation.objects.get(pk=int(response['relation']))
+        transaction.save()
+
+
+        response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
+        if transaction.relation != None:
+            response['relation_display'] = transaction.relation.displayname
         else:
-            db_trans.commit()
+            response['relation_display'] = ''
 
-            return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 
     # A delete  is done via DELETE /transactiondata/id
     elif request.method == "DELETE":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
-        try:
-            transaction = Transaction.objects.get(pk=response['id'])
 
-            # Delete the related transaction first (There can be only one!)
-            assert transaction.related.count() == 1
-            for related in transaction.related.all():
-                related.delete()
-            transaction.delete()
+        transaction = Transaction.objects.get(pk=response['id'])
 
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-            return HttpResponse(json.dumps({ 'success': True }))
+        # Delete the related transaction first (There can be only one!)
+        assert transaction.related.count() == 1
+        for related in transaction.related.all():
+            related.delete()
+        transaction.delete()
+
+        return HttpResponse(json.dumps({ 'success': True }))
 
     # Requesting transactions is done via GET /transactiondata?account=..
     else:
-        try:
-            transactions = Transaction.objects.filter(account=request.GET['account'])
-            # XXX May want to change this to use simplejson
-            response = '{success:true,data:['
-            for transaction in transactions:
-                response += '{id:%d,' % transaction.id
-                response += 'date:"%s",' % transaction.date
-                response += 'transfer:%d,' % transaction.transfer.id
-                response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
-                response += 'description:"%s",' % transaction.description
-                if transaction.relation != None:
-                    response += 'relation:%d,' % transaction.relation.id
-                    response += 'relation_display:"%s",' % transaction.relation.displayname
-                else:
-                    response += 'relation:null,'
-                    response += 'relation_display:"",'
-                response += 'amount:%s},' % transaction.amount
-            response += ']}'
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-            return HttpResponse(response)        
-    
+        transactions = Transaction.objects.filter(account=request.GET['account'])
+        # XXX May want to change this to use simplejson
+        response = '{success:true,data:['
+        for transaction in transactions:
+            response += '{id:%d,' % transaction.id
+            response += 'date:"%s",' % transaction.date
+            response += 'transfer:%d,' % transaction.transfer.id
+            response += 'transfer_display:"%s %s",' % (transaction.transfer.number, transaction.transfer.name)
+            response += 'description:"%s",' % transaction.description
+            if transaction.relation != None:
+                response += 'relation:%d,' % transaction.relation.id
+                response += 'relation_display:"%s",' % transaction.relation.displayname
+            else:
+                response += 'relation:null,'
+                response += 'relation_display:"",'
+            response += 'amount:%s},' % transaction.amount
+        response += ']}'
+
+        return HttpResponse(response)
