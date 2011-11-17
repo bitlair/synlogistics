@@ -44,7 +44,6 @@ class Invoice(models.Model):
         """ Metadata """
         db_table = u'invoices'
 
-    @db_trans.commit_manually
     def save(self, *args, **kwargs):
         """ 
         Assign invoice number and save to the database. This extends the default django save() function.
@@ -53,43 +52,37 @@ class Invoice(models.Model):
         assert self.customer
         assert self.date
 
-        try:
-            # Get the active booking period for this invoice
-            booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
-            assert booking_periods.count() == 1
-            self.booking_period = booking_periods[0]
-        
-            # Get the list of invoices in this booking period ordered by number
-            invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
+        # Get the active booking period for this invoice
+        booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
+        assert booking_periods.count() == 1
+        self.booking_period = booking_periods[0]
 
-            # Select the first available invoice number
-            self.number = 1
-            for invoice in invoices:
-                if self.number < invoice.number:
-                    break
-                self.number += 1
+        # Get the list of invoices in this booking period ordered by number
+        invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
 
-            # We need the settings for the invoice format string    
-            settings = Settings.objects.all()
-            assert settings.count() == 1
-            settings = settings[0]
+        # Select the first available invoice number
+        self.number = 1
+        for invoice in invoices:
+            if self.number < invoice.number:
+                break
+            self.number += 1
 
-            # Create the full invoice number based on the user defined format string
-            self.full_invoice_no = settings.invoice_format_string % {
-                    'booking_period': self.booking_period.number,
-                    'year': self.date.year,
-                    'month': self.date.month,
-                    'day': self.date.day,
-                    'number': self.number, }
+        # We need the settings for the invoice format string
+        settings = Settings.objects.all()
+        assert settings.count() == 1
+        settings = settings[0]
 
-            # Call the superclass's save function to write to the database
-            super(Invoice, self).save(*args, **kwargs)
+        # Create the full invoice number based on the user defined format string
+        self.full_invoice_no = settings.invoice_format_string % {
+                'booking_period': self.booking_period.number,
+                'year': self.date.year,
+                'month': self.date.month,
+                'day': self.date.day,
+                'number': self.number, }
 
-        except:
-            db_trans.rollback()            
-            raise
-        else:
-            db_trans.commit()
+        # Call the superclass's save function to write to the database
+        super(Invoice, self).save(*args, **kwargs)
+
 
     def book(self):
         """ Books the invoice """
