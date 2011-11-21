@@ -1,0 +1,327 @@
+[
+    {
+        "pk": 1,
+        "model": "accounting.account",
+        "fields": {
+            "parent": null,
+            "account_type": 0,
+            "description": "Assets",
+            "is_readonly": true,
+            "number": "0000",
+            "_balance": 0,
+            "name": "Assets"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 1,
+            "account_type": 1,
+            "description": "Receivable from customers",
+            "is_readonly": false,
+            "number": "0100",
+            "_balance": 0,
+            "name": "Accounts receivable"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 1,
+            "account_type": 0,
+            "description": "Bank accounts, cash, etc",
+            "is_readonly": true,
+            "number": "0200",
+            "_balance": 0,
+            "name": "Current assets"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 4,
+            "account_type": 3,
+            "description": "Cash",
+            "is_readonly": false,
+            "number": "0210",
+            "_balance": 0,
+            "name": "Cash"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 4,
+            "account_type": 2,
+            "description": "Main bank account",
+            "is_readonly": false,
+            "number": "0220",
+            "_balance": 0,
+            "name": "Current account"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 4,
+            "account_type": 2,
+            "description": "Savings account",
+            "is_readonly": false,
+            "number": "0230",
+            "_balance": 0,
+            "name": "Savings account"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 4,
+            "account_type": 2,
+            "description": "Reserves held for depreciation and taxes",
+            "is_readonly": false,
+            "number": "0240",
+            "_balance": 0,
+            "name": "Reserve account"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 1,
+            "account_type": 0,
+            "description": "Things of value you own",
+            "is_readonly": true,
+            "number": "0300",
+            "_balance": 0,
+            "name": "Fixed assets"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 9,
+            "account_type": 0,
+            "description": "Equipment",
+            "is_readonly": false,
+            "number": "0310",
+            "_balance": 0,
+            "name": "Equipment"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 9,
+            "account_type": 0,
+            "description": "Housing",
+            "is_readonly": false,
+            "number": "0320",
+            "_balance": 0,
+            "name": "Housing"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 9,
+            "account_type": 0,
+            "description": "Vehicles",
+            "is_readonly": false,
+            "number": "0330",
+            "_balance": 0,
+            "name": "Vehicles"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "accounting.account",
+        "fields": {
+            "parent": null,
+            "account_type": 10,
+            "description": "Debts, unpaid bills, etc",
+            "is_readonly": true,
+            "number": "1000",
+            "_balance": 0,
+            "name": "Liabilities"
+        }
+    },
+    {
+        "pk": 14,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 13,
+            "account_type": 11,
+            "description": "Unpaid bills",
+            "is_readonly": false,
+            "number": "1100",
+            "_balance": 0,
+            "name": "Accounts payable"
+        }
+    },
+    {
+        "pk": 15,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 13,
+            "account_type": 10,
+            "description": "Taxes you owe",
+            "is_readonly": false,
+            "number": "1200",
+            "_balance": 0,
+            "name": "Taxes"
+        }
+    },
+    {
+        "pk": 16,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 15,
+            "account_type": 10,
+            "description": "VAT owed",
+            "is_readonly": false,
+            "number": "1210",
+            "_balance": 0,
+            "name": "VAT"
+        }
+    },
+    {
+        "pk": 18,
+        "model": "accounting.account",
+        "fields": {
+            "parent": null,
+            "account_type": 20,
+            "description": "Results",
+            "is_readonly": true,
+            "number": "2000",
+            "_balance": 0,
+            "name": "Equity"
+        }
+    },
+    {
+        "pk": 19,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 18,
+            "account_type": 20,
+            "description": "Opening balance",
+            "is_readonly": false,
+            "number": "2100",
+            "_balance": 0,
+            "name": "Opening balance"
+        }
+    },
+    {
+        "pk": 20,
+        "model": "accounting.account",
+        "fields": {
+            "parent": null,
+            "account_type": 40,
+            "description": "Expenses",
+            "is_readonly": true,
+            "number": "4000",
+            "_balance": 0,
+            "name": "Expenses"
+        }
+    },
+    {
+        "pk": 21,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 20,
+            "account_type": 40,
+            "description": "Taxes paid",
+            "is_readonly": false,
+            "number": "4100",
+            "_balance": 0,
+            "name": "Taxes"
+        }
+    },
+    {
+        "pk": 23,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 20,
+            "account_type": 40,
+            "description": "Purchases of goods for resale",
+            "is_readonly": false,
+            "number": "4200",
+            "_balance": 0,
+            "name": "Products for resale"
+        }
+    },
+    {
+        "pk": 24,
+        "model": "accounting.account",
+        "fields": {
+            "parent": null,
+            "account_type": 80,
+            "description": "Income",
+            "is_readonly": true,
+            "number": "8000",
+            "_balance": 0,
+            "name": "Income"
+        }
+    },
+    {
+        "pk": 25,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 24,
+            "account_type": 80,
+            "description": "All sales",
+            "is_readonly": false,
+            "number": "8100",
+            "_balance": 0,
+            "name": "Sales"
+        }
+    },
+    {
+        "pk": 26,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 25,
+            "account_type": 80,
+            "description": "Services rendered",
+            "is_readonly": false,
+            "number": "8110",
+            "_balance": 0,
+            "name": "Services"
+        }
+    },
+    {
+        "pk": 27,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 25,
+            "account_type": 80,
+            "description": "Products sold",
+            "is_readonly": false,
+            "number": "8120",
+            "_balance": 0,
+            "name": "Products"
+        }
+    },
+    {
+        "pk": 28,
+        "model": "accounting.account",
+        "fields": {
+            "parent": 25,
+            "account_type": 80,
+            "description": "Products with periodic invoicing",
+            "is_readonly": false,
+            "number": "8130",
+            "_balance": 0,
+            "name": "Contracts/subscription/memberships"
+        }
+    }
+]
