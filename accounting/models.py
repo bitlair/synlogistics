@@ -362,6 +362,14 @@ class Account(models.Model):
     _balance = models.DecimalField(decimal_places=5, max_digits=25, null=False, blank=False, default=0.0)
     parent = models.ForeignKey('self', null=True, related_name='children')
 
+    class Meta:
+        """ Metadata """
+        db_table = u'accounts'
+        ordering = ['number']
+
+    def __unicode__(self):
+        return "%s: %s" % (self.number, self.name)
+
     def get_balance(self):
         """ Get the active balance """
         balance = 0
@@ -387,9 +395,6 @@ class Account(models.Model):
 
     balance = property(get_balance, set_balance)
 
-    class Meta:
-        """ Metadata """
-        db_table = u'accounts'
 
 class Transaction(models.Model):
     """ Transactions in the accounting ledger """
@@ -404,6 +409,14 @@ class Transaction(models.Model):
     purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True)
     invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True)
     document = models.TextField(blank=True)
+
+    class Meta:
+        """ Metadata """
+        db_table = u'transactions'
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return "%s %s (%s -> %s): %d" % (self.date, self.description, self.account.name, self.transfer.name, self.amount)
 
     def save(self, *args, **kwargs):
         """ Inserts/updates the related transaction. This extends the models.Model save() function """
@@ -437,16 +450,15 @@ class Transaction(models.Model):
         if new:
             self.related.add(related)
 
-    class Meta:
-        """ Metadata """
-        db_table = u'transactions'
-
 class Vat(models.Model):
     """ VAT table: Describes VAT/GST percentage and to which account it's to be booked """
     name = models.CharField(max_length=30, blank=True)
     percent = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
     account = models.ForeignKey(Account, related_name='+', null=True)
+
     class Meta:
         """ Metadata """
         db_table = u'vat'
 
+    def __unicode__(self):
+        return "%s: %s%%" % (self.name, self.percent)
