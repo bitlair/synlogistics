@@ -144,11 +144,11 @@ class Invoice(models.Model):
         canvas.drawString(10 * mm, A4[1] - (100 * mm), 'Invoice number:')
         canvas.drawString(50 * mm, A4[1] - (100 * mm), self.full_invoice_no)
         canvas.drawString(110 * mm, A4[1] - (100 * mm), 'Order number:')
-        canvas.drawString(140 * mm, A4[1] - (100 * mm), '-')
+        canvas.drawString(160 * mm, A4[1] - (100 * mm), '-')
         canvas.drawString(10 * mm, A4[1] - (105 * mm), 'Customer reference:')
         canvas.drawString(50 * mm, A4[1] - (105 * mm), '-')
         canvas.drawString(110 * mm, A4[1] - (105 * mm), 'ISO-4217 currency:')
-        canvas.drawString(140 * mm, A4[1] - (105 * mm), 'EUR')
+        canvas.drawString(160 * mm, A4[1] - (105 * mm), 'EUR')
 
         # Draw the invoice data header
         canvas.setFont("FreeSerifB", 12)
