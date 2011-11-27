@@ -27,29 +27,6 @@ from django.contrib.auth.decorators import login_required
 
 import settings
 
-def login(request):
-    error = ""
-    if 'login' in request.POST:
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                auth_login(request, user)
-                # Redirect to a success page.
-                return HttpResponseRedirect("main/layout")
-            else:
-                error = "Your account is disabled."
-        else:
-            error = "Invalid username or password"
-    ctx = RequestContext(request, {
-        'error': error,
-        'request': request
-    })
-    ctx.update(csrf(request))
-
-    return render_to_response('main/login.html', ctx)
-
 @login_required
 def layout(request):
     ctx = RequestContext(request, {

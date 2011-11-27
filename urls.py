@@ -18,16 +18,16 @@ SynLogistics URL mappings module.
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import patterns, url, include
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^$', 'main.views.login'),
-    url(r'^main/layout$', 'main.views.layout'),
+    url(r'^$', 'main.views.layout'),
+    url(r'^login$', 'django.contrib.auth.views.login', {'template_name': 'main/login.html'}),
     url(r'^accounting/overview$', 'accounting.views.overview'),
     url(r'^accounting/transactions$', 'accounting.views.transactions_view'),
     url(r'^accounting/transactiondata', 'accounting.views.transaction_data'),
@@ -41,8 +41,8 @@ urlpatterns = patterns('',
     url(r'^ajax/productsearch.json$', 'ajax.views.get_products'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )

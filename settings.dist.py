@@ -64,7 +64,8 @@ STATIC_URL = '/synlogistics/static/'
 
 
 BASE_URL = "/synlogistics/"
-LOGIN_URL = BASE_URL
+LOGIN_URL = BASE_URL+'login/'
+LOGIN_REDIRECT_URL = BASE_URL
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -103,6 +104,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -122,10 +124,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admindocs',
+    'constance',
     'main',
+    'accounting',
+    'ajax',
+    'invoicing',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -25,7 +25,6 @@ from django.template import RequestContext
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson as json
-from django.db import transaction as db_trans
 from decimal import Decimal
 from datetime import datetime
 
@@ -58,7 +57,6 @@ def subscriptions_view(request):
     return render_to_response('invoicing/subscriptions.html', ctx)
 
 @login_required
-@db_trans.commit_manually
 def subscription_data(request):
     """ AJAX handler for the subscription data in the sales->subscription view. """
 
@@ -70,117 +68,93 @@ def subscription_data(request):
         if response['product'] == 0 or response['startdate'] == None:
             return HttpResponse('')
 
-        try:
-            # insert the subscription
-            subscription = Subscription()
-            subscription.product = Product.objects.get(pk=int(response['product']))
-            subscription.customer = Relation.objects.get(pk=int(response['customer']))
-            subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
-            if response['enddate']:
-                subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
-            subscription.discount = Decimal(response['discount'])
-            subscription.intervals_per_invoice = response['intervals_per_invoice']
-            subscription.extra_info = response['extra_info']
-            subscription.active = response['active']
-            subscription.save()
+        # insert the subscription
+        subscription = Subscription()
+        subscription.product = Product.objects.get(pk=int(response['product']))
+        subscription.customer = Relation.objects.get(pk=int(response['customer']))
+        subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
+        if response['enddate']:
+            subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
+        subscription.discount = Decimal(response['discount'])
+        subscription.intervals_per_invoice = response['intervals_per_invoice']
+        subscription.extra_info = response['extra_info']
+        subscription.active = response['active']
+        subscription.save()
 
-            # Make output parseable
-            response['customer_display'] = subscription.customer.displayname
-            response['product_display'] = subscription.product.name
-            response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
-            if response['enddate']:
-                response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
-            
-            # The decimal can't be serialized by json
-            response['discount'] = str(response['discount'])
+        # Make output parseable
+        response['customer_display'] = subscription.customer.displayname
+        response['product_display'] = subscription.product.name
+        response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
+        if response['enddate']:
+            response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
 
-            # Give the id to the frontend
-            response['id'] = subscription.id
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-        
-            return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        # The decimal can't be serialized by json
+        response['discount'] = str(response['discount'])
+
+        # Give the id to the frontend
+        response['id'] = subscription.id
+
+        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
 
     # Updates come in as PUT subscriptiondata/id
     elif request.method == "PUT":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
-        try:
-            subscription = Subscription.objects.get(pk=response['id'])
-            subscription.product = Product.objects.get(pk=int(response['product']))
-            subscription.customer = Relation.objects.get(pk=int(response['customer']))
-            subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
 
-            if response['enddate']:
-                subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
-            else:
-                subscription.end_date = None
+        subscription = Subscription.objects.get(pk=response['id'])
+        subscription.product = Product.objects.get(pk=int(response['product']))
+        subscription.customer = Relation.objects.get(pk=int(response['customer']))
+        subscription.start_date = datetime.strptime(response['startdate'], '%Y-%m-%dT%H:%M:%S')
 
-            subscription.discount = Decimal(response['discount'])
-            subscription.intervals_per_invoice = response['intervals_per_invoice']
-            subscription.extra_info = response['extra_info']
-            subscription.active = response['active']
-            subscription.save()
-
-            # Make output parseable
-            response['customer_display'] = subscription.customer.displayname
-            response['product_display'] = subscription.product.name
-            response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
-            if response['enddate']:
-                response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
-            
-            # The decimal can't be serialized by json
-            response['discount'] = str(response['discount'])
-        except:
-            db_trans.rollback()
-            raise
+        if response['enddate']:
+            subscription.end_date = datetime.strptime(response['enddate'], '%Y-%m-%dT%H:%M:%S')
         else:
-            db_trans.commit()
+            subscription.end_date = None
 
-            return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        subscription.discount = Decimal(response['discount'])
+        subscription.intervals_per_invoice = response['intervals_per_invoice']
+        subscription.extra_info = response['extra_info']
+        subscription.active = response['active']
+        subscription.save()
+
+        # Make output parseable
+        response['customer_display'] = subscription.customer.displayname
+        response['product_display'] = subscription.product.name
+        response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
+        if response['enddate']:
+            response['enddate'] = subscription.end_date.strftime("%Y-%m-%d")
+
+        # The decimal can't be serialized by json
+        response['discount'] = str(response['discount'])
+
+        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
         
     # A delete is done via DELETE subscriptiondata/id
     elif request.method == "DELETE":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
-        try:
-            subscription = Subscription.objects.get(pk=response['id'])
-            subscription.delete()
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-            return HttpResponse(json.dumps({ 'success': True }))
-    else:
-        try:
-            # TODO: Allow for filtering here!
-            subscriptions = Subscription.objects.all()
-        
-            response = []
-            for subscription in subscriptions:
-                response.append({
-                        'id': subscription.id,
-                        'product': subscription.product.id,
-                        'product_display': subscription.product.name,
-                        'customer': subscription.customer.id,
-                        'customer_display': subscription.customer.displayname,
-                        'startdate': subscription.start_date.strftime("%Y-%m-%d"),
-                        'enddate': subscription.end_date.strftime("%Y-%m-%d") 
-                                   if subscription.end_date else None,
-                        'discount': int(subscription.discount*10000)/10000,
-                        'intervals_per_invoice': subscription.intervals_per_invoice,
-                        'extra_info': subscription.extra_info,
-                        'active': subscription.active,
-                    })
 
-            # This temporary variable is for benefit of django's lazy database retrieval that does 
-            # database transactions late, when the json is built
-        except:
-            db_trans.rollback()
-            raise
-        else:
-            db_trans.commit()
-            return HttpResponse(json.dumps({ 'success': True, 'data': response }))
-                    
+        subscription = Subscription.objects.get(pk=response['id'])
+        subscription.delete()
+
+        return HttpResponse(json.dumps({ 'success': True }))
+    else:
+        # TODO: Allow for filtering here!
+        subscriptions = Subscription.objects.all()
+
+        response = []
+        for subscription in subscriptions:
+            response.append({
+                    'id': subscription.id,
+                    'product': subscription.product.id,
+                    'product_display': subscription.product.name,
+                    'customer': subscription.customer.id,
+                    'customer_display': subscription.customer.displayname,
+                    'startdate': subscription.start_date.strftime("%Y-%m-%d"),
+                    'enddate': subscription.end_date.strftime("%Y-%m-%d")
+                               if subscription.end_date else None,
+                    'discount': int(subscription.discount*10000)/10000,
+                    'intervals_per_invoice': subscription.intervals_per_invoice,
+                    'extra_info': subscription.extra_info,
+                    'active': subscription.active,
+                })
+
+        return HttpResponse(json.dumps({ 'success': True, 'data': response }))

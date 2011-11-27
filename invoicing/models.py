@@ -19,7 +19,8 @@ SynLogistics: Invoice class
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from django.db import models, transaction as db_trans
-from main.models import BookingPeriod, Settings
+from django.core.exceptions import ImproperlyConfigured
+from main.models import BookingPeriod
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -29,6 +30,7 @@ from cStringIO import StringIO
 from pyPdf import PdfFileReader, PdfFileWriter
 from os.path import exists
 from settings import STATIC_ROOT
+from constance import config
 import os
 import errno
 
@@ -37,14 +39,13 @@ class Invoice(models.Model):
     customer = models.ForeignKey('main.Relation', related_name='invoices', null=False)
     date = models.DateField(null=False, db_index=True)
     booking_period = models.ForeignKey('main.BookingPeriod', null=False)
-    number = models.IntegerField(null=False, db_index=True)
-    full_invoice_no = models.CharField(max_length=25, db_index=True)
+    number = models.IntegerField(null=False, db_index=True, editable=False)
+    full_invoice_no = models.CharField(max_length=25, db_index=True, editable=False)
     
     class Meta:
         """ Metadata """
         db_table = u'invoices'
 
-    @db_trans.commit_manually
     def save(self, *args, **kwargs):
         """ 
         Assign invoice number and save to the database. This extends the default django save() function.
@@ -53,43 +54,32 @@ class Invoice(models.Model):
         assert self.customer
         assert self.date
 
-        try:
-            # Get the active booking period for this invoice
-            booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
-            assert booking_periods.count() == 1
-            self.booking_period = booking_periods[0]
-        
-            # Get the list of invoices in this booking period ordered by number
-            invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
+        # Get the active booking period for this invoice
+        booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
+        assert booking_periods.count() == 1
+        self.booking_period = booking_periods[0]
 
-            # Select the first available invoice number
-            self.number = 1
-            for invoice in invoices:
-                if self.number < invoice.number:
-                    break
-                self.number += 1
+        # Get the list of invoices in this booking period ordered by number
+        invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
 
-            # We need the settings for the invoice format string    
-            settings = Settings.objects.all()
-            assert settings.count() == 1
-            settings = settings[0]
+        # Select the first available invoice number
+        self.number = 1
+        for invoice in invoices:
+            if self.number < invoice.number:
+                break
+            self.number += 1
 
-            # Create the full invoice number based on the user defined format string
-            self.full_invoice_no = settings.invoice_format_string % {
-                    'booking_period': self.booking_period.number,
-                    'year': self.date.year,
-                    'month': self.date.month,
-                    'day': self.date.day,
-                    'number': self.number, }
+        # Create the full invoice number based on the user defined format string
+        self.full_invoice_no = config.invoice_number_format % {
+                'booking_period': self.booking_period.number,
+                'year': self.date.year,
+                'month': self.date.month,
+                'day': self.date.day,
+                'number': self.number, }
 
-            # Call the superclass's save function to write to the database
-            super(Invoice, self).save(*args, **kwargs)
+        # Call the superclass's save function to write to the database
+        super(Invoice, self).save(*args, **kwargs)
 
-        except:
-            db_trans.rollback()            
-            raise
-        else:
-            db_trans.commit()
 
     def book(self):
         """ Books the invoice """
@@ -110,13 +100,8 @@ class Invoice(models.Model):
 
         # FIXME This function only works for periodic invoices at this time
 
-        # We need the settings for the letterhead paper path
-        settings = Settings.objects.all()
-        assert settings.count() == 1
-        settings = settings[0]
-
         # Verify the watermark PDF exists or bail
-        if not exists(settings.letterhead_paper_path):
+        if not exists(config.letterhead_paper_path):
             raise IOError(errno.ENOENT)
 
         # Read the letterhead paper
