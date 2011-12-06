@@ -44,6 +44,10 @@ class Relation(models.Model):
     invoice_by_email = models.BooleanField(default=True)
     invoice_email = models.CharField(max_length=180, blank=True)
     notes = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.displayname
+
     class Meta:
         """ Metadata """
         db_table = u'relations'
@@ -60,6 +64,10 @@ class Contact(models.Model):
     email = models.CharField(max_length=180, blank=True)
     notes = models.TextField(blank=True)
     active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.displayname
+
     class Meta:
         """ Metadata """
         db_table = u'contacts'
@@ -71,6 +79,10 @@ class PurchaseOrder(models.Model):
     order_method = models.IntegerField(null=True, blank=True)
     relation_contact = models.ForeignKey(Contact, related_name='purchase_orders')
     external_order_reference = models.CharField(max_length=90, blank=True)
+
+    def __unicode__(self):
+        return u'%d %s %s' % (self.id, self.purchasing_date, self.customer.displayname)
+
     class Meta:
         """ Metadata """
         db_table = u'purchase_orders'
@@ -85,6 +97,10 @@ class Location(models.Model):
     phone = models.CharField(max_length=60, blank=True)
     location_type = models.IntegerField(null=True, blank=True)
     active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         """ Metadata """
         db_table = u'locations'
@@ -94,6 +110,10 @@ class ProductGroup(models.Model):
     name = models.CharField(unique=True, max_length=255, blank=False)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         """ Metadata """
         db_table = u'product_groups'
@@ -124,11 +144,14 @@ class Product(models.Model):
     invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
     invoice_interval_count = models.IntegerField(null=True, default=1)
 
+    def __unicode__(self):
+        return u'%s %s' % (self.code, self.name)
+
     def get_price(self, date=None):
         """ Get the active price for a given date or now.. """
         if date == None:
             date = datetime.utcnow()
-    
+
         price = ProductSellingprice.objects.raw("SELECT s1.* FROM product_sellingprices s1 " +
                 "LEFT JOIN product_sellingprices s2 ON s1.product_id=s2.product_id " +
                 "AND s1.commencing_date < s2.commencing_date " +
@@ -136,7 +159,7 @@ class Product(models.Model):
         for p in price:
             return p.price
         return None
-        
+
 
     class Meta:
         """ Metadata """
@@ -147,6 +170,10 @@ class Subproduct(models.Model):
     product = models.ForeignKey(Product, related_name='subproducts')
     ean_upc_code = models.CharField(unique=True, max_length=180, blank=False)
     name = models.CharField(max_length=300, blank=False)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         """ Metadata """
         db_table = u'subproducts'
@@ -166,6 +193,10 @@ class InternalOrder(models.Model):
     for_customer = models.BooleanField(default=False)
     customer = models.ForeignKey(Relation, related_name='internal_orders')
     customer_reference = models.CharField(max_length=180, blank=True)
+
+    def __unicode__(self):
+        return u'%d %s %s' % (self.id, self.sale_order_date, self.customer.displayname)
+
     class Meta:
         """ Metadata """
         db_table = u'internal_order'
@@ -181,6 +212,10 @@ class PurchaseOrderItem(models.Model):
     subproduct = models.ForeignKey(Subproduct, related_name='purchase_data')
     supplier_has_in_stock = models.BooleanField(default=False)
     expected_date = models.DateField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.subproduct
+
     class Meta:
         """ Metadata """
         db_table = u'purchase_order_data'
@@ -199,6 +234,10 @@ class Item(models.Model):
     written_off_by_user = models.ForeignKey(User, related_name='items_writtenoff')
     location = models.ForeignKey(Location, related_name='items')
     arrival_date = models.DateTimeField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.serial_number
+
     class Meta:
         """ Metadata """
         db_table = u'items'
@@ -211,6 +250,10 @@ class Container(models.Model):
     create_date = models.DateTimeField(null=True, blank=True)
     display_contents = models.IntegerField(null=True, blank=True)
     sold = models.IntegerField(null=True, blank=True)
+
+    def __unicode__(self):
+        return u'%s %s' % (self.container_number, self.name)
+
     class Meta:
         """ Metadata """
         db_table = u'containers'
@@ -220,6 +263,10 @@ class ContainerItem(models.Model):
     container = models.ForeignKey(Container, related_name='data')
     item = models.ForeignKey(Item, related_name='container_data')
     added_date = models.DateTimeField(null=True, blank=True)
+
+    def __unicode__(self):
+        return unicode(self.item)
+
     class Meta:
         """ Metadata """
         db_table = u'container_data'
@@ -230,6 +277,10 @@ class ContainerTemplate(models.Model):
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     products = models.ManyToManyField('product', symmetrical=False)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         """ Metadata """
         db_table = u'container_templates'
