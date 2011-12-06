@@ -72,7 +72,7 @@ def get_products(request):
 
     products = Product.objects.filter(active=1)
     products = products.filter(name__icontains=request.GET['query'])
-    products = products.filter(product_type=03)
+    products = products.filter(product_type=02)
     products = products.order_by('name')
 
     response = "{products:["
