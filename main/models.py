@@ -291,6 +291,10 @@ class Inventory(models.Model):
     date = models.DateTimeField(null=True, blank=True)
     name = models.CharField(max_length=120, blank=True)
     notes = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         """ Metadata """
         db_table = u'inventories'
@@ -301,6 +305,10 @@ class InventoryItem(models.Model):
     item = models.ForeignKey(Item, related_name='item')
     location = models.ForeignKey(Location, related_name='+')
     value = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.item
+
     class Meta:
         """ Metadata """
         db_table = u'inventory_data'
@@ -312,6 +320,10 @@ class ProductSellingprice(models.Model):
     commencing_date = models.DateField(null=False)
     set_date = models.DateField(null=False)
     price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+
+    def __unicode__(self):
+        return '%s: %s: %03.05d' % (self.product, self.commencing_date, self.price)
+
     class Meta:
         """ Metadata """
         db_table = u'product_sellingprices'
@@ -320,6 +332,10 @@ class BookingPeriod(models.Model):
     number = models.IntegerField(null=False, db_index=True)
     start_date = models.DateField(null=False)
     end_date = models.DateField(null=False)
+
+    def __unicode__(self):
+        return u'%d (%s - %s)' % (self.number, self.start_date, self.end_date)
+
     class Meta:
         """ Metadata """
         db_table = u'booking_periods'

@@ -41,7 +41,10 @@ class Invoice(models.Model):
     booking_period = models.ForeignKey('main.BookingPeriod', null=False)
     number = models.IntegerField(null=False, db_index=True, editable=False)
     full_invoice_no = models.CharField(max_length=25, db_index=True, editable=False)
-    
+
+    def __unicode__(self):
+        return u'%s: %s (%s)' % (self.full_invoice_no, self.customer, self.date)
+
     class Meta:
         """ Metadata """
         db_table = u'invoices'
@@ -211,6 +214,10 @@ class InvoiceItem(models.Model):
     count = models.IntegerField(null=False)
     amount = models.DecimalField(decimal_places=5, max_digits=25, null=False)
     vat = models.ForeignKey('accounting.Vat', null=True)
+
+    def __unicode__(self):
+        return u'%s (%s)' % (self.product, self.item)
+
     class Meta:
         """ Metadata """
         db_table = u'invoice_data'
@@ -226,6 +233,10 @@ class Subscription(models.Model):
     intervals_per_invoice = models.IntegerField(null=False, default=0)
     extra_info = models.TextField(null=False, blank=False)
     active = models.BooleanField(null=False, default=1)
+
+    def __unicode__(self):
+        return u'%s: %s' % (self.customer, self.product)
+
     class Meta:
         """ Metadata """
         db_table = u'subscriptions'
