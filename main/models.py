@@ -272,13 +272,3 @@ class BookingPeriod(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'booking_periods'
-    
-
-class Settings(models.Model):
-    """ SynLogistics application settings """
-    invoice_format_string = models.CharField(max_length=60, null=False, blank=False)
-    letterhead_paper_path = models.CharField(max_length=180, null=False, blank=False)
-    periodic_accounts_receivable = models.CharField(max_length=180, null=False, blank=False)
-    class Meta:
-        """ Metadata """
-        db_table = u'settings'
