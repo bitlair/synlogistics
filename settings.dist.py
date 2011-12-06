@@ -156,3 +156,10 @@ LOGGING = {
         },
     }
 }
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+CONSTANCE_CONFIG = {
+    'invoice_number_format': ('%(booking_period)02d%(month)02dSL%(number)06d', 'Format string for the invoice number'),
+    'letterhead_paper_path': ('', 'Path to letterhead used for invoices'),
+    'periodic_accounts_receivable': ('', '?'),
+}
