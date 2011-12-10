@@ -24,6 +24,19 @@ from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 admin.autodiscover()
 
+from tastypie.api import Api
+from accounting.api import *
+from invoicing.api import *
+from main.api import *
+
+# DRY. This gets all the just imported resource classes from the local
+# scope, instantiates them and registers them with the API.
+rest_api = Api(api_name='synlogistics')
+for name in dir():
+    if name.endswith("Resource") and name != "ModelResource":
+        klass = locals()[name]
+        if issubclass(klass, ModelResource):
+            rest_api.register(klass())
 
 urlpatterns = patterns('',
     url(r'^$', 'main.views.layout'),
@@ -45,4 +58,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    url(r'^api/', include(rest_api.urls)),
 )
