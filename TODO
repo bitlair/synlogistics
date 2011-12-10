@@ -3,6 +3,11 @@ Wilco:
 * Service product support, including periodically invoicable product
 * Invoicing, including periodic invoicing
 
+Jeroen:
+* Multitenancy:
+  - http://tidbids.posterous.com/saas-with-django-and-postgresql-schemas
+  - https://github.com/allanlei/django-multitenant
+* Use tastypie for rest interface
 
 Unassigned:
 * Relation management support
@@ -39,6 +44,4 @@ Future ideas (this is all speculation! Do it right or leave to others!!):
 * Add issue tracker to track issues for relations/projects
 * Add work log book for relations
 * Add planning module using external CalDAV server, syncing relations <-> w/ CardDAV and adding X-Relation links
-* 
-
 
