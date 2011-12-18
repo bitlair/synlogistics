@@ -208,7 +208,7 @@ class InvoiceItem(models.Model):
     """ Invoice contents """
     invoice = models.ForeignKey(Invoice, related_name="items")
     item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
-    product = models.ForeignKey('main.Product', related_name="invoice_date")
+    product = models.ForeignKey('main.Product', related_name="invoice_data")
     period = models.CharField(max_length=30, blank=True, null=True)
     description = models.CharField(max_length=255, blank=False, null=False)
     count = models.IntegerField(null=False)
