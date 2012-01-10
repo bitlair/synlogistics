@@ -360,7 +360,7 @@ class Account(models.Model):
     account_type = models.IntegerField(null=False, blank=False, choices=TYPE_CHOICES)
     is_readonly = models.BooleanField(null=False, default=False)
     _balance = models.DecimalField(decimal_places=5, max_digits=25, null=False, blank=False, default=0.0)
-    parent = models.ForeignKey('self', null=True, related_name='children')
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
 
     class Meta:
         """ Metadata """
