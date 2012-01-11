@@ -40,7 +40,7 @@ class Relation(models.Model):
     active_customer = models.BooleanField(default=True)
     active_supplier = models.BooleanField(default=False)
     invoice_name = models.CharField(max_length=180, blank=True)
-    invoice_contact = models.ForeignKey('Contact', blank=False, related_name='+')
+    invoice_contact = models.ForeignKey('Contact', blank=True, null=True, related_name='+')
     invoice_by_email = models.BooleanField(default=True)
     invoice_email = models.CharField(max_length=180, blank=True)
     notes = models.TextField(blank=True)
