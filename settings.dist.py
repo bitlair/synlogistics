@@ -135,6 +135,22 @@ INSTALLED_APPS = (
     'invoicing',
 )
 
+# Settings for django-sphinx-autodoc
+# Excludes all external apps
+DS_ROOT = "/usr/share/synlogistics/doc/source/"
+DS_EXCLUDED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
+    'django.contrib.admindocs',
+    'constance',
+    'constance.backends.database',
+)
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.

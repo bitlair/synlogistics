@@ -3,3 +3,4 @@ settings.py
 *~
 test.db
 .DS_Store
+doc/build
