@@ -44,19 +44,34 @@ class AccountTestCase(unittest.TestCase):
         self.expenses_account.delete()
         self.relation.delete()
 
+    def do_transaction(self, source, dest, amount):
+        transaction = Transaction()
+        transaction.relation = self.relation
+        transaction.date = datetime.strptime('2012-01-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
+        transaction.account = source
+        transaction.transfer = dest
+        transaction.description = 'Monies!'
+        transaction.amount = amount
+        transaction.save()
+
     def test_account_start_balance_is_zero(self):
         self.assertEqual(self.banking_account.balance, 0.0)
         self.assertEqual(self.expenses_account.balance, 0.0)
 
     def test_transaction_from_banking_to_expenses_account(self):
-        transaction = Transaction()
-        transaction.relation = self.relation
-        transaction.date = datetime.strptime('2012-01-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
-        transaction.account = self.banking_account
-        transaction.transfer = self.expenses_account
-        transaction.description = 'Monies!'
-        transaction.amount = -10.0
-        transaction.save()
+        self.do_transaction(self.banking_account, self.expenses_account, -10.0)
 
         self.assertEqual(self.banking_account.balance, -10.0)
         self.assertEqual(self.expenses_account.balance, 10.0)
+
+    def test_balance_propagates_to_parent(self):
+        parent_account = Account.objects.create(
+                number = '67890',
+                name = 'parent_account',
+                account_type = '40')
+
+        self.expenses_account.parent = parent_account
+        self.expenses_account.save()
+        self.do_transaction(self.banking_account, self.expenses_account, -10.0)
+
+        self.assertEqual(parent_account.balance, 10.0)
