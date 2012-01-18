@@ -152,10 +152,9 @@ class Product(models.Model):
         if date == None:
             date = datetime.utcnow()
 
-        price = ProductSellingprice.objects.raw("SELECT s1.* FROM product_sellingprices s1 " +
-                "LEFT JOIN product_sellingprices s2 ON s1.product_id=s2.product_id " +
-                "AND s1.commencing_date < s2.commencing_date " +
-                "WHERE s2.commencing_date IS NULL AND s1.product_id=%s", [ self.id ])
+        price = ProductSellingprice.objects.raw("SELECT id FROM product_sellingprices " +
+                "WHERE product_id=%s AND commencing_date=(SELECT MAX(commencing_date) FROM product_sellingprices " +
+                "WHERE commencing_date < %s AND product_id = %s)", [ self.id, date.strftime('%Y-%m-%d:%H:%M:%S'), self.id ])
         for p in price:
             return p.price
         return None
@@ -317,7 +316,7 @@ class InventoryItem(models.Model):
 class ProductSellingprice(models.Model):
     """ Active selling prices of products for given dates. """
     product = models.ForeignKey(Product, related_name='sellingprices')
-    commencing_date = models.DateField(null=False)
+    commencing_date = models.DateField(null=False, unique=True)
     set_date = models.DateField(null=False)
     price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 
