@@ -36,10 +36,10 @@ import errno
 
 class Invoice(models.Model):
     """ Invoice """
-    customer = models.ForeignKey('main.Relation', related_name='invoices', null=False)
-    date = models.DateField(null=False, db_index=True)
-    booking_period = models.ForeignKey('main.BookingPeriod', null=False)
-    number = models.IntegerField(null=False, db_index=True, editable=False)
+    customer = models.ForeignKey('main.Relation', related_name='invoices')
+    date = models.DateField(db_index=True)
+    booking_period = models.ForeignKey('main.BookingPeriod')
+    number = models.IntegerField(db_index=True, editable=False)
     full_invoice_no = models.CharField(max_length=25, db_index=True, editable=False)
 
     def __unicode__(self):
@@ -206,9 +206,9 @@ class InvoiceItem(models.Model):
     item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
     product = models.ForeignKey('main.Product', related_name="invoice_data")
     period = models.CharField(max_length=30, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=False, null=False)
-    count = models.IntegerField(null=False)
-    amount = models.DecimalField(decimal_places=5, max_digits=25, null=False)
+    description = models.CharField(max_length=255)
+    count = models.IntegerField()
+    amount = models.DecimalField(decimal_places=5, max_digits=25)
     vat = models.ForeignKey('accounting.Vat', null=True)
 
     def __unicode__(self):
@@ -222,13 +222,13 @@ class Subscription(models.Model):
     """ Customer subscriptions to products of type 02 'Periodic'. """
     product = models.ForeignKey('main.Product', related_name='subscriptions')
     customer = models.ForeignKey('main.Relation', related_name='subscriptions')
-    start_date = models.DateTimeField(null=False, blank=False)
+    start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True)
-    discount = models.DecimalField(decimal_places=5, max_digits=9, null=False, default=0.0)
+    discount = models.DecimalField(decimal_places=5, max_digits=9, default=0.0)
     invoiced_until_date = models.DateTimeField(null=True)
-    intervals_per_invoice = models.IntegerField(null=False, default=0)
-    extra_info = models.TextField(null=False, blank=False)
-    active = models.BooleanField(null=False, default=1)
+    intervals_per_invoice = models.IntegerField(default=0)
+    extra_info = models.TextField()
+    active = models.BooleanField(default=1)
 
     def __unicode__(self):
         return u'%s: %s' % (self.customer, self.product)

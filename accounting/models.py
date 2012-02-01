@@ -354,12 +354,12 @@ class Account(models.Model):
         (20, 'Equity'),
         (40, 'Expenses'),
         (80, 'Income'))
-    number = models.CharField(unique=True, max_length=24, blank=False)
-    name = models.CharField(max_length=180, blank=False)
+    number = models.CharField(unique=True, max_length=24)
+    name = models.CharField(max_length=180)
     description = models.CharField(max_length=765, blank=True)
-    account_type = models.IntegerField(null=False, blank=False, choices=TYPE_CHOICES)
-    is_readonly = models.BooleanField(null=False, default=False)
-    _balance = models.DecimalField(decimal_places=5, max_digits=25, null=False, blank=False, default=0.0)
+    account_type = models.IntegerField(choices=TYPE_CHOICES)
+    is_readonly = models.BooleanField(default=False)
+    _balance = models.DecimalField(decimal_places=5, max_digits=25, default=0.0)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
 
     class Meta:
@@ -398,10 +398,10 @@ class Account(models.Model):
 
 class Transaction(models.Model):
     """ Transactions in the accounting ledger """
-    date = models.DateField(null=False, blank=False)
+    date = models.DateField()
     account = models.ForeignKey(Account, related_name='transactions')
     transfer = models.ForeignKey(Account, related_name='+')
-    related = models.ManyToManyField('self', blank=False)
+    related = models.ManyToManyField('self')
     relation = models.ForeignKey('main.Relation', null=True, related_name='transactions')
     description = models.CharField(max_length=765, blank=True)
     amount = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)

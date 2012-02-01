@@ -25,7 +25,7 @@ from datetime import datetime
 
 class Relation(models.Model):
     """ Relations: customers, members or suppliers """
-    displayname = models.CharField(unique=True, max_length=180, blank=False)
+    displayname = models.CharField(unique=True, max_length=180)
     visit_address = models.CharField(max_length=180, blank=True, default='')
     visit_postalcode_zip = models.CharField(max_length=30, blank=True, null=True)
     visit_city = models.CharField(max_length=180, blank=True, null=True)
@@ -55,7 +55,7 @@ class Relation(models.Model):
 class Contact(models.Model):
     """ Contacts per relation """
     relation = models.ForeignKey(Relation, related_name='contacts')
-    displayname = models.CharField(max_length=180, blank=False)
+    displayname = models.CharField(max_length=180)
     givenname = models.CharField(max_length=75, blank=True)
     infix = models.CharField(max_length=75, blank=True)
     surname = models.CharField(max_length=180, blank=True)
@@ -107,7 +107,7 @@ class Location(models.Model):
 
 class ProductGroup(models.Model):
     """ Product groups """
-    name = models.CharField(unique=True, max_length=255, blank=False)
+    name = models.CharField(unique=True, max_length=255)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
@@ -130,9 +130,9 @@ class Product(models.Model):
         (02, 'Monthly'),
         (03, 'Quarterly'),
         (04, 'Annually'))
-    product_type = models.IntegerField(null=False, choices=TYPE_CHOICES)
-    product_group = models.ForeignKey(ProductGroup, related_name='products', null=False)
-    code = models.CharField(unique=True, max_length=120, blank=False)
+    product_type = models.IntegerField(choices=TYPE_CHOICES)
+    product_group = models.ForeignKey(ProductGroup, related_name='products')
+    code = models.CharField(unique=True, max_length=120)
     name = models.CharField(max_length=300, blank=True)
     description = models.TextField(blank=True)
     minimum_stock = models.IntegerField(null=True, blank=True)
@@ -167,8 +167,8 @@ class Product(models.Model):
 class Subproduct(models.Model):
     """ Specific product, like "High-End 48p 10GbE Switch" -> "Arista 7148S" or "Linksys WRT54g" -> "Linksys WRT54g rev. 3". """
     product = models.ForeignKey(Product, related_name='subproducts')
-    ean_upc_code = models.CharField(unique=True, max_length=180, blank=False)
-    name = models.CharField(max_length=300, blank=False)
+    ean_upc_code = models.CharField(unique=True, max_length=180)
+    name = models.CharField(max_length=300)
 
     def __unicode__(self):
         return self.name
@@ -221,7 +221,7 @@ class PurchaseOrderItem(models.Model):
 
 class Item(models.Model):
     """ Individual units that are in stock. """
-    serial_number = models.CharField(unique=True, max_length=180, blank=False)
+    serial_number = models.CharField(unique=True, max_length=180)
     purchase_order_data = models.ForeignKey(PurchaseOrderItem, related_name='items')
     input_by_user = models.ForeignKey(User, related_name='items_input')
     reserved = models.BooleanField(default=False)
@@ -243,7 +243,7 @@ class Item(models.Model):
 
 class Container(models.Model):
     """ Specific containers that contain multiple items """
-    container_number = models.CharField(unique=True, max_length=180, blank=False)
+    container_number = models.CharField(unique=True, max_length=180)
     name = models.CharField(max_length=180, blank=True)
     container_template = models.IntegerField(null=True, blank=True)
     create_date = models.DateTimeField(null=True, blank=True)
@@ -272,7 +272,7 @@ class ContainerItem(models.Model):
 
 class ContainerTemplate(models.Model):
     """ Template for specifying/ordering what should be in a container """
-    name = models.CharField(unique=True, max_length=255, blank=False)
+    name = models.CharField(unique=True, max_length=255)
     description = models.TextField(blank=True)
     active = models.BooleanField(default=True)
     products = models.ManyToManyField('product', symmetrical=False)
@@ -316,8 +316,8 @@ class InventoryItem(models.Model):
 class ProductSellingprice(models.Model):
     """ Active selling prices of products for given dates. """
     product = models.ForeignKey(Product, related_name='sellingprices')
-    commencing_date = models.DateField(null=False, unique=True)
-    set_date = models.DateField(null=False)
+    commencing_date = models.DateField(unique=True)
+    set_date = models.DateField()
     price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
 
     def __unicode__(self):
@@ -328,9 +328,9 @@ class ProductSellingprice(models.Model):
         db_table = u'product_sellingprices'
 
 class BookingPeriod(models.Model):
-    number = models.IntegerField(null=False, db_index=True)
-    start_date = models.DateField(null=False)
-    end_date = models.DateField(null=False)
+    number = models.IntegerField(db_index=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
 
     def __unicode__(self):
         return u'%d (%s - %s)' % (self.number, self.start_date, self.end_date)
