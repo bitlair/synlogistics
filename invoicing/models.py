@@ -53,10 +53,6 @@ class Invoice(models.Model):
         """ 
         Assign invoice number and save to the database. This extends the default django save() function.
         """
-        # Assert that the mandatory fields are set
-        assert self.customer
-        assert self.date
-
         # Get the active booking period for this invoice
         booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
         assert booking_periods.count() == 1
