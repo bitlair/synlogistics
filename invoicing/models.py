@@ -4,6 +4,7 @@ SynLogistics: Invoice class
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
+# Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
 #   
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -20,6 +21,7 @@ SynLogistics: Invoice class
 #
 from django.db import models, transaction as db_trans
 from django.core.exceptions import ImproperlyConfigured
+from durationfield.db.models.fields.duration import DurationField
 from main.models import BookingPeriod
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
@@ -31,6 +33,8 @@ from pyPdf import PdfFileReader, PdfFileWriter
 from os.path import exists
 from settings import STATIC_ROOT
 from constance import config
+from datetime import datetime, time, date
+from decimal import Decimal
 import os
 import errno
 
@@ -237,3 +241,40 @@ class Subscription(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'subscriptions'
+
+class TimeBillingRate(models.Model):
+    name = models.CharField(max_length=30)
+    rate = models.DecimalField(decimal_places=2, max_digits=12)
+    vat = models.ForeignKey('accounting.Vat')
+
+    def __unicode__(self):
+        return u'%s: %.2f' % (self.name, self.rate)
+
+class TimeKeepingEntry(models.Model):
+    rate = models.ForeignKey('TimeBillingRate')
+    customer = models.ForeignKey('main.Relation')
+    description = models.TextField()
+    date = models.DateField(default=date.today, blank=True, null=True)
+    start_time = models.TimeField(blank=True, null=True)
+    duration = DurationField()
+    invoice = models.ForeignKey('Invoice', blank=True, null=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def __unicode__(self):
+        if self.date:
+            return u'%s: %s (%s)' % (self.date, self.description, self.customer)
+        else:
+            return u'%s (%s)' % (self.description, self.customer)
+
+    @property
+    def end_time(self):
+        if self.start_time:
+            return (datetime.combine(date.today(), self.start_time) + self.duration).time()
+        else:
+            return None
+
+    @property
+    def hours(self):
+        return self.duration.seconds/Decimal(3600)
