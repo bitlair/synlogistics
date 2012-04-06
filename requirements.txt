@@ -1,0 +1,9 @@
+Django
+django-debug-toolbar
+django-extensions
+south
+django-constance
+django-picklefield
+django-durationfield
+pypdf
+reportlab
