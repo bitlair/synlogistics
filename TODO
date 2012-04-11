@@ -8,6 +8,7 @@ Jeroen:
   - http://tidbids.posterous.com/saas-with-django-and-postgresql-schemas
   - https://github.com/allanlei/django-multitenant
 * Use tastypie for rest interface
+* Use django-money: http://www.progsoc.org/~wildfire/aum/2012/04/10#thestateofmoney
 
 Unassigned:
 * Relation management support
