@@ -278,3 +278,13 @@ class TimeKeepingEntry(models.Model):
     @property
     def hours(self):
         return self.duration.seconds/Decimal(3600)
+
+class SimpleInvoiceItem(models.Model):
+    invoice = models.ForeignKey(Invoice, related_name="simple_items")
+    description = models.TextField()
+    count = models.DecimalField(decimal_places=2, max_digits=12)
+    price = models.DecimalField(decimal_places=5, max_digits=25)
+    vat = models.ForeignKey('accounting.Vat', null=True)
+
+    def __unicode__(self):
+        return u'%s' % (self.description)
