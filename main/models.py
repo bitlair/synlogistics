@@ -35,7 +35,7 @@ class Relation(models.Model):
     postal_zip_code = models.CharField(max_length=30, blank=True)
     postal_city = models.CharField(max_length=180, blank=True)
     postal_country = models.CharField(max_length=180, blank=True)
-    email = models.CharField(max_length=180, blank=True)
+    email = models.EmailField(max_length=254, blank=True)
     phone1 = models.CharField(max_length=60, blank=True)
     phone2 = models.CharField(max_length=60, blank=True)
     active_customer = models.BooleanField(default=True)
@@ -43,7 +43,7 @@ class Relation(models.Model):
     invoice_name = models.CharField(max_length=180, blank=True)
     invoice_contact = models.ForeignKey('Contact', blank=True, null=True, related_name='+')
     invoice_by_email = models.BooleanField(default=True)
-    invoice_email = models.CharField(max_length=180, blank=True)
+    invoice_email = models.EmailField(max_length=254, blank=True)
     notes = models.TextField(blank=True)
 
     def __unicode__(self):
@@ -62,7 +62,7 @@ class Contact(models.Model):
     surname = models.CharField(max_length=180, blank=True)
     phone = models.CharField(max_length=60, blank=True)
     mobilephone = models.CharField(max_length=60, blank=True)
-    email = models.CharField(max_length=180, blank=True)
+    email = models.EmailField(max_length=254, blank=True)
     notes = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
