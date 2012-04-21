@@ -66,9 +66,15 @@ class Invoice(models.Model):
 
             # Select the first available invoice number
             if config.invoice_number_per_booking_period:
-                self.number = Invoice.objects.filter(booking_period=self.booking_period).aggregate(Max('number'))['number__max'] + 1
+                number_max = Invoice.objects.filter(booking_period=self.booking_period).aggregate(Max('number'))['number__max']
             else:
-                self.number = Invoice.objects.all().aggregate(Max('number'))['number__max'] + 1
+                number_max = Invoice.objects.all().aggregate(Max('number'))['number__max']
+
+            # When there aren't any invoices, number_max will be None
+            if number_max:
+                self.number = number_max + 1
+            else:
+                self.number = 1
 
             # Create the full invoice number based on the user defined format string
             self.full_invoice_no = config.invoice_number_format % {

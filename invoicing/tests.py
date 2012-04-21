@@ -1,6 +1,6 @@
 from django.test import TestCase
-from datetime import timedelta, time
-from main.models import Relation
+from datetime import timedelta, time, date
+from main.models import Relation, BookingPeriod
 from accounting.models import Vat
 from .models import *
 
@@ -17,3 +17,19 @@ class TimeKeepingTest(TestCase):
         self.assertEqual(self.entry2.end_time, time(hour=11, minute=45))
         self.assertEqual(self.entry1.hours, 2)
         self.assertEqual(self.entry2.hours, 1.25)
+
+class InvoiceTest(TestCase):
+    def setUp(self):
+        self.customer = Relation.objects.create(name="Customer")
+        self.booking_period1 = BookingPeriod.objects.create(number=2011, start_date=date(2011,1,1), end_date=date(2011,12,31))
+        self.booking_period2 = BookingPeriod.objects.create(number=2012, start_date=date(2012,1,1), end_date=date(2012,12,31))
+        self.booking_period3 = BookingPeriod.objects.create(number=2013, start_date=date(2013,1,1), end_date=date(2013,12,31))
+
+    def test_invoice(self):
+        invoice1 = Invoice.objects.create(customer=self.customer, date=date(2012, 4, 21))
+        invoice2 = Invoice.objects.create(customer=self.customer, date=date(2012, 4, 21))
+        invoice3 = Invoice.objects.create(customer=self.customer, date=date(2012, 4, 21))
+        self.assertEqual(invoice1.booking_period, self.booking_period2)
+        self.assertEqual(invoice1.number, 1)
+        self.assertEqual(invoice2.number, 2)
+        self.assertEqual(invoice3.number, 3)
