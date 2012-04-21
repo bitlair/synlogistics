@@ -177,6 +177,7 @@ LOGGING = {
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
     'invoice_number_format': ('%(booking_period)02d%(month)02dSL%(number)06d', 'Format string for the invoice number'),
+    'invoice_number_per_booking_period': (True, 'Set to true when each booking period should have its own invoice number series'),
     'letterhead_paper_path': ('', 'Path to letterhead used for invoices'),
     'periodic_accounts_receivable': ('', '?'),
 }

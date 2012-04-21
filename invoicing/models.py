@@ -21,6 +21,7 @@ SynLogistics: Invoice class
 #
 from django.db import models, transaction as db_trans
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Max
 from durationfield.db.models.fields.duration import DurationField
 from main.models import BookingPeriod
 from reportlab.pdfgen.canvas import Canvas
@@ -63,15 +64,11 @@ class Invoice(models.Model):
             assert booking_periods.count() == 1
             self.booking_period = booking_periods[0]
 
-            # Get the list of invoices in this booking period ordered by number
-            invoices = Invoice.objects.filter(booking_period=self.booking_period.id).order_by('number')
-
             # Select the first available invoice number
-            self.number = 1
-            for invoice in invoices:
-                if self.number < invoice.number:
-                    break
-                self.number += 1
+            if config.invoice_number_per_booking_period:
+                self.number = Invoice.objects.filter(booking_period=self.booking_period).aggregate(Max('number'))['number__max'] + 1
+            else:
+                self.number = Invoice.objects.all().aggregate(Max('number'))['number__max'] + 1
 
             # Create the full invoice number based on the user defined format string
             self.full_invoice_no = config.invoice_number_format % {
