@@ -405,7 +405,7 @@ class Transaction(models.Model):
     relation = models.ForeignKey('main.Relation', null=True, related_name='transactions')
     description = models.CharField(max_length=765, blank=True)
     amount = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
-    invoice_number = models.CharField(max_length=45, null=True, blank=True)
+    invoice_number = models.CharField(max_length=45, blank=True)
     purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True)
     invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True)
     document = models.TextField(blank=True)

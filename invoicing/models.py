@@ -211,7 +211,7 @@ class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name="items")
     item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
     product = models.ForeignKey('main.Product', related_name="invoice_data")
-    period = models.CharField(max_length=30, blank=True, null=True)
+    period = models.CharField(max_length=30, blank=True)
     description = models.CharField(max_length=255)
     count = models.IntegerField()
     amount = models.DecimalField(decimal_places=5, max_digits=25)
