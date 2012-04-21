@@ -37,7 +37,7 @@ class AccountTestCase(unittest.TestCase):
                 account_type = '40')
 
         self.relation = Relation.objects.create(
-                displayname = 'Henk de Vries')
+                name = 'Henk de Vries')
 
     def tearDown(self):
         self.banking_account.delete()

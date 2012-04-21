@@ -25,13 +25,13 @@ from datetime import datetime
 
 class Relation(models.Model):
     """ Relations: customers, members or suppliers """
-    displayname = models.CharField(unique=True, max_length=180)
+    name = models.CharField(unique=True, max_length=180)
     visit_address = models.CharField(max_length=180, blank=True, default='')
-    visit_postalcode_zip = models.CharField(max_length=30, blank=True, null=True)
+    visit_zip_code = models.CharField(max_length=30, blank=True, null=True)
     visit_city = models.CharField(max_length=180, blank=True, null=True)
     visit_country = models.CharField(max_length=180, blank=True, null=True)
     postal_address = models.CharField(max_length=180, blank=True)
-    postal_code_zip = models.CharField(max_length=30, blank=True)
+    postal_zip_code = models.CharField(max_length=30, blank=True)
     postal_city = models.CharField(max_length=180, blank=True)
     postal_country = models.CharField(max_length=180, blank=True)
     email = models.CharField(max_length=180, blank=True)
@@ -46,7 +46,7 @@ class Relation(models.Model):
     notes = models.TextField(blank=True)
 
     def __unicode__(self):
-        return self.displayname
+        return self.name
 
     class Meta:
         """ Metadata """
@@ -81,7 +81,7 @@ class PurchaseOrder(models.Model):
     external_order_reference = models.CharField(max_length=90, blank=True)
 
     def __unicode__(self):
-        return u'%d %s %s' % (self.id, self.purchasing_date, self.customer.displayname)
+        return u'%d %s %s' % (self.id, self.purchasing_date, self.customer.name)
 
     class Meta:
         """ Metadata """
@@ -194,7 +194,7 @@ class InternalOrder(models.Model):
     customer_reference = models.CharField(max_length=180, blank=True)
 
     def __unicode__(self):
-        return u'%d %s %s' % (self.id, self.sale_order_date, self.customer.displayname)
+        return u'%d %s %s' % (self.id, self.sale_order_date, self.customer.name)
 
     class Meta:
         """ Metadata """

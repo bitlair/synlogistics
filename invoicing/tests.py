@@ -6,7 +6,7 @@ from .models import *
 
 class TimeKeepingTest(TestCase):
     def setUp(self):
-        customer = Relation.objects.create(displayname="Customer")
+        customer = Relation.objects.create(name="Customer")
         vat = Vat.objects.create(name="Vat", percent=19)
         rate = TimeBillingRate.objects.create(name="Standard", rate=10, vat=vat)
         self.entry1 = TimeKeepingEntry.objects.create(rate=rate, customer=customer, description="entry1", duration=timedelta(hours=2))

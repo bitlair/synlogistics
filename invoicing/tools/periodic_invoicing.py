@@ -151,7 +151,7 @@ def main():
             # Mail the invoice to the client if requested, otherwise put the PDF in the outgoing snailmail queue
             if invoice.customer.invoice_by_email:
                 pdf = invoice.pdf()
-                send_mail("%s <%s>" % (invoice.customer.displayname, invoice.customer.invoice_email), invoice.full_invoice_no, pdf)
+                send_mail("%s <%s>" % (invoice.customer.name, invoice.customer.invoice_email), invoice.full_invoice_no, pdf)
             else:
                 # FIXME Snailmail queue should be here
                 pass

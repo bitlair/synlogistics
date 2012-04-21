@@ -32,16 +32,16 @@ def get_relations(request):
     if not 'query' in request.GET:
         return HttpResponse("")
 
-    relations = Relation.objects.filter(displayname__icontains=request.GET['query'])
+    relations = Relation.objects.filter(name__icontains=request.GET['query'])
     
     # TODO Need filter here what type is needed: supplier, customer or both
     relations = relations.filter(Q(active_customer=1)|Q(active_supplier=1))
     
-    relations = relations.order_by('displayname')
+    relations = relations.order_by('name')
 
     response = "{relations:["
     for relation in relations:
-        response += "{ id:'"+str(relation.id)+"',name:'"+relation.displayname+"'},"
+        response += "{ id:'"+str(relation.id)+"',name:'"+relation.name+"'},"
     response += "]}"
 
     return HttpResponse(response, mimetype='application/json')

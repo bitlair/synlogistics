@@ -123,7 +123,7 @@ class Invoice(models.Model):
         canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.invoice_name)
         canvas.drawString(40 * mm, A4[1] - (60 * mm), self.customer.invoice_contact.displayname)
         canvas.drawString(40 * mm, A4[1] - (65 * mm), self.customer.postal_address)
-        canvas.drawString(40 * mm, A4[1] - (70 * mm), self.customer.postal_code_zip + " " + self.customer.postal_city)
+        canvas.drawString(40 * mm, A4[1] - (70 * mm), self.customer.postal_zip_code + " " + self.customer.postal_city)
         canvas.drawString(40 * mm, A4[1] - (75 * mm), self.customer.postal_country)
 
         # Draw the invoice information

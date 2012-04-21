@@ -131,7 +131,7 @@ def transaction_data(request):
         response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
         response['id'] = transaction.id
         if transaction.relation != None:
-            response['relation_display'] = transaction.relation.displayname
+            response['relation_display'] = transaction.relation.name
 
         return HttpResponse(json.dumps({ 'success': True, 'data': response }))
     
@@ -152,7 +152,7 @@ def transaction_data(request):
 
         response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
         if transaction.relation != None:
-            response['relation_display'] = transaction.relation.displayname
+            response['relation_display'] = transaction.relation.name
         else:
             response['relation_display'] = ''
 
@@ -185,7 +185,7 @@ def transaction_data(request):
             response += 'description:"%s",' % transaction.description
             if transaction.relation != None:
                 response += 'relation:%d,' % transaction.relation.id
-                response += 'relation_display:"%s",' % transaction.relation.displayname
+                response += 'relation_display:"%s",' % transaction.relation.name
             else:
                 response += 'relation:null,'
                 response += 'relation_display:"",'

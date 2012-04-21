@@ -82,7 +82,7 @@ def subscription_data(request):
         subscription.save()
 
         # Make output parseable
-        response['customer_display'] = subscription.customer.displayname
+        response['customer_display'] = subscription.customer.name
         response['product_display'] = subscription.product.name
         response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
         if response['enddate']:
@@ -117,7 +117,7 @@ def subscription_data(request):
         subscription.save()
 
         # Make output parseable
-        response['customer_display'] = subscription.customer.displayname
+        response['customer_display'] = subscription.customer.name
         response['product_display'] = subscription.product.name
         response['startdate'] = subscription.start_date.strftime("%Y-%m-%d")
         if response['enddate']:
@@ -147,7 +147,7 @@ def subscription_data(request):
                     'product': subscription.product.id,
                     'product_display': subscription.product.name,
                     'customer': subscription.customer.id,
-                    'customer_display': subscription.customer.displayname,
+                    'customer_display': subscription.customer.name,
                     'startdate': subscription.start_date.strftime("%Y-%m-%d"),
                     'enddate': subscription.end_date.strftime("%Y-%m-%d")
                                if subscription.end_date else None,
