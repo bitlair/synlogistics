@@ -3,6 +3,7 @@ SynLogistics database model
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
+# Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
 #   
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -338,3 +339,7 @@ class BookingPeriod(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'booking_periods'
+
+    @staticmethod
+    def get_by_date(date):
+        return BookingPeriod.objects.get(start_date__lte=date, end_date__gte=date)

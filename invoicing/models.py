@@ -60,9 +60,7 @@ class Invoice(models.Model):
         """
         if not self.pk:
             # Get the active booking period for this invoice
-            booking_periods = BookingPeriod.objects.filter(start_date__lte=self.date).filter(end_date__gte=self.date)
-            assert booking_periods.count() == 1
-            self.booking_period = booking_periods[0]
+            self.booking_period = BookingPeriod.get_by_date(self.date)
 
             # Select the first available invoice number
             if config.invoice_number_per_booking_period:
