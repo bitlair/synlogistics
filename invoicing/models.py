@@ -279,7 +279,7 @@ class TimeKeepingEntry(models.Model):
 
     @property
     def hours(self):
-        return self.duration.seconds/Decimal(3600)
+        return int(self.duration.total_seconds())/Decimal(3600)
 
 class SimpleInvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name="simple_items")

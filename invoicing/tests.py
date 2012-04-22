@@ -13,10 +13,12 @@ class TimeKeepingTest(TestCase):
     def test_timekeeping(self):
         self.entry1 = TimeKeepingEntry.objects.create(rate=self.rate, customer=self.customer, description="entry1", duration=timedelta(hours=2))
         self.entry2 = TimeKeepingEntry.objects.create(rate=self.rate, customer=self.customer, description="entry1", start_time=time(hour=10, minute=30), duration=timedelta(hours=1.25))
+        self.entry3 = TimeKeepingEntry.objects.create(rate=self.rate, customer=self.customer, description="entry1", duration=timedelta(hours=30))
         self.assertEqual(self.entry1.end_time, None)
         self.assertEqual(self.entry2.end_time, time(hour=11, minute=45))
         self.assertEqual(self.entry1.hours, 2)
         self.assertEqual(self.entry2.hours, 1.25)
+        self.assertEqual(self.entry3.hours, 30)
 
 class InvoiceTest(TestCase):
     def setUp(self):
