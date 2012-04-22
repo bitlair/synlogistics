@@ -4,6 +4,7 @@ SynLogistics accounting models
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
+# Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
 #   
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -21,6 +22,7 @@ SynLogistics accounting models
 
 from django.db import models
 from django.db.models import Sum
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 CURRENCY_CHOICES = (
@@ -340,7 +342,7 @@ CURRENCY_SYMBOLS = (
     ('ZWD', 'Zimbabwean dollar'))
 
 
-class Account(models.Model):
+class Account(MPTTModel):
     """ Accounting ledger account """
     TYPE_CHOICES = (
         (00, 'Assets'),
@@ -360,21 +362,25 @@ class Account(models.Model):
     account_type = models.IntegerField(choices=TYPE_CHOICES)
     is_readonly = models.BooleanField(default=False)
     _balance = models.DecimalField(decimal_places=5, max_digits=25, default=0.0)
-    parent = models.ForeignKey('self', null=True, blank=True, related_name='children')
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
 
     class Meta:
         """ Metadata """
         db_table = u'accounts'
         ordering = ['number']
 
+    class MPTTMeta:
+        order_insertion_by=['number']
+
     def __unicode__(self):
         return "%s: %s" % (self.number, self.name)
 
-    def get_balance(self):
+    @property
+    def balance(self):
         """ Get the active balance """
         balance = 0
 
-        for child in self.children.all():
+        for child in self.get_children():
             balance += child.balance
         
         mysum = Transaction.objects.filter(account=self.id).aggregate(total=Sum('amount'))
@@ -383,8 +389,8 @@ class Account(models.Model):
     
         return balance
 
-    
-    def set_balance(self, value):
+    @balance.setter
+    def balance(self, value):
         """ Set the active balance recursively """
         self._balance += value
 
@@ -392,8 +398,6 @@ class Account(models.Model):
         parent = Account.objects.get(id=self.parent)
         if parent:
             parent._balance += value
-
-    balance = property(get_balance, set_balance)
 
 
 class Transaction(models.Model):

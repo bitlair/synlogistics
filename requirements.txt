@@ -7,3 +7,4 @@ django-picklefield
 django-durationfield
 pypdf
 reportlab
+-e git://github.com/dekkers/django-mptt.git#egg=django-mptt
