@@ -22,6 +22,7 @@ SynLogistics database model
  
 from django.db import models
 from django.contrib.auth.models import User
+from djmoney.models.fields import MoneyField
 from datetime import datetime
 
 class Relation(models.Model):
@@ -187,8 +188,8 @@ class InternalOrder(models.Model):
     product = models.ForeignKey(Product, related_name='internal_orders')
     product_group = models.ForeignKey(ProductGroup, related_name='internal_orders')
     product_description = models.CharField(max_length=300, blank=True)
-    purchase_price_indication = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
-    selling_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+    purchase_price_indication = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
+    selling_price = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
     supplier_suggestion = models.ForeignKey(Relation, related_name='+')
     for_customer = models.BooleanField(default=False)
     customer = models.ForeignKey(Relation, related_name='internal_orders')
@@ -206,7 +207,7 @@ class PurchaseOrderItem(models.Model):
     purchase_order = models.ForeignKey(PurchaseOrder, related_name='data')
     internal_order = models.ForeignKey(InternalOrder, related_name='purchase_data')
     state = models.IntegerField(null=True, blank=True)
-    purchase_price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+    purchase_price = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
     order_amount = models.IntegerField(null=True, blank=True)
     units_per_pack = models.IntegerField(null=True, blank=True)
     subproduct = models.ForeignKey(Subproduct, related_name='purchase_data')
@@ -304,7 +305,7 @@ class InventoryItem(models.Model):
     inventory = models.ForeignKey('Inventory', related_name='data')
     item = models.ForeignKey(Item, related_name='item')
     location = models.ForeignKey(Location, related_name='+')
-    value = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+    value = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
 
     def __unicode__(self):
         return self.item
@@ -319,7 +320,7 @@ class ProductSellingprice(models.Model):
     product = models.ForeignKey(Product, related_name='sellingprices')
     commencing_date = models.DateField(unique=True)
     set_date = models.DateField()
-    price = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
+    price = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
 
     def __unicode__(self):
         return '%s: %s: %03.05d' % (self.product, self.commencing_date, self.price)

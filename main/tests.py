@@ -22,7 +22,7 @@ SynLogistics accounting tests
 from django.utils import unittest
 from main.models import Product, ProductGroup, ProductSellingprice
 from datetime import datetime
-from decimal import Decimal
+from moneyed import Money
 
 class MainTestCase(unittest.TestCase):
     def test_product_price(self):
@@ -40,15 +40,15 @@ class MainTestCase(unittest.TestCase):
         product_sellingprice.product = product
         product_sellingprice.commencing_date = datetime.strptime('2012-02-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
         product_sellingprice.set_date = datetime.strptime('2012-01-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
-        product_sellingprice.price = '4.00'
+        product_sellingprice.price = Money(4.00, 'EUR')
         product_sellingprice.save()
         
         product_sellingprice = ProductSellingprice()
         product_sellingprice.product = product
         product_sellingprice.commencing_date = datetime.strptime('2012-03-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
         product_sellingprice.set_date = datetime.strptime('2012-01-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
-        product_sellingprice.price = '6.00'
+        product_sellingprice.price = Money(6.00, 'EUR')
         product_sellingprice.save()
         
-        self.assertEqual(product.get_price(date=datetime.strptime('2012-02-02:00:00:00', '%Y-%m-%d:%H:%M:%S')), Decimal('4.00'))
-        self.assertEqual(product.get_price(date=datetime.strptime('2012-03-02:00:00:00', '%Y-%m-%d:%H:%M:%S')), Decimal('6.00'))
+        self.assertEqual(product.get_price(date=datetime.strptime('2012-02-02:00:00:00', '%Y-%m-%d:%H:%M:%S')), Money(4.00, 'EUR'))
+        self.assertEqual(product.get_price(date=datetime.strptime('2012-03-02:00:00:00', '%Y-%m-%d:%H:%M:%S')), Money(6.00, 'EUR'))

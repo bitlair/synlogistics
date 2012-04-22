@@ -8,3 +8,4 @@ django-durationfield
 pypdf
 reportlab
 -e git://github.com/dekkers/django-mptt.git#egg=django-mptt
+-e git://github.com/dekkers/django-money.git#egg=django-money

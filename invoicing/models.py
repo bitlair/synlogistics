@@ -23,6 +23,7 @@ from django.db import models, transaction as db_trans
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Max
 from durationfield.db.models.fields.duration import DurationField
+from djmoney.models.fields import MoneyField
 from main.models import BookingPeriod
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
@@ -214,7 +215,7 @@ class InvoiceItem(models.Model):
     period = models.CharField(max_length=30, blank=True)
     description = models.CharField(max_length=255)
     count = models.IntegerField()
-    amount = models.DecimalField(decimal_places=5, max_digits=25)
+    amount = MoneyField(decimal_places=5, max_digits=25, default_currency='EUR')
     vat = models.ForeignKey('accounting.Vat', null=True)
 
     def __unicode__(self):
@@ -230,7 +231,7 @@ class Subscription(models.Model):
     customer = models.ForeignKey('main.Relation', related_name='subscriptions')
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True)
-    discount = models.DecimalField(decimal_places=5, max_digits=9, default=0.0)
+    discount = MoneyField(decimal_places=5, max_digits=9, default=0.0, default_currency='EUR')
     invoiced_until_date = models.DateTimeField(null=True)
     intervals_per_invoice = models.IntegerField(default=0)
     extra_info = models.TextField()
@@ -245,11 +246,11 @@ class Subscription(models.Model):
 
 class TimeBillingRate(models.Model):
     name = models.CharField(max_length=30)
-    rate = models.DecimalField(decimal_places=2, max_digits=12)
+    rate = MoneyField(decimal_places=2, max_digits=12, default_currency='EUR')
     vat = models.ForeignKey('accounting.Vat')
 
     def __unicode__(self):
-        return u'%s: %.2f' % (self.name, self.rate)
+        return u'%s: %s' % (self.name, self.rate)
 
 class TimeKeepingEntry(models.Model):
     rate = models.ForeignKey('TimeBillingRate')
@@ -284,7 +285,7 @@ class SimpleInvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name="simple_items")
     description = models.TextField()
     count = models.DecimalField(decimal_places=2, max_digits=12)
-    price = models.DecimalField(decimal_places=5, max_digits=25)
+    price = MoneyField(decimal_places=5, max_digits=25, default_currency='EUR')
     vat = models.ForeignKey('accounting.Vat', null=True)
 
     def __unicode__(self):
