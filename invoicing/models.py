@@ -210,13 +210,13 @@ class Invoice(models.Model):
 class InvoiceItem(models.Model):
     """ Invoice contents """
     invoice = models.ForeignKey(Invoice, related_name="items")
-    item = models.ForeignKey('main.Item', related_name="invoice_data", null=True)
+    item = models.ForeignKey('main.Item', related_name="invoice_data", null=True, blank=True)
     product = models.ForeignKey('main.Product', related_name="invoice_data")
     period = models.CharField(max_length=30, blank=True)
     description = models.CharField(max_length=255)
     count = models.IntegerField()
     amount = MoneyField(decimal_places=5, max_digits=25, default_currency='EUR')
-    vat = models.ForeignKey('accounting.Vat', null=True)
+    vat = models.ForeignKey('accounting.Vat', null=True, blank=True)
 
     def __unicode__(self):
         return u'%s (%s)' % (self.product, self.item)
@@ -230,9 +230,9 @@ class Subscription(models.Model):
     product = models.ForeignKey('main.Product', related_name='subscriptions')
     customer = models.ForeignKey('main.Relation', related_name='subscriptions')
     start_date = models.DateTimeField()
-    end_date = models.DateTimeField(null=True)
+    end_date = models.DateTimeField(null=True, blank=True)
     discount = MoneyField(decimal_places=5, max_digits=9, default=0.0, default_currency='EUR')
-    invoiced_until_date = models.DateTimeField(null=True)
+    invoiced_until_date = models.DateTimeField(null=True, blank=True)
     intervals_per_invoice = models.IntegerField(default=0)
     extra_info = models.TextField()
     active = models.BooleanField(default=1)
@@ -286,7 +286,7 @@ class SimpleInvoiceItem(models.Model):
     description = models.TextField()
     count = models.DecimalField(decimal_places=2, max_digits=12)
     price = MoneyField(decimal_places=5, max_digits=25, default_currency='EUR')
-    vat = models.ForeignKey('accounting.Vat', null=True)
+    vat = models.ForeignKey('accounting.Vat', null=True, blank=True)
 
     def __unicode__(self):
         return u'%s' % (self.description)

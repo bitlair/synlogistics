@@ -93,12 +93,12 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, related_name='transactions')
     transfer = models.ForeignKey(Account, related_name='+')
     related = models.ManyToManyField('self')
-    relation = models.ForeignKey('main.Relation', null=True, related_name='transactions')
+    relation = models.ForeignKey('main.Relation', related_name='transactions', null=True, blank=True)
     description = models.CharField(max_length=765, blank=True)
     amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
     invoice_number = models.CharField(max_length=45, blank=True)
-    purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True)
-    invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True)
+    purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True, blank=True)
+    invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True, blank=True)
     document = models.TextField(blank=True)
 
     class Meta:
@@ -145,7 +145,7 @@ class Vat(models.Model):
     """ VAT table: Describes VAT/GST percentage and to which account it's to be booked """
     name = models.CharField(max_length=30, blank=True)
     percent = models.DecimalField(decimal_places=5, max_digits=25, null=True, blank=True)
-    account = models.ForeignKey(Account, related_name='+', null=True)
+    account = models.ForeignKey(Account, related_name='+', null=True, blank=True)
 
     class Meta:
         """ Metadata """

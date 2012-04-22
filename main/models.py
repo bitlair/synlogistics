@@ -141,10 +141,10 @@ class Product(models.Model):
     maximum_stock = models.IntegerField(null=True, blank=True)
     active = models.BooleanField(default=True)
     # Vat is done as a string because of recursive import issues
-    vat = models.ForeignKey('accounting.Vat', related_name='products', null=True)  
+    vat = models.ForeignKey('accounting.Vat', related_name='products', null=True, blank=True)
     has_own_serials = models.BooleanField(default=True)
-    invoice_interval = models.IntegerField(null=True, choices=INTERVAL_CHOICES)
-    invoice_interval_count = models.IntegerField(null=True, default=1)
+    invoice_interval = models.IntegerField(null=True, blank=True, choices=INTERVAL_CHOICES)
+    invoice_interval_count = models.IntegerField(null=True, blank=True, default=1)
 
     def __unicode__(self):
         return u'%s %s' % (self.code, self.name)
