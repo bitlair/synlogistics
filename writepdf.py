@@ -7,7 +7,8 @@ import settings
 
 setup_environ(settings)
 
-from invoicing.models import *
+from invoicing.models import Invoice, TimeKeepingEntry
+from moneyed import Money
 from decimal import Decimal
 from itertools import chain
 
@@ -93,9 +94,9 @@ for invoice in Invoice.objects.filter(number=sys.argv[1]):
     flowlist.append(Normal("Factuurdatum: %s" % invoice.date))
 
     print invoice
-    tot_ex = Decimal(0)
-    tot_inc = Decimal(0)
-    tot_btw = Decimal(0)
+    tot_ex = Money(0, 'EUR')
+    tot_inc = Money(0, 'EUR')
+    tot_btw = Money(0, 'EUR')
     itemlist = []
     for item in chain(invoice.timekeepingentry_set.order_by('date'), invoice.simple_items.all()):
         if isinstance(item, TimeKeepingEntry):
