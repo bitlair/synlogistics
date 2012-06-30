@@ -138,5 +138,5 @@ for invoice in Invoice.objects.filter(number=sys.argv[1]):
 
     flowlist.append(Spacer(0, 10*mm))
     flowlist.append(Normal(u"Gelieve het totaalbedrag van € %s binnen 30 dagen te voldoen onder vermelding van factuurnummer "
-                           u"%s op rekening 13.53.17.363 ten name van Jeroen Dekkers." % (locale.format("%.2f", tot_inc), invoice.full_invoice_no)))
+                           u"%s op rekening 11.69.44.684 ten name van Pyzuka." % (locale.format("%.2f", tot_inc), invoice.full_invoice_no)))
     doc.build(flowlist)
