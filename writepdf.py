@@ -76,6 +76,12 @@ reportlab.rl_config.canvas_basefontname = 'DejaVu'
 import locale
 locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
 
+import moneyed.localization
+
+
+def format_money(money):
+    return moneyed.localization._FORMATTER.format(money, locale="nl_NL")
+
 for invoice in Invoice.objects.filter(number=sys.argv[1]):
     customer = invoice.customer
     frameleft = Frame(x1 = 0, y1= 250*mm, width=A4[0]*0.5, height=45*mm, leftPadding=15*mm, topPadding=15*mm)
@@ -115,21 +121,21 @@ for invoice in Invoice.objects.filter(number=sys.argv[1]):
         ex_btw = count * price
         btw = ex_btw * vat_percent/100
         print description
-        print "%s x %s = %s ex btw" % (count, price, ex_btw)
+        print "%s x %s = %s ex btw" % (count, format_money(price), format_money(ex_btw))
         tot_ex += ex_btw
         tot_btw += btw
-        itemlist.append([AlignRight(locale.format("%.2f", count)), AlignRight("€ " + locale.format("%.2f", float(price))), Normal(description), AlignRight("€ " + locale.format("%.2f", ex_btw))])
+        itemlist.append([AlignRight(locale.format("%.2f", count)), AlignRight(format_money(price)), Normal(description), AlignRight(format_money(ex_btw))])
 
-    tot_btw = tot_btw.quantize(Decimal('.01'))
+    tot_btw = tot_btw
     tot_inc = tot_ex + tot_btw
-    print "tot %s tot inc %s tot btw %s" % (tot_ex, tot_inc, tot_btw)
+    print "tot %s tot inc %s tot btw %s" % (format_money(tot_ex), format_money(tot_inc), format_money(tot_btw))
     print
     flowlist.append(Spacer(0, 5*mm))
     if itemlist:
         table = Table([[Normal("Aantal"), Center("Prijs"), Normal("Beschrijving"), AlignRight("Totaal")]] +
-                      itemlist + [[Bold("Subtotaal"), '', '', BoldRight("€ " +locale.format("%.2f", tot_ex))],
-                                  ["BTW (19%)", '', '', AlignRight("€ " +locale.format("%.2f", tot_btw))],
-                                  [Bold("Totaal"), '', '', BoldRight("€ " + locale.format("%.2f", tot_inc))]],
+                      itemlist + [[Bold("Subtotaal"), '', '', BoldRight(format_money(tot_ex))],
+                                  ["BTW (19%)", '', '', AlignRight(format_money(tot_btw))],
+                                  [Bold("Totaal"), '', '', BoldRight(format_money(tot_inc))]],
                       [15*mm, 20*mm, A4[0]-(15+20+28+15+15)*mm, 28*mm])
         table.setStyle(TableStyle([('LINEABOVE', (0, -1), (-1, -1), 1, colors.black),
                                    ('LINEABOVE', (0, -3), (-1, -3), 1, colors.black),
@@ -138,6 +144,6 @@ for invoice in Invoice.objects.filter(number=sys.argv[1]):
 
 
     flowlist.append(Spacer(0, 10*mm))
-    flowlist.append(Normal(u"Gelieve het totaalbedrag van € %s binnen 30 dagen te voldoen onder vermelding van factuurnummer "
-                           u"%s op rekening 11.69.44.684 ten name van Pyzuka." % (locale.format("%.2f", tot_inc), invoice.full_invoice_no)))
+    flowlist.append(Normal(u"Gelieve het totaalbedrag van %s binnen 30 dagen te voldoen onder vermelding van factuurnummer "
+                           u"%s op rekening 11.69.44.684 ten name van Pyzuka." % (format_money(tot_inc), invoice.full_invoice_no)))
     doc.build(flowlist)
