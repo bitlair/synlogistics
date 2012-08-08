@@ -194,7 +194,7 @@ class Invoice(models.Model):
         canvas.save()
 
         # Merge the letterhead paper with the data
-        letterhead = PdfFileReader(file(settings.letterhead_paper_path, "rb"))
+        letterhead = PdfFileReader(file(config.letterhead_paper_path, "rb"))
         page = letterhead.getPage(0)
         pdfInput = PdfFileReader(StringIO(pdf_buffer.getvalue())) 
         page.mergePage(pdfInput.getPage(0))
