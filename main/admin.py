@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import *
+from .models import (Relation, Contact, PurchaseOrder, Location, ProductGroup, Product, Subproduct,
+                     InternalOrder, PurchaseOrderItem, Item, Container, ContainerItem, ContainerTemplate,
+                     Inventory, InventoryItem, ProductSellingprice, BookingPeriod)
 
 admin.site.register(Relation)
 admin.site.register(Contact)

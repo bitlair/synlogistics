@@ -4,17 +4,17 @@ generic interactive components.
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -26,6 +26,7 @@ from django.contrib.auth.decorators import login_required
 from accounting.models import Account
 from main.models import Relation, Product
 
+
 @login_required
 def get_relations(request):
     # Obscure errors ftw \o/
@@ -33,15 +34,15 @@ def get_relations(request):
         return HttpResponse("")
 
     relations = Relation.objects.filter(name__icontains=request.GET['query'])
-    
+
     # TODO Need filter here what type is needed: supplier, customer or both
-    relations = relations.filter(Q(active_customer=1)|Q(active_supplier=1))
-    
+    relations = relations.filter(Q(active_customer=1) | Q(active_supplier=1))
+
     relations = relations.order_by('name')
 
     response = "{relations:["
     for relation in relations:
-        response += "{ id:'"+str(relation.id)+"',name:'"+relation.name+"'},"
+        response += "{ id:'" + str(relation.id) + "',name:'" + relation.name + "'},"
     response += "]}"
 
     return HttpResponse(response, mimetype='application/json')
@@ -59,10 +60,11 @@ def get_accounts(request):
 
     response = "{accounts:["
     for account in accounts:
-        response += "{ id:'"+str(account.id)+"',name:'"+account.number+" "+account.name+"'},"
+        response += "{ id:'" + str(account.id) + "',name:'" + account.number + " " + account.name + "'},"
     response += "]}"
 
-    return HttpResponse(response, mimetype='application/json' )
+    return HttpResponse(response, mimetype='application/json')
+
 
 @login_required
 def get_products(request):
@@ -77,9 +79,7 @@ def get_products(request):
 
     response = "{products:["
     for product in products:
-        response += "{ id:'"+str(product.id)+"',name:'"+product.name+"'},"
+        response += "{ id:'" + str(product.id) + "',name:'" + product.name + "'},"
     response += "]}"
 
-    return HttpResponse(response, mimetype='application/json' )
-
-
+    return HttpResponse(response, mimetype='application/json')

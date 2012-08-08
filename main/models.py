@@ -4,26 +4,27 @@ SynLogistics database model
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
- 
+
 from django.db import models
 from django.contrib.auth.models import User
 from djmoney.models.fields import MoneyField
 from datetime import datetime
+
 
 class Relation(models.Model):
     """ Relations: customers, members or suppliers """
@@ -54,6 +55,7 @@ class Relation(models.Model):
         """ Metadata """
         db_table = u'relations'
 
+
 class Contact(models.Model):
     """ Contacts per relation """
     relation = models.ForeignKey(Relation, related_name='contacts')
@@ -74,6 +76,7 @@ class Contact(models.Model):
         """ Metadata """
         db_table = u'contacts'
 
+
 class PurchaseOrder(models.Model):
     """ External purchase order """
     purchasing_date = models.DateTimeField(null=True, blank=True)
@@ -88,6 +91,7 @@ class PurchaseOrder(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'purchase_orders'
+
 
 class Location(models.Model):
     """ Location: point of sale, storage, warehouse, etc """
@@ -107,6 +111,7 @@ class Location(models.Model):
         """ Metadata """
         db_table = u'locations'
 
+
 class ProductGroup(models.Model):
     """ Product groups """
     name = models.CharField(unique=True, max_length=255)
@@ -119,6 +124,7 @@ class ProductGroup(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'product_groups'
+
 
 class Product(models.Model):
     """ Products you trade with """
@@ -156,15 +162,15 @@ class Product(models.Model):
 
         price = ProductSellingprice.objects.raw("SELECT id FROM product_sellingprices " +
                 "WHERE product_id=%s AND commencing_date=(SELECT MAX(commencing_date) FROM product_sellingprices " +
-                "WHERE commencing_date < %s AND product_id = %s)", [ self.id, date.strftime('%Y-%m-%d:%H:%M:%S'), self.id ])
+                "WHERE commencing_date < %s AND product_id = %s)", [self.id, date.strftime('%Y-%m-%d:%H:%M:%S'), self.id])
         for p in price:
             return p.price
         return None
 
-
     class Meta:
         """ Metadata """
         db_table = u'products'
+
 
 class Subproduct(models.Model):
     """ Specific product, like "High-End 48p 10GbE Switch" -> "Arista 7148S" or "Linksys WRT54g" -> "Linksys WRT54g rev. 3". """
@@ -178,6 +184,7 @@ class Subproduct(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'subproducts'
+
 
 class InternalOrder(models.Model):
     """ Internal ordering for things that are to be purchased externally, kind of like an order queue. """
@@ -202,6 +209,7 @@ class InternalOrder(models.Model):
         """ Metadata """
         db_table = u'internal_order'
 
+
 class PurchaseOrderItem(models.Model):
     """ Purchase Order contents """
     purchase_order = models.ForeignKey(PurchaseOrder, related_name='data')
@@ -220,6 +228,7 @@ class PurchaseOrderItem(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'purchase_order_data'
+
 
 class Item(models.Model):
     """ Individual units that are in stock. """
@@ -243,6 +252,7 @@ class Item(models.Model):
         """ Metadata """
         db_table = u'items'
 
+
 class Container(models.Model):
     """ Specific containers that contain multiple items """
     container_number = models.CharField(unique=True, max_length=180)
@@ -259,6 +269,7 @@ class Container(models.Model):
         """ Metadata """
         db_table = u'containers'
 
+
 class ContainerItem(models.Model):
     """ Item inside a container """
     container = models.ForeignKey(Container, related_name='data')
@@ -271,6 +282,7 @@ class ContainerItem(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'container_data'
+
 
 class ContainerTemplate(models.Model):
     """ Template for specifying/ordering what should be in a container """
@@ -300,6 +312,7 @@ class Inventory(models.Model):
         """ Metadata """
         db_table = u'inventories'
 
+
 class InventoryItem(models.Model):
     """ Stock inventory contents """
     inventory = models.ForeignKey('Inventory', related_name='data')
@@ -328,6 +341,7 @@ class ProductSellingprice(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'product_sellingprices'
+
 
 class BookingPeriod(models.Model):
     number = models.IntegerField(db_index=True)

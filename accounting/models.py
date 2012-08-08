@@ -5,17 +5,17 @@ SynLogistics accounting models
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -26,6 +26,7 @@ import mptt
 from mptt.managers import TreeManager
 from mptt.models import TreeForeignKey
 from djmoney.models.fields import MoneyField
+
 
 class Account(models.Model):
     """ Accounting ledger account """
@@ -66,11 +67,11 @@ class Account(models.Model):
 
         for child in self.get_children():
             balance += child.balance
-        
+
         mysum = Transaction.objects.filter(account=self.id).aggregate(total=Sum('amount'))
         if 'total' in mysum and mysum['total'] != None:
             balance += mysum['total']
-    
+
         return balance
 
     @balance.setter
@@ -86,6 +87,7 @@ class Account(models.Model):
 # We manually register with mptt here, because django-money changes the manager
 # in such a way that it doesn't work when we subclass directly from MPPTModel.
 mptt.register(Account, order_insertion_by=['number'])
+
 
 class Transaction(models.Model):
     """ Transactions in the accounting ledger """
@@ -130,9 +132,8 @@ class Transaction(models.Model):
         # Some accounts, like liabilities and expenses are inverted.
         # Determine if we need to invert the amount on the related transaction
         if (self.account.account_type < 10 or self.account.account_type == 40) \
-            ==    (self.transfer.account_type < 10 or self.transfer.account_type == 40):
+            == (self.transfer.account_type < 10 or self.transfer.account_type == 40):
             related.amount = -self.amount
-
 
         # The super class does the actual saving to the database.
         super(Transaction, related).save()
@@ -140,6 +141,7 @@ class Transaction(models.Model):
 
         if new:
             self.related.add(related)
+
 
 class Vat(models.Model):
     """ VAT table: Describes VAT/GST percentage and to which account it's to be booked """

@@ -3,17 +3,17 @@ SynLogistics: Invoicing and subscription views.
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -21,7 +21,7 @@ SynLogistics: Invoicing and subscription views.
 from random import getrandbits
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
-from django.template import RequestContext 
+from django.template import RequestContext
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import simplejson as json
@@ -32,17 +32,19 @@ from main.models import Relation, Product
 from invoicing.models import Subscription
 import settings
 
+
 @login_required
 def create(request):
     """ Displays the create invoice template """
 
     ctx = RequestContext(request, {
         'BASE_URL': settings.BASE_URL,
-        'uniquestring':    str(getrandbits(32)),
+        'uniquestring': str(getrandbits(32)),
     })
     ctx.update(csrf(request))
 
     return render_to_response('invoicing/create.html', ctx)
+
 
 @login_required
 def subscriptions_view(request):
@@ -56,12 +58,13 @@ def subscriptions_view(request):
 
     return render_to_response('invoicing/subscriptions.html', ctx)
 
+
 @login_required
 def subscription_data(request):
     """ AJAX handler for the subscription data in the sales->subscription view. """
 
     # New subscriptions come in through a POST request
-    if request.method == "POST": 
+    if request.method == "POST":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
 
         # Catch phony record creation request.
@@ -94,7 +97,7 @@ def subscription_data(request):
         # Give the id to the frontend
         response['id'] = subscription.id
 
-        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        return HttpResponse(json.dumps({'success': True, 'data': response}))
 
     # Updates come in as PUT subscriptiondata/id
     elif request.method == "PUT":
@@ -126,8 +129,8 @@ def subscription_data(request):
         # The decimal can't be serialized by json
         response['discount'] = str(response['discount'])
 
-        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
-        
+        return HttpResponse(json.dumps({'success': True, 'data': response}))
+
     # A delete is done via DELETE subscriptiondata/id
     elif request.method == "DELETE":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
@@ -135,7 +138,7 @@ def subscription_data(request):
         subscription = Subscription.objects.get(pk=response['id'])
         subscription.delete()
 
-        return HttpResponse(json.dumps({ 'success': True }))
+        return HttpResponse(json.dumps({'success': True}))
     else:
         # TODO: Allow for filtering here!
         subscriptions = Subscription.objects.all()
@@ -151,10 +154,10 @@ def subscription_data(request):
                     'startdate': subscription.start_date.strftime("%Y-%m-%d"),
                     'enddate': subscription.end_date.strftime("%Y-%m-%d")
                                if subscription.end_date else None,
-                    'discount': int(subscription.discount*10000)/10000,
+                    'discount': int(subscription.discount * 10000) / 10000,
                     'intervals_per_invoice': subscription.intervals_per_invoice,
                     'extra_info': subscription.extra_info,
                     'active': subscription.active,
                 })
 
-        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        return HttpResponse(json.dumps({'success': True, 'data': response}))

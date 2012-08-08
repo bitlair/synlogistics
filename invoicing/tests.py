@@ -2,7 +2,8 @@ from django.test import TestCase
 from datetime import timedelta, time, date
 from main.models import Relation, BookingPeriod
 from accounting.models import Vat
-from .models import *
+from .models import Invoice, TimeBillingRate, TimeKeepingEntry
+
 
 class TimeKeepingTest(TestCase):
     def setUp(self):
@@ -20,12 +21,13 @@ class TimeKeepingTest(TestCase):
         self.assertEqual(self.entry2.hours, 1.25)
         self.assertEqual(self.entry3.hours, 30)
 
+
 class InvoiceTest(TestCase):
     def setUp(self):
         self.customer = Relation.objects.create(name="Customer")
-        self.booking_period1 = BookingPeriod.objects.create(number=2011, start_date=date(2011,1,1), end_date=date(2011,12,31))
-        self.booking_period2 = BookingPeriod.objects.create(number=2012, start_date=date(2012,1,1), end_date=date(2012,12,31))
-        self.booking_period3 = BookingPeriod.objects.create(number=2013, start_date=date(2013,1,1), end_date=date(2013,12,31))
+        self.booking_period1 = BookingPeriod.objects.create(number=2011, start_date=date(2011, 1, 1), end_date=date(2011, 12, 31))
+        self.booking_period2 = BookingPeriod.objects.create(number=2012, start_date=date(2012, 1, 1), end_date=date(2012, 12, 31))
+        self.booking_period3 = BookingPeriod.objects.create(number=2013, start_date=date(2013, 1, 1), end_date=date(2013, 12, 31))
 
     def test_invoice(self):
         invoice1 = Invoice.objects.create(customer=self.customer, date=date(2012, 4, 21))

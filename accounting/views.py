@@ -4,17 +4,17 @@ SynLogistics accounting overview and transaction management views.
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) by Rudy Hardeman <zarya@bitlair.nl> 2011
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -23,7 +23,7 @@ from random import getrandbits
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
-from django.template import RequestContext 
+from django.template import RequestContext
 from django.http import HttpResponse
 from django.utils import simplejson as json
 from accounting.models import Account, Transaction
@@ -39,12 +39,12 @@ def show_children(children, account_id):
     accounttree_json = "expanded: true, children: ["
     for account in children[account_id]:
         accounttree_json += "{"
-        accounttree_json += "id:'"+str(account.id)+"',"
-        accounttree_json += "number:'"+account.number+"',"
-        accounttree_json += "name:'"+account.name+"',"
-        accounttree_json += "description:'"+account.description+"',"
-        accounttree_json += "type:'"+account.get_account_type_display()+"',"
-        accounttree_json += "balance:'"+str(account.balance)+"',"
+        accounttree_json += "id:'" + str(account.id) + "',"
+        accounttree_json += "number:'" + account.number + "',"
+        accounttree_json += "name:'" + account.name + "',"
+        accounttree_json += "description:'" + account.description + "',"
+        accounttree_json += "type:'" + account.get_account_type_display() + "',"
+        accounttree_json += "balance:'" + str(account.balance) + "',"
         if not account.is_readonly:
             accounttree_json += "iconCls:'icon-readwrite',"
         if account.id in children:
@@ -54,6 +54,7 @@ def show_children(children, account_id):
         accounttree_json += "},"
     accounttree_json += "],"
     return accounttree_json
+
 
 @login_required
 def overview(request):
@@ -85,12 +86,13 @@ def overview(request):
 
     ctx = RequestContext(request, {
         'BASE_URL': settings.BASE_URL,
-        'uniquestring':    str(getrandbits(32)),
+        'uniquestring': str(getrandbits(32)),
         'accounttree_json': accounttree_json,
     })
     ctx.update(csrf(request))
 
     return render_to_response('accounting/overview.html', ctx)
+
 
 @login_required
 def transactions_view(request):
@@ -98,7 +100,7 @@ def transactions_view(request):
 
     ctx = RequestContext(request, {
         'BASE_URL': settings.BASE_URL,
-        'uniquestring':    str(getrandbits(32)),
+        'uniquestring': str(getrandbits(32)),
         'account_id': request.POST['account'],
     })
     ctx.update(csrf(request))
@@ -110,7 +112,7 @@ def transaction_data(request):
     """ AJAX handler for transaction data in the transaction view """
 
     # New transactions come in through a POST request
-    if request.method == "POST": 
+    if request.method == "POST":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
 
         # Catch phony record creation request.
@@ -133,8 +135,8 @@ def transaction_data(request):
         if transaction.relation != None:
             response['relation_display'] = transaction.relation.name
 
-        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
-    
+        return HttpResponse(json.dumps({'success': True, 'data': response}))
+
     # Existing transactions come in through a PUT request on /transactiondata/id
     elif request.method == "PUT":
         response = json.loads(request.raw_post_data, parse_float=Decimal)
@@ -149,14 +151,13 @@ def transaction_data(request):
             transaction.relation = Relation.objects.get(pk=int(response['relation']))
         transaction.save()
 
-
         response['transfer_display'] = '%s %s' % (transaction.transfer.number, transaction.transfer.name)
         if transaction.relation != None:
             response['relation_display'] = transaction.relation.name
         else:
             response['relation_display'] = ''
 
-        return HttpResponse(json.dumps({ 'success': True, 'data': response }))
+        return HttpResponse(json.dumps({'success': True, 'data': response}))
 
     # A delete  is done via DELETE /transactiondata/id
     elif request.method == "DELETE":
@@ -170,7 +171,7 @@ def transaction_data(request):
             related.delete()
         transaction.delete()
 
-        return HttpResponse(json.dumps({ 'success': True }))
+        return HttpResponse(json.dumps({'success': True}))
 
     # Requesting transactions is done via GET /transactiondata?account=..
     else:

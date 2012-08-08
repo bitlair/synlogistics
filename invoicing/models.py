@@ -5,22 +5,21 @@ SynLogistics: Invoice class
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) 2012 Jeroen Dekkers <jeroen@dekkers.ch>
-#   
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-#   
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
-#   
+#
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from django.db import models, transaction as db_trans
-from django.core.exceptions import ImproperlyConfigured
+from django.db import models
 from django.db.models import Max
 from durationfield.db.models.fields.duration import DurationField
 from djmoney.models.fields import MoneyField
@@ -35,10 +34,11 @@ from pyPdf import PdfFileReader, PdfFileWriter
 from os.path import exists
 from settings import STATIC_ROOT
 from constance import config
-from datetime import datetime, time, date
+from datetime import datetime, date
 from decimal import Decimal
 import os
 import errno
+
 
 class Invoice(models.Model):
     """ Invoice """
@@ -56,7 +56,7 @@ class Invoice(models.Model):
         db_table = u'invoices'
 
     def save(self, *args, **kwargs):
-        """ 
+        """
         Assign invoice number and save to the database. This extends the default django save() function.
         """
         if not self.pk:
@@ -85,7 +85,6 @@ class Invoice(models.Model):
 
         # Call the superclass's save function to write to the database
         super(Invoice, self).save(*args, **kwargs)
-
 
     def book(self):
         """ Books the invoice """
@@ -166,7 +165,7 @@ class Invoice(models.Model):
             total_amount += item.amount
             total_vat += item.amount * item.vat.percent
 
-        canvas.drawString(175 * mm, A4[1] - ((y-4) * mm), "____________")
+        canvas.drawString(175 * mm, A4[1] - ((y - 4) * mm), "____________")
         canvas.setFont("FreeSerif", 12)
         canvas.drawString(150 * mm, A4[1] - (y * mm), 'Subtotal')
         canvas.setFont("FreeSerif", 10)
@@ -196,9 +195,9 @@ class Invoice(models.Model):
         # Merge the letterhead paper with the data
         letterhead = PdfFileReader(file(config.letterhead_paper_path, "rb"))
         page = letterhead.getPage(0)
-        pdfInput = PdfFileReader(StringIO(pdf_buffer.getvalue())) 
+        pdfInput = PdfFileReader(StringIO(pdf_buffer.getvalue()))
         page.mergePage(pdfInput.getPage(0))
-        output = PdfFileWriter() 
+        output = PdfFileWriter()
         output.addPage(page)
         pdf_buffer.close()
 
@@ -206,6 +205,7 @@ class Invoice(models.Model):
         output.write(file(filename, "wb"))
 
         return filename
+
 
 class InvoiceItem(models.Model):
     """ Invoice contents """
@@ -224,6 +224,7 @@ class InvoiceItem(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'invoice_data'
+
 
 class Subscription(models.Model):
     """ Customer subscriptions to products of type 02 'Periodic'. """
@@ -244,6 +245,7 @@ class Subscription(models.Model):
         """ Metadata """
         db_table = u'subscriptions'
 
+
 class TimeBillingRate(models.Model):
     name = models.CharField(max_length=30)
     rate = MoneyField(decimal_places=2, max_digits=12, default_currency='EUR')
@@ -251,6 +253,7 @@ class TimeBillingRate(models.Model):
 
     def __unicode__(self):
         return u'%s: %s' % (self.name, self.rate)
+
 
 class TimeKeepingEntry(models.Model):
     rate = models.ForeignKey('TimeBillingRate')
@@ -279,7 +282,8 @@ class TimeKeepingEntry(models.Model):
 
     @property
     def hours(self):
-        return int(self.duration.total_seconds())/Decimal(3600)
+        return int(self.duration.total_seconds()) / Decimal(3600)
+
 
 class SimpleInvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name="simple_items")
