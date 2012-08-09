@@ -35,7 +35,9 @@ from os.path import exists
 from settings import STATIC_ROOT
 from constance import config
 from datetime import datetime, date
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
+from itertools import chain
+from moneyed import Money
 import os
 import errno
 
@@ -85,6 +87,42 @@ class Invoice(models.Model):
 
         # Call the superclass's save function to write to the database
         super(Invoice, self).save(*args, **kwargs)
+
+    @property
+    def vat(self):
+        """Total VAT of the invoice"""
+        if not hasattr(self, '_vat'):
+            self._calculate_amounts()
+        return self._vat
+
+    @property
+    def total(self):
+        """Total amount of the invoice, excluding VAT"""
+        if not hasattr(self, '_total'):
+            self._calculate_amounts()
+        return self._total
+
+    @property
+    def total_inc_vat(self):
+        """Total amount of the invoice, inluding VAT"""
+        return self.total + self.vat
+
+    def _calculate_amounts(self):
+        self._total = Money(0, 'EUR')
+        self._vat = Money(0, 'EUR')
+
+        for item in chain(self.timekeepingentry_set.all(), self.simple_items.all()):
+            if isinstance(item, TimeKeepingEntry):
+                item_amount = item.hours * item.rate.rate
+                vat_percent = item.rate.vat.percent
+            else:
+                item_amount = item.count * item.price
+                vat_percent = item.vat.percent
+            self._vat += item_amount * vat_percent / 100
+            self._total += item_amount
+
+        self._vat.amount = self._vat.amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
+        self._total.amount = self._total.amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
 
     def book(self):
         """ Books the invoice """

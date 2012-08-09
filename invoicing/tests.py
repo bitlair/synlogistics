@@ -1,8 +1,10 @@
 from django.test import TestCase
 from datetime import timedelta, time, date
+from moneyed import Money
+
 from main.models import Relation, BookingPeriod
 from accounting.models import Vat
-from .models import Invoice, TimeBillingRate, TimeKeepingEntry
+from .models import Invoice, SimpleInvoiceItem, TimeBillingRate, TimeKeepingEntry
 
 
 class TimeKeepingTest(TestCase):
@@ -37,3 +39,11 @@ class InvoiceTest(TestCase):
         self.assertEqual(invoice1.number, 1)
         self.assertEqual(invoice2.number, 2)
         self.assertEqual(invoice3.number, 3)
+
+    def test_vat(self):
+        vat = Vat.objects.create(name="Vat", percent=19)
+        invoice = Invoice.objects.create(customer=self.customer, date=date(2012, 4, 21))
+        SimpleInvoiceItem.objects.create(invoice=invoice, vat=vat, count=4.25, price=85)
+        SimpleInvoiceItem.objects.create(invoice=invoice, vat=vat, count=2, price=45)
+        self.assertEqual(invoice.total, Money(451.25, 'EUR'))
+        self.assertEqual(invoice.vat, Money(85.74, 'EUR'))
