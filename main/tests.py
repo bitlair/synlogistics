@@ -19,13 +19,13 @@ SynLogistics accounting tests
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from django.utils import unittest
+from django.test import TestCase
 from main.models import Product, ProductGroup, ProductSellingprice
 from datetime import datetime
 from moneyed import Money
 
 
-class MainTestCase(unittest.TestCase):
+class MainTestCase(TestCase):
     def test_product_price(self):
         product = Product()
         product.product_type = '00'

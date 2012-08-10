@@ -19,13 +19,13 @@ SynLogistics accounting tests
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from django.utils import unittest
+from django.test import TestCase
 from accounting.models import Account, Transaction
 from main.models import Relation
 from datetime import datetime
 
 
-class AccountTestCase(unittest.TestCase):
+class AccountTestCase(TestCase):
     def setUp(self):
         self.banking_account = Account.objects.create(
                 number='12345',
@@ -39,11 +39,6 @@ class AccountTestCase(unittest.TestCase):
 
         self.relation = Relation.objects.create(
                 name='Henk de Vries')
-
-    def tearDown(self):
-        self.banking_account.delete()
-        self.expenses_account.delete()
-        self.relation.delete()
 
     def do_transaction(self, source, dest, amount):
         transaction = Transaction()
