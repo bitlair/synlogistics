@@ -19,6 +19,7 @@ SynLogistics accounting models
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.db import models
 from django.db.models import Sum
@@ -46,8 +47,6 @@ class Account(models.Model):
     name = models.CharField(max_length=180)
     description = models.CharField(max_length=765, blank=True)
     account_type = models.IntegerField(choices=TYPE_CHOICES)
-    is_readonly = models.BooleanField(default=False)
-    _balance = MoneyField(decimal_places=5, max_digits=25, default=0.0, default_currency='EUR')
     parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
 
     objects = TreeManager()
@@ -63,45 +62,41 @@ class Account(models.Model):
     @property
     def balance(self):
         """ Get the active balance """
-        balance = 0
+        balance = Decimal(0)
 
         for child in self.get_children():
             balance += child.balance
 
-        mysum = Transaction.objects.filter(account=self.id).aggregate(total=Sum('amount'))
+        mysum = SubTransaction.objects.filter(account=self.id).aggregate(total=Sum('amount'))
         if 'total' in mysum and mysum['total'] != None:
             balance += mysum['total']
 
+        # FIXME: we need an integral solution for rounding
+        balance = balance.quantize(Decimal('0.01'), ROUND_HALF_UP)
+
         return balance
 
-    @balance.setter
-    def balance(self, value):
-        """ Set the active balance recursively """
-        self._balance += value
-
-        # This should be recursive
-        parent = Account.objects.get(id=self.parent)
-        if parent:
-            parent._balance += value
 
 # We manually register with mptt here, because django-money changes the manager
 # in such a way that it doesn't work when we subclass directly from MPPTModel.
 mptt.register(Account, order_insertion_by=['number'])
 
 
+class TransactionManager(models.Manager):
+    def create_simple(self, date, description, source, dest, amount):
+        transaction = self.create(date=date, description=description)
+        SubTransaction.objects.create(transaction=transaction, date=date, account=source, amount=-amount)
+        SubTransaction.objects.create(transaction=transaction, date=date, account=dest, amount=amount)
+        return transaction
+
+
 class Transaction(models.Model):
     """ Transactions in the accounting ledger """
     date = models.DateField()
-    account = models.ForeignKey(Account, related_name='transactions')
-    transfer = models.ForeignKey(Account, related_name='+')
-    related = models.ManyToManyField('self')
-    relation = models.ForeignKey('main.Relation', related_name='transactions', null=True, blank=True)
     description = models.CharField(max_length=765, blank=True)
-    amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
-    invoice_number = models.CharField(max_length=45, blank=True)
-    purchase_order = models.ForeignKey('main.PurchaseOrder', related_name='transactions', null=True, blank=True)
-    invoice_item = models.ForeignKey('invoicing.InvoiceItem', null=True, blank=True)
-    document = models.TextField(blank=True)
+    invoice = models.OneToOneField('invoicing.Invoice', null=True, blank=True, unique=True)
+
+    objects = TransactionManager()
 
     class Meta:
         """ Metadata """
@@ -109,38 +104,20 @@ class Transaction(models.Model):
         ordering = ['-date']
 
     def __unicode__(self):
-        return "%s %s (%s -> %s): %d" % (self.date, self.description, self.account.name, self.transfer.name, self.amount)
+        return "%s %s" % (self.date, self.description)
 
-    def save(self, *args, **kwargs):
-        """ Inserts/updates the related transaction. This extends the models.Model save() function """
-        # Insert or update the related transaction for the transfer account.
-        if self.id:
-            new = False
-            # There must only be one related transaction, so we can use get() here.
-            related = self.related.get()
-        else:
-            new = True
-            related = Transaction()
 
-        related.account = self.transfer
-        related.date = self.date
-        related.transfer = self.account
-        related.description = self.description
-        related.relation = self.relation
-        related.amount = self.amount
+class SubTransaction(models.Model):
+    transaction = models.ForeignKey('Transaction')
+    date = models.DateField()
+    account = models.ForeignKey(Account, related_name='subtransactions')
+    amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
 
-        # Some accounts, like liabilities and expenses are inverted.
-        # Determine if we need to invert the amount on the related transaction
-        if (self.account.account_type < 10 or self.account.account_type == 40) \
-            == (self.transfer.account_type < 10 or self.transfer.account_type == 40):
-            related.amount = -self.amount
+    class Meta:
+        ordering = ['-date']
 
-        # The super class does the actual saving to the database.
-        super(Transaction, related).save()
-        super(Transaction, self).save(*args, **kwargs)
-
-        if new:
-            self.related.add(related)
+    def __unicode__(self):
+        return "%s: %s" % (self.date, self.account)
 
 
 class Vat(models.Model):

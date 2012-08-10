@@ -22,7 +22,7 @@ SynLogistics accounting tests
 from django.test import TestCase
 from accounting.models import Account, Transaction
 from main.models import Relation
-from datetime import datetime
+from datetime import date
 
 
 class AccountTestCase(TestCase):
@@ -40,22 +40,12 @@ class AccountTestCase(TestCase):
         self.relation = Relation.objects.create(
                 name='Henk de Vries')
 
-    def do_transaction(self, source, dest, amount):
-        transaction = Transaction()
-        transaction.relation = self.relation
-        transaction.date = datetime.strptime('2012-01-01:00:00:00', '%Y-%m-%d:%H:%M:%S')
-        transaction.account = source
-        transaction.transfer = dest
-        transaction.description = 'Monies!'
-        transaction.amount = amount
-        transaction.save()
-
     def test_account_start_balance_is_zero(self):
         self.assertEqual(self.banking_account.balance, 0.0)
         self.assertEqual(self.expenses_account.balance, 0.0)
 
     def test_transaction_from_banking_to_expenses_account(self):
-        self.do_transaction(self.banking_account, self.expenses_account, -10.0)
+        Transaction.objects.create_simple(date.today(), "Monies!", self.banking_account, self.expenses_account, 10.0)
 
         self.assertEqual(self.banking_account.balance, -10.0)
         self.assertEqual(self.expenses_account.balance, 10.0)
@@ -68,6 +58,6 @@ class AccountTestCase(TestCase):
 
         self.expenses_account.parent = parent_account
         self.expenses_account.save()
-        self.do_transaction(self.banking_account, self.expenses_account, -10.0)
+        Transaction.objects.create_simple(date.today(), "Monies!", self.banking_account, self.expenses_account, 10.0)
 
         self.assertEqual(parent_account.balance, 10.0)
