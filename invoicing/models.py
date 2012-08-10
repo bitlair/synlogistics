@@ -24,6 +24,7 @@ from django.db.models import Max
 from durationfield.db.models.fields.duration import DurationField
 from djmoney.models.fields import MoneyField
 from main.models import BookingPeriod
+from accounting.models import Account, Transaction, SubTransaction
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -124,16 +125,25 @@ class Invoice(models.Model):
         self._vat.amount = self._vat.amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
         self._total.amount = self._total.amount.quantize(Decimal('0.01'), ROUND_HALF_UP)
 
+    @property
+    def is_booked(self):
+        return Transaction.objects.filter(invoice=self).exists()
+
     def book(self):
         """ Books the invoice """
-        # FIXME This is a stub function
+        if self.is_booked:
+            return
 
-        for item in self.items.all():
-            print item.amount
+        transaction = Transaction.objects.create(invoice=self, date=self.date, description="Invoice " + self.full_invoice_no)
+        # FIXME Should not be hardcoded
+        revenue_account = Account.objects.get(number='8010')
+        vat_account = Account.objects.get(number='1210')
+        receivable_account = Account.objects.get(number='0100')
 
-            # If there is VAT on this product, book that as well.
-            if item.product.vat.percent > 0:
-                print item.amount * item.product.vat.percent
+        SubTransaction.objects.create(transaction=transaction, date=self.date, account=revenue_account, amount=self.total)
+        SubTransaction.objects.create(transaction=transaction, date=self.date, account=vat_account, amount=self.vat)
+        SubTransaction.objects.create(transaction=transaction, date=self.date, account=receivable_account, amount=self.total_inc_vat)
+        # FIXME: Make sure transaction is valid
 
     def pdf(self):
         """ Generates PDF invoice """
