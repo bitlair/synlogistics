@@ -19,9 +19,12 @@ SynLogistics URL mappings module.
 #
 
 from django.conf.urls.defaults import patterns, url, include
-
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+
+from easycrud.urls import easycrud_urlpatterns
+
+from accounting.views import AccountDetailView
+
 admin.autodiscover()
 
 
@@ -45,4 +48,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    url(r'^account/(?P<pk>\d+)/$', AccountDetailView.as_view(), name='account_detail'),
 )
+
+urlpatterns += easycrud_urlpatterns()

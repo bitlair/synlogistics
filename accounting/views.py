@@ -4,6 +4,7 @@ SynLogistics accounting overview and transaction management views.
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
 # Copyright (C) by Rudy Hardeman <zarya@bitlair.nl> 2011
+# Copyright (C) by Jeroen Dekkers <jeroen@dekkers.ch> 2012
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -25,13 +26,31 @@ from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.http import HttpResponse
+from django.views.generic import DetailView
 from django.utils import simplejson as json
-from accounting.models import Account, Transaction
+from accounting.models import Account, SubTransaction, Transaction
 from main.models import Relation
 from decimal import Decimal
+from moneyed import Money
 
 import settings
 from datetime import datetime
+
+
+class AccountDetailView(DetailView):
+    model = Account
+
+    def get_context_data(self, **kwargs):
+        context = super(AccountDetailView, self).get_context_data(**kwargs)
+        context['transaction_list'] = []
+        balance = Money(0, 'EUR')
+        for transaction in [s.transaction for s in SubTransaction.objects.filter(account=self.object).select_related('transaction')]:
+            subtransaction_list = list(SubTransaction.objects.filter(transaction=transaction).select_related('account'))
+            for subtransaction in subtransaction_list:
+                if subtransaction.account == self.object:
+                    balance += subtransaction.amount
+            context['transaction_list'].append({'transaction': transaction, 'subtransaction_list': subtransaction_list, 'balance': balance})
+        return context
 
 
 # XXX may want to replace this with simplejson

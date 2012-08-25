@@ -27,9 +27,10 @@ import mptt
 from mptt.managers import TreeManager
 from mptt.models import TreeForeignKey
 from djmoney.models.fields import MoneyField
+from easycrud.models import EasyCrudModel
 
 
-class Account(models.Model):
+class Account(EasyCrudModel):
     """ Accounting ledger account """
     TYPE_CHOICES = (
         (00, 'Assets'),
@@ -76,6 +77,12 @@ class Account(models.Model):
 
         return balance
 
+    @property
+    def increase_is_debit(self):
+        if self.account_type in [10, 11, 12, 80]:
+            return False
+        else:
+            return True
 
 # We manually register with mptt here, because django-money changes the manager
 # in such a way that it doesn't work when we subclass directly from MPPTModel.

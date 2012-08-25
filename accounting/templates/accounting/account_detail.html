@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load easycrud money %}
+
+{% block content %}
+<div class="offset2 span8">
+{% easy_object_heading object %}
+<table class="table table-condensed table-bordered">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th colspan="2">Description</th>
+      <th>Debit</th>
+      <th>Credit</th>
+      <th>Balance</th>
+    </tr>
+  </thead>
+  {% for item in transaction_list %}
+  <tr>
+    <td>
+      {{ item.transaction.date }}
+    </td>
+    <td colspan="4">
+      {{ item.transaction.description }}
+    </td>
+    <td>
+      {{ item.balance }}
+    </td>
+  </tr>
+  {% for subtransaction in item.subtransaction_list %}
+  <tr>
+    <td>
+      {{ subtransaction.date }}
+    </td>
+    {% if forloop.first %}
+    <td width="150px" rowspan="{{item.subtransaction_list|length }}">
+    </td>
+    {% endif %}
+    <td>
+      {{ subtransaction.account }}
+    </td>
+    {% if subtransaction.account.increase_is_debit and subtransaction.amount.amount > 0 or not subtransaction.account.increase_is_debit and subtransaction.amount.amount < 0 %}
+    <td style="text-align: right;">
+      {{ subtransaction.amount|money_abs }}
+    </td>
+    <td>
+    </td>
+    {% else %}
+    <td>
+    </td>
+    <td style="text-align: right;">
+      {{ subtransaction.amount|money_abs }}
+    </td>
+    {% endif %}
+    <td>
+    </td>
+  </tr>
+  {% endfor %}
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

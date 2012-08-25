@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load mptt_tags multiply %}
+
+{% block content %}
+<div class="offset2 span8">
+<h1>Accounts</h1>
+{% full_tree_for_model accounting.Account as tree %}
+<table class="table">
+  {% for node, structure in tree|tree_info %}
+  <tr>
+    <td style="padding-left: {{node.level|multiply:20}}px;">
+      <a href="{{ node.get_absolute_url }}">{{ node }}</a>
+    </td>
+    <td style="text-align: right; padding-left: 50px;">
+      {{ node.balance }}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}
