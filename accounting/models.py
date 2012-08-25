@@ -101,7 +101,7 @@ class Transaction(models.Model):
     class Meta:
         """ Metadata """
         db_table = u'transactions'
-        ordering = ['-date']
+        ordering = ['date']
 
     def __unicode__(self):
         return "%s %s" % (self.date, self.description)
@@ -114,7 +114,7 @@ class SubTransaction(models.Model):
     amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['date']
 
     def __unicode__(self):
         return "%s: %s" % (self.date, self.account)
