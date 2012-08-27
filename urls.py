@@ -25,7 +25,7 @@ from django.views.generic import RedirectView
 
 from easycrud.urls import easycrud_urlpatterns
 
-from accounting.views import AccountDetailView
+from accounting.views import AccountDetailView, TransactionCreateSimpleView
 
 admin.autodiscover()
 
@@ -52,6 +52,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^account/(?P<pk>\d+)/$', AccountDetailView.as_view(), name='account_detail'),
+    url(r'^transaction/create_simple/$', TransactionCreateSimpleView.as_view(), name='transaction_create_simple'),
 )
 
 urlpatterns += easycrud_urlpatterns()

@@ -21,12 +21,13 @@ SynLogistics accounting overview and transaction management views.
 #
 
 from random import getrandbits
+from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import render_to_response
 from django.core.context_processors import csrf
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 from django.http import HttpResponse
-from django.views.generic import DetailView
+from django.views.generic import DetailView, FormView
 from django.utils import simplejson as json
 from accounting.models import Account, SubTransaction, Transaction
 from main.models import Relation
@@ -35,6 +36,8 @@ from moneyed import Money
 
 import settings
 from datetime import datetime
+
+from .forms import TransactionCreateSimpleForm
 
 
 class AccountDetailView(DetailView):
@@ -51,6 +54,17 @@ class AccountDetailView(DetailView):
                     balance += subtransaction.amount
             context['transaction_list'].append({'transaction': transaction, 'subtransaction_list': subtransaction_list, 'balance': balance})
         return context
+
+
+class TransactionCreateSimpleView(FormView):
+    form_class = TransactionCreateSimpleForm
+    template_name = 'accounting/transaction_create_simple.html'
+    success_url = reverse_lazy('transaction_create_simple')
+
+    def form_valid(self, form):
+        Transaction.objects.create_simple(form.cleaned_data['date'], form.cleaned_data['description'], form.cleaned_data['source'],
+                                          form.cleaned_data['dest'], form.cleaned_data['amount'])
+        return super(TransactionCreateSimpleView, self).form_valid(form)
 
 
 # XXX may want to replace this with simplejson
