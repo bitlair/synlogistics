@@ -1,16 +1,51 @@
-{% extends 'bootstrap/base.html' %}
+<!DOCTYPE html>
+<html lang="en"{% block extra_html %}{% endblock extra_html %}>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Synlogistics{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-{% block title %}Synlogistics{% endblock %}
-{% block extra_body %}style="padding-top: 40px;"{% endblock extra_body %}
+    <!-- Le styles -->
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}css/custom.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-{% block nav %}
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+
+<body>
+
 <div class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
       <ul class="nav">
 	<li><a href="/account/">Accounts</a></li>
+	<li><a href="/transaction/create_simple/">Add transaction</a></li>
+	<li><a href="/transaction/create/">Add split transaction</a></li>
       </ul>
     </div>
   </div>
 </div>
-{% endblock nav %}
+
+<div class="container">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success">
+        <a class="close" data-dismiss="alert">×</a>
+        <h4 class="alert-heading">{{ message.tags }}</h4>
+        <p>{{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock content %}
+</div> <!-- /container -->
+
+{% block extra_foot %}{% endblock extra_foot %}
+</body>
+</html>
