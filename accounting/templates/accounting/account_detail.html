@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load easycrud money %}
+{% load easycrud money static %}
 
 {% block content %}
 {% easy_object_heading object %}
@@ -20,6 +20,8 @@
     </td>
     <td colspan="4">
       {{ item.transaction.description }}
+      <a href="{{ item.transaction.update_url }}"><img src="{% static "admin/img/icon_changelink.gif" %}"></a>
+      <a href="{{ item.transaction.delete_url }}"><img src="{% static "admin/img/icon_deletelink.gif" %}"></a>
     </td>
     <td>
       {{ item.balance }}
