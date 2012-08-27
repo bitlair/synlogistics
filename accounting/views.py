@@ -48,7 +48,7 @@ class AccountDetailView(DetailView):
         context['transaction_list'] = []
         balance = Money(0, 'EUR')
         for transaction in [s.transaction for s in SubTransaction.objects.filter(account=self.object).select_related('transaction')]:
-            subtransaction_list = list(SubTransaction.objects.filter(transaction=transaction).select_related('account'))
+            subtransaction_list = list(SubTransaction.objects.filter(transaction=transaction).select_related('account').order_by('account__number'))
             for subtransaction in subtransaction_list:
                 if subtransaction.account == self.object:
                     balance += subtransaction.amount
