@@ -14,10 +14,16 @@ class AccountAdmin(MPTTModelAdmin):
     inlines = [SubTransactionInline]
 
 
+class SubTransactionAdmin(admin.ModelAdmin):
+    model = SubTransaction
+    list_select_related = True
+
+
 class TransactionAdmin(admin.ModelAdmin):
     inlines = [SubTransactionInline]
 
+
 admin.site.register(Account, AccountAdmin)
-admin.site.register(SubTransaction)
+admin.site.register(SubTransaction, SubTransactionAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Vat)

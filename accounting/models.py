@@ -134,7 +134,7 @@ class SubTransaction(models.Model):
         ordering = ['date']
 
     def __unicode__(self):
-        return "%s: %s" % (self.date, self.account)
+        return "%s %s (%s): %s" % (self.date, self.transaction.description, self.account, self.amount)
 
 
 class Vat(models.Model):
