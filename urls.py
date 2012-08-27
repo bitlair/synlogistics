@@ -3,6 +3,7 @@ SynLogistics URL mappings module.
 """
 #
 # Copyright (C) by Wilco Baan Hofman <wilco@baanhofman.nl> 2011
+# Copyright (C) by Jeroen Dekkers <jeroen@dekkers.ch> 2012
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -20,6 +21,7 @@ SynLogistics URL mappings module.
 
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
+from django.views.generic import RedirectView
 
 from easycrud.urls import easycrud_urlpatterns
 
@@ -29,7 +31,7 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^$', 'main.views.layout'),
+    url(r'^$', RedirectView.as_view(url='/account/')),
     url(r'^login$', 'django.contrib.auth.views.login', {'template_name': 'main/login.html'}),
     url(r'^accounting/overview$', 'accounting.views.overview'),
     url(r'^accounting/transactions$', 'accounting.views.transactions_view'),
