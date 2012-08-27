@@ -92,8 +92,14 @@ mptt.register(Account, order_insertion_by=['number'])
 class TransactionManager(models.Manager):
     def create_simple(self, date, description, source, dest, amount):
         transaction = self.create(date=date, description=description)
-        SubTransaction.objects.create(transaction=transaction, date=date, account=source, amount=-amount)
-        SubTransaction.objects.create(transaction=transaction, date=date, account=dest, amount=amount)
+        if source.increase_is_debit:
+            SubTransaction.objects.create(transaction=transaction, date=date, account=source, amount=-amount)
+        else:
+            SubTransaction.objects.create(transaction=transaction, date=date, account=source, amount=amount)
+        if dest.increase_is_debit:
+            SubTransaction.objects.create(transaction=transaction, date=date, account=dest, amount=amount)
+        else:
+            SubTransaction.objects.create(transaction=transaction, date=date, account=dest, amount=-amount)
         return transaction
 
 
