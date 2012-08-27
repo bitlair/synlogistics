@@ -27,6 +27,7 @@ import mptt
 from mptt.managers import TreeManager
 from mptt.models import TreeForeignKey
 from djmoney.models.fields import MoneyField
+from moneyed import Money
 from easycrud.models import EasyCrudModel
 
 
@@ -124,7 +125,7 @@ class SubTransaction(models.Model):
     transaction = models.ForeignKey('Transaction')
     date = models.DateField()
     account = models.ForeignKey(Account, related_name='subtransactions')
-    amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default_currency='EUR')
+    amount = MoneyField(decimal_places=5, max_digits=25, null=True, blank=True, default=Money(0, 'EUR'))
 
     class Meta:
         ordering = ['date']
