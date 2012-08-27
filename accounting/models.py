@@ -104,7 +104,7 @@ class TransactionManager(models.Manager):
         return transaction
 
 
-class Transaction(models.Model):
+class Transaction(EasyCrudModel):
     """ Transactions in the accounting ledger """
     date = models.DateField()
     description = models.CharField(max_length=765, blank=True)
@@ -116,6 +116,9 @@ class Transaction(models.Model):
         """ Metadata """
         db_table = u'transactions'
         ordering = ['date']
+
+    class EasyCrudMeta:
+        inline_models = [{'model': 'SubTransaction'}]
 
     def __unicode__(self):
         return "%s %s" % (self.date, self.description)
