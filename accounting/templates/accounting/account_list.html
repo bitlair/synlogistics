@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% load mptt_tags multiply %}
+{% load mptt_tags multiply easycrud %}
 
 {% block content %}
 <div class="offset2 span8">
-<h1>Accounts</h1>
+{% easy_heading 'Account' %}
 {% full_tree_for_model accounting.Account as tree %}
 <table class="table">
   {% for node, structure in tree|tree_info %}
