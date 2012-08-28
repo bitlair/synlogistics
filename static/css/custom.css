@@ -11,3 +11,7 @@ a.delete-row {
     position: absolute;
     right: 0px;
 }
+
+td.money {
+    text-align: right;
+}

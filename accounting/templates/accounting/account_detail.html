@@ -23,7 +23,7 @@
       <a href="{{ item.transaction.update_url }}"><img src="{% static "admin/img/icon_changelink.gif" %}"></a>
       <a href="{{ item.transaction.delete_url }}"><img src="{% static "admin/img/icon_deletelink.gif" %}"></a>
     </td>
-    <td>
+    <td class="money">
       {{ item.balance }}
     </td>
   </tr>
@@ -40,7 +40,7 @@
       {{ subtransaction.account }}
     </td>
     {% if subtransaction.account.increase_is_debit and subtransaction.amount.amount > 0 or not subtransaction.account.increase_is_debit and subtransaction.amount.amount < 0 %}
-    <td style="text-align: right;">
+    <td class="money">
       {{ subtransaction.amount|money_abs }}
     </td>
     <td>
@@ -48,7 +48,7 @@
     {% else %}
     <td>
     </td>
-    <td style="text-align: right;">
+    <td class="money">
       {{ subtransaction.amount|money_abs }}
     </td>
     {% endif %}
